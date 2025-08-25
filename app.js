@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentUser: localStorage.getItem('currentUser') || 'Esposo',
     users: ['Esposo', 'Esposa'],
     currentDate: new Date(),
-    expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Emprestimo', 'Cartão de Credito', 'Agua', 'Energia', 'Gas', 'Internet',  'Lazer', 'Saúde', 'Outros'],
+    expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros'],
     incomeCategories: ['Salário', 'Freelance', 'Investimentos', 'Outros'], // ✅ revisado
   };
 

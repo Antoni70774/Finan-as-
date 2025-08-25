@@ -135,3 +135,10 @@ input[type="date"] { color: var(--text-secondary); }
 .bank-integration { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 .bank-button { flex: 1; min-width: 100px; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; background: white; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; }
 .bank-button img { width: 20px; height: 20px; }
+
+#app-main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+    padding-bottom: 80px; /* espaço para a barra inferior */
+}

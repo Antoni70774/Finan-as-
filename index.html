@@ -4,193 +4,167 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Controle Financeiro</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#4A90E2">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f6fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: linear-gradient(90deg, #4facfe, #00f2fe);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    nav {
+      display: flex;
+      justify-content: space-around;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+    }
+    nav button {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    nav button.active {
+      border-bottom: 3px solid #4facfe;
+      font-weight: bold;
+      color: #4facfe;
+    }
+    .aba {
+      display: none;
+      padding: 20px;
+    }
+    .aba.active {
+      display: block;
+    }
+    .card {
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .float-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #4facfe;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .lista-lancamentos div {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+    .lista-lancamentos div:hover {
+      background: #f9f9f9;
+      cursor: pointer;
+    }
+    .progress-bar {
+      width: 100%;
+      background: #eee;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    .progress {
+      height: 20px;
+      background: linear-gradient(90deg,#4facfe,#00f2fe);
+      text-align: center;
+      color: white;
+      font-size: 12px;
+    }
+    .grafico-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+    .legenda {
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header -->
-    <header class="app-header">
-      <h1></h1>
-      <div class="profile-icon">
-        <span class="material-icons-sharp">person_outline</span>
+  <header>💰 Controle Financeiro</header>
+
+  <nav>
+    <button class="active" onclick="mostrarAba('dashboard')">Dashboard</button>
+    <button onclick="mostrarAba('metas')">Metas</button>
+    <button onclick="mostrarAba('pagar-receber')">A Pagar / A Receber</button>
+    <button onclick="mostrarAba('despesas-conta')">Despesas por Conta</button>
+    <button onclick="mostrarAba('receitas-conta')">Receitas por Conta</button>
+  </nav>
+
+  <div id="dashboard" class="aba active">
+    <div class="card">
+      </h2></h2>
+      <div class="grafico-container">
+        <canvas id="graficoGeral" width="200"></canvas>
+        <div id="legendaGeral" class="legenda"></div>
       </div>
-    </header>
-
-    <!-- Main Content -->
-    <main id="app-main">
-      <!-- Dashboard Page -->
-      <div id="dashboard-page" class="page active">
-        <div class="summary-card">
-          <div class="date-selector">
-            <button id="prev-month" class="icon-btn" aria-label="Mês anterior">
-              <span class="material-icons-sharp">chevron_left</span>
-            </button>
-            <h2 id="current-month-year"></h2>
-            <button id="next-month" class="icon-btn" aria-label="Próximo mês">
-              <span class="material-icons-sharp">chevron_right</span>
-            </button>
-          </div>
-          <div class="balance-info">
-            <p>Balanço do Mês</p>
-            <h3 id="month-balance">R$ 0,00</h3>
-          </div>
-          <div class="income-expense">
-            <div class="income" id="card-income">
-              <span class="material-icons-sharp up">arrow_upward</span>
-              <div>
-                <p>Receitas</p>
-                <h4 id="month-income">R$ 0,00</h4>
-              </div>
-            </div>
-            <div class="expense" id="card-expense">
-              <span class="material-icons-sharp down">arrow_downward</span>
-              <div>
-                <p>Despesas</p>
-                <h4 id="month-expense">R$ 0,00</h4>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="chart-container">
-          <h3>Despesas por Categoria</h3>
-          <canvas id="expense-chart"></canvas>
-        </div>
-      </div>
-
-      <!-- Goals Page -->
-      <div id="goals-page" class="page">
-        <div class="goals-header">
-          <h3>Metas Pessoais</h3>
-          <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
-        </div>
-        <div id="goal-list"></div>
-      </div>
-
-      <!-- Profile Page -->
-      <div id="profile-page" class="page">
-        <h3>Perfil & Configurações</h3>
-        <div class="profile-card">
-          <p><strong>Usuário Atual:</strong> <span id="current-user-name"></span></p>
-          <div class="user-switcher">
-            <p>Trocar de usuário:</p>
-            <div class="user-buttons">
-              <button class="btn-secondary" data-user="Esposo">Esposo</button>
-              <button class="btn-secondary" data-user="Esposa">Esposa</button>
-            </div>
-          </div>
-          <button id="export-data-btn" class="btn-secondary">Exportar Dados</button>
-        </div>
-        <div class="bank-connect">
-          <h4>Conexão Bancária</h4>
-          <p>Selecione seu banco para conectar:</p>
-          <div class="bank-integration">
-            <button class="bank-button" onclick="connectBank('nubank')">
-              <img src="assets/nubank-icon.png" alt="Nubank">
-              Nubank
-            </button>
-            <button class="bank-button" onclick="connectBank('itau')">
-              <img src="assets/itau-icon.png" alt="Itaú">
-              Itaú
-            </button>
-            <button class="bank-button" onclick="connectBank('caixa')">
-              <img src="assets/caixa-icon.png" alt="Caixa">
-              Caixa
-            </button>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <!-- Floating Action Button -->
-    <button id="add-transaction-btn" class="fab" style="bottom: 20px; right: 20px;">
-      <span class="material-icons-sharp">add</span>
-    </button>
-
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-      <a href="#" class="nav-item active" data-page="dashboard-page">
-        <span class="material-icons-sharp">home</span>
-        <span class="nav-text">Início</span>
-      </a>
-      <a href="#" class="nav-item" data-page="goals-page">
-        <span class="material-icons-sharp">flag</span>
-        <span class="nav-text">Metas</span>
-      </a>
-      <a href="#" class="nav-item" data-page="profile-page">
-        <span class="material-icons-sharp">person</span>
-        <span class="nav-text">Perfil</span>
-      </a>
-    </nav>
-  </div>
-
-  <!-- Add Transaction Modal -->
-  <div id="transaction-modal" class="modal-overlay">
-    <div class="modal-content">
-      <form id="transaction-form">
-        <h3>Nova Transação</h3>
-        <div class="toggle-type">
-          <button type="button" id="type-expense-btn" class="toggle-btn active">Despesa</button>
-          <button type="button" id="type-income-btn" class="toggle-btn">Receita</button>
-        </div>
-        <input type="hidden" id="transaction-type" value="expense">
-        
-        <label for="amount">Valor</label>
-        <input type="number" id="amount" placeholder="R$ 0,00" step="0.01" min="0" required>
-        
-        <label for="category">Categoria</label>
-        <select id="category" required></select>
-
-        <label for="date">Data</label>
-        <input type="date" id="date" required>
-
-        <div class="modal-actions">
-          <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button>
-          <button type="submit" class="btn-primary">Salvar</button>
-        </div>
-      </form>
+      <div id="tabelaGeral"></div>
     </div>
-  </div>
-  
-  <!-- Goal Modal -->
-  <div id="goal-modal" class="modal-overlay">
-    <div class="modal-content">
-      <form id="goal-form">
-        <h3 id="goal-modal-title">Nova Meta Financeira</h3>
-        <input type="hidden" id="goal-id">
-        <label for="goal-name">Nome da Meta</label>
-        <input type="text" id="goal-name" required>
-        <label for="goal-target">Valor Alvo</label>
-        <input type="number" id="goal-target" step="0.01" min="0" required>
-        <label for="goal-current">Valor Atual</label>
-        <input type="number" id="goal-current" step="0.01" min="0" required>
-        <div class="modal-actions">
-          <button type="button" id="cancel-goal-btn" class="btn-secondary">Cancelar</button>
-          <button type="submit" class="btn-primary">Salvar</button>
-          <button type="button" id="delete-goal-btn" class="btn-danger" style="display:none">Excluir</button>
-        </div>
-      </form>
+    <div class="card">
+      <h3>Lançamentos</h3>
+      <div id="listaLancamentos" class="lista-lancamentos"></div>
     </div>
   </div>
 
-  <script type="module" src="app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => {
-            console.log('ServiceWorker registrado com sucesso:', registration.scope);
-          })
-          .catch(error => {
-            console.log('Falha ao registrar ServiceWorker:', error);
-          });
-      });
-    }
-  </script>
+  <div id="metas" class="aba">
+    <div class="card">
+      <h2>Metas</h2>
+      <p id="metaValor"></p>
+      <div class="progress-bar"><div id="progress" class="progress"></div></div>
+      <p id="metaPrevisao"></p>
+    </div>
+  </div>
+
+  <div id="pagar-receber" class="aba">
+    <div class="card">
+      <h2>A Pagar / A Receber</h2>
+      <div id="listaPagarReceber" class="lista-lancamentos"></div>
+      <p><b>Total a Pagar:</b> <span id="totalPagar">0</span></p>
+      <p><b>Total a Receber:</b> <span id="totalReceber">0</span></p>
+    </div>
+  </div>
+
+  <div id="despesas-conta" class="aba">
+    <div class="card">
+      <h2>Despesas por Conta</h2>
+      <canvas id="graficoDespesasConta"></canvas>
+      <div id="tabelaDespesasConta"></div>
+    </div>
+  </div>
+
+  <div id="receitas-conta" class="aba">
+    <div class="card">
+      <h2>Receitas por Conta</h2>
+      <canvas id="graficoReceitasConta"></canvas>
+      <div id="tabelaReceitasConta"></div>
+    </div>
+  </div>
+
+  <button class="float-btn" onclick="abrirLancamento()">+</button>
+
+  <script src="app.js"></script>
 </body>
 </html>

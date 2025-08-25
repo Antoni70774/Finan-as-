@@ -1,544 +1,159 @@
-import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
+// Dados salvos em localStorage
+let dados = JSON.parse(localStorage.getItem("financeiro")) || {
+  lancamentos: [],
+  metas: { valorMeta: 10000, valorGuardado: 0 },
+  pagarReceber: []
+};
 
-// ==========================
-// APP PRINCIPAL
-// ==========================
-document.addEventListener('DOMContentLoaded', () => {
-  // --------------------------
-  // STATE MANAGEMENT
-  // --------------------------
-  const state = {
-    transactions: JSON.parse(localStorage.getItem('transactions')) || [],
-    goals: JSON.parse(localStorage.getItem('goals')) || [],
-    currentUser: localStorage.getItem('currentUser') || 'Esposo',
-    users: ['Esposo', 'Esposa'],
-    currentDate: new Date(),
-    expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros'],
-    incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
-  };
+const contasDespesas = ["Empréstimo","Cartão de Débito","Água","Energia","Gás","Vestiário","Investimento"];
 
-  // --------------------------
-  // UTILITÁRIOS
-  // --------------------------
-  function formatCurrency(value) {
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  }
+// Função troca abas
+function mostrarAba(id) {
+  document.querySelectorAll(".aba").forEach(el => el.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll("nav button").forEach(btn => btn.classList.remove("active"));
+  event.target.classList.add("active");
+  atualizarTudo();
+}
 
-  // Corrige "data de ontem" por causa de toISOString/UTC
-  function formatDateLocalISO(date) {
-    const d = new Date(date);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`; // YYYY-MM-DD no fuso local
-  }
+// Salvar no localStorage
+function salvar() {
+  localStorage.setItem("financeiro", JSON.stringify(dados));
+}
 
-  function ensureHiddenIdInput() {
-    if (!document.getElementById('transaction-id')) {
-      const hidden = document.createElement('input');
-      hidden.type = 'hidden';
-      hidden.id = 'transaction-id';
-      hidden.name = 'transaction-id';
-      transactionForm?.appendChild(hidden);
-    }
-  }
+// Adicionar lançamento (receita ou despesa)
+function abrirLancamento() {
+  const tipo = prompt("Digite tipo: receita ou despesa");
+  if (!tipo) return;
 
-  function injectStylesOnce() {
-    if (document.getElementById('finance-app-injected-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'finance-app-injected-styles';
-    style.textContent = `
-      /* Floating Action Button */
-      .fab {
-        position: fixed; right: 20px; bottom: 20px; z-index: 1000;
-        border-radius: 9999px; padding: 12px 18px; font-weight: 600;
-        box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  const valor = parseFloat(prompt("Digite o valor:"));
+  if (isNaN(valor)) return;
+
+  const categoria = tipo === "despesa" 
+    ? prompt("Digite categoria (ex: " + contasDespesas.join(", ") + ")") 
+    : prompt("Digite categoria da receita:");
+
+  const conta = prompt("Digite a conta (ex: Banco, Carteira, etc.)");
+  const data = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+
+  dados.lancamentos.push({ tipo, valor, categoria, conta, data });
+  if (tipo === "receita") dados.metas.valorGuardado += valor;
+
+  salvar();
+  atualizarTudo();
+}
+
+// Exibir lançamentos
+function atualizarLancamentos() {
+  const lista = document.getElementById("listaLancamentos");
+  lista.innerHTML = "";
+  dados.lancamentos.forEach((l, i) => {
+    const div = document.createElement("div");
+    div.innerHTML = `${l.tipo.toUpperCase()} - R$ ${l.valor.toFixed(2)} (${l.categoria}) <small>${l.data}</small>`;
+    div.onclick = () => {
+      if (confirm("Deseja excluir este lançamento?")) {
+        if (l.tipo === "receita") dados.metas.valorGuardado -= l.valor;
+        dados.lancamentos.splice(i, 1);
+        salvar();
+        atualizarTudo();
       }
-      .fab-menu { position: fixed; right: 20px; bottom: 80px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
-      .fab-menu button { border-radius: 9999px; padding: 10px 14px; box-shadow: 0 6px 18px rgba(0,0,0,.15); }
-
-      /* Modal de listagem */
-      .list-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; z-index: 1100; }
-      .list-modal { width: min(720px, 94vw); max-height: 80vh; overflow: auto; background: var(--card-bg, #111418); color: var(--text, #eaeaea); border-radius: 16px; padding: 16px; }
-      .list-modal header { display:flex; align-items:center; justify-content:space-between; gap:12px; position: sticky; top: 0; background: inherit; padding-bottom: 8px; margin-bottom: 8px; }
-      .list-modal .tx-row { display:flex; align-items:center; justify-content:space-between; gap: 10px; padding: 10px 6px; border-bottom: 1px solid rgba(255,255,255,.06); }
-      .tx-info { display:flex; flex-direction: column; gap:2px; }
-      .tx-actions { display:flex; gap: 8px; }
-      .btn { cursor:pointer; border: 0; padding: 8px 12px; border-radius: 10px; font-weight: 600; }
-      .btn-primary { background: #4f46e5; color: #fff; }
-      .btn-danger { background: #ef4444; color: #fff; }
-      .btn-ghost { background: transparent; color: inherit; }
-
-      /* Esconde a lista padrão para cumprir pedido "somente o gráfico" */
-      #transaction-list { display: none; }
-    `;
-    document.head.appendChild(style);
-  }
-
-  // --------------------------
-  // ELEMENTOS DA UI
-  // --------------------------
-  const pages = document.querySelectorAll('.page');
-  const navItems = document.querySelectorAll('.nav-item');
-  const addTransactionBtn = document.getElementById('add-transaction-btn');
-  const transactionModal = document.getElementById('transaction-modal');
-  const cancelBtn = document.getElementById('cancel-btn');
-  const transactionForm = document.getElementById('transaction-form');
-  const typeExpenseBtn = document.getElementById('type-expense-btn');
-  const typeIncomeBtn = document.getElementById('type-income-btn');
-  const transactionTypeInput = document.getElementById('transaction-type');
-  const categorySelect = document.getElementById('category');
-
-  const addGoalBtn = document.getElementById('add-goal-btn');
-  const goalModal = document.getElementById('goal-modal');
-  const cancelGoalBtn = document.getElementById('cancel-goal-btn');
-  const goalForm = document.getElementById('goal-form');
-  const userButtons = document.querySelectorAll('.user-buttons button');
-  const currentUserNameEl = document.getElementById('current-user-name');
-  const exportDataBtn = document.getElementById('export-data-btn');
-
-  // cartões/valores para abrir listagem por tipo
-  const monthExpenseTap = document.getElementById('card-expense') || document.getElementById('month-expense');
-  const monthIncomeTap = document.getElementById('card-income') || document.getElementById('month-income');
-
-  // --------------------------
-  // INICIALIZAÇÃO
-  // --------------------------
-  injectStylesOnce();
-  createExpenseChart();
-  setCurrentDate();
-  updateAll();
-  makeFAB();
-
-  // --------------------------
-  // NAVEGAÇÃO DE MÊS
-  // --------------------------
-  const prevBtn = document.getElementById('prev-month');
-  const nextBtn = document.getElementById('next-month');
-  if (prevBtn) prevBtn.addEventListener('click', () => changeMonth(-1));
-  if (nextBtn) nextBtn.addEventListener('click', () => changeMonth(1));
-
-  function changeMonth(direction) {
-    state.currentDate.setMonth(state.currentDate.getMonth() + direction);
-    updateAll();
-  }
-
-  function setCurrentDate() {
-    const dateEl = document.getElementById('date');
-    if (dateEl) dateEl.value = formatDateLocalISO(new Date()); // data local correta
-  }
-
-  // --------------------------
-  // NAVEGAÇÃO ENTRE PÁGINAS
-  // --------------------------
-  navItems.forEach((item) => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      const pageId = item.getAttribute('data-page');
-      if (!pageId) return;
-      pages.forEach((p) => p.classList.remove('active'));
-      document.getElementById(pageId)?.classList.add('active');
-      navItems.forEach((n) => n.classList.remove('active'));
-      item.classList.add('active');
-    });
+    };
+    lista.appendChild(div);
   });
+}
 
-  // --------------------------
-  // MODAIS BÁSICOS
-  // --------------------------
-  function openModal(modal) { modal?.classList.add('active'); }
-  function closeModal(modal) { modal?.classList.remove('active'); }
+// Atualizar metas
+function atualizarMetas() {
+  const { valorMeta, valorGuardado } = dados.metas;
+  document.getElementById("metaValor").innerText = `Meta: R$ ${valorGuardado.toFixed(2)} / R$ ${valorMeta.toFixed(2)}`;
+  const progresso = (valorGuardado / valorMeta) * 100;
+  document.getElementById("progress").style.width = progresso + "%";
+  document.getElementById("progress").innerText = progresso.toFixed(1) + "%";
 
-  if (addTransactionBtn) {
-    // Garante estilo flutuante
-    addTransactionBtn.classList.add('fab');
-    addTransactionBtn.addEventListener('click', openFABMenu);
+  // previsão
+  const receitas = dados.lancamentos.filter(l => l.tipo === "receita");
+  const meses = new Set(receitas.map(r => r.data.substring(3,10))).size || 1;
+  const media = receitas.reduce((s,r)=>s+r.valor,0) / meses || 0;
+  const restante = valorMeta - valorGuardado;
+  if (media > 0 && restante > 0) {
+    const mesesRestantes = Math.ceil(restante / media);
+    const dataPrev = new Date();
+    dataPrev.setMonth(dataPrev.getMonth() + mesesRestantes);
+    document.getElementById("metaPrevisao").innerText = 
+      `Previsão: ${mesesRestantes} meses → ${dataPrev.toLocaleDateString("pt-BR",{month:"short", year:"numeric"})}`;
+  } else {
+    document.getElementById("metaPrevisao").innerText = "Previsão: --";
   }
+}
 
-  if (cancelBtn) cancelBtn.addEventListener('click', () => closeModal(transactionModal));
-
-  if (addGoalBtn) {
-    addGoalBtn.addEventListener('click', () => {
-      goalForm?.reset();
-      openModal(goalModal);
-    });
-  }
-  if (cancelGoalBtn) cancelGoalBtn.addEventListener('click', () => closeModal(goalModal));
-
-  // --------------------------
-  // FORM DE TRANSAÇÃO
-  // --------------------------
-  if (typeExpenseBtn) typeExpenseBtn.addEventListener('click', () => setTransactionType('expense'));
-  if (typeIncomeBtn) typeIncomeBtn.addEventListener('click', () => setTransactionType('income'));
-
-  // Tipo padrão ao abrir o app
-  setTransactionType('expense');
-
-  function setTransactionType(type) {
-    if (!transactionTypeInput) return;
-    transactionTypeInput.value = type;
-    typeExpenseBtn?.classList.toggle('active', type === 'expense');
-    typeIncomeBtn?.classList.toggle('active', type === 'income');
-    updateCategoryOptions(type);
-  }
-
-  function updateCategoryOptions(type) {
-    if (!categorySelect) return;
-    categorySelect.innerHTML = '';
-    const categories = type === 'income' ? state.incomeCategories : state.expenseCategories;
-    categories.forEach((c) => {
-      const opt = document.createElement('option');
-      opt.value = c;
-      opt.textContent = c;
-      categorySelect.appendChild(opt);
-    });
-  }
-
-  if (transactionForm) {
-    ensureHiddenIdInput();
-    transactionForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const idHidden = document.getElementById('transaction-id');
-      const editingId = idHidden?.value || '';
-
-      const tx = {
-        id: editingId || Date.now().toString(),
-        type: transactionTypeInput?.value || 'expense',
-        amount: parseFloat(document.getElementById('amount')?.value || '0') || 0,
-        description: (document.getElementById('description')?.value || '').trim(),
-        category: categorySelect?.value || '',
-        date: document.getElementById('date')?.value || formatDateLocalISO(new Date()),
-        user: state.currentUser,
-      };
-
-      if (!tx.category || !tx.date || !tx.type || isNaN(tx.amount)) {
-        alert('Preencha os campos corretamente.');
-        return;
+// A Pagar / A Receber
+function atualizarPagarReceber() {
+  const lista = document.getElementById("listaPagarReceber");
+  lista.innerHTML = "";
+  let totalPagar = 0, totalReceber = 0;
+  dados.pagarReceber.forEach((p,i)=>{
+    const div = document.createElement("div");
+    div.innerHTML = `${p.tipo.toUpperCase()} - R$ ${p.valor.toFixed(2)} (${p.descricao})`;
+    div.onclick = ()=> {
+      if (confirm("Dar baixa neste lançamento?")) {
+        dados.pagarReceber.splice(i,1);
+        salvar(); atualizarTudo();
       }
-
-      if (editingId) {
-        const idx = state.transactions.findIndex((t) => t.id === editingId);
-        if (idx !== -1) state.transactions[idx] = tx;
-      } else {
-        state.transactions.push(tx);
-      }
-
-      // limpa edição
-      if (idHidden) idHidden.value = '';
-
-      saveAndRerender();
-      closeModal(transactionModal);
-      this.reset();
-      setCurrentDate();
-    });
-  }
-
-  // --------------------------
-  // METAS (GOALS)
-  // --------------------------
-  if (goalForm) {
-    goalForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const goal = {
-        id: document.getElementById('goal-id')?.value || Date.now().toString(),
-        name: document.getElementById('goal-name')?.value || '',
-        target: parseFloat(document.getElementById('goal-target')?.value || '0') || 0,
-        current: parseFloat(document.getElementById('goal-current')?.value || '0') || 0,
-      };
-
-      if (!goal.name) {
-        alert('Informe o nome da meta.');
-        return;
-      }
-
-      const existsIdx = state.goals.findIndex((g) => g.id === goal.id);
-      if (existsIdx !== -1) state.goals[existsIdx] = goal; else state.goals.push(goal);
-
-      saveAndRerender();
-      closeGoalModal();
-    });
-  }
-
-  window.editGoal = function (goalId) {
-    const goal = state.goals.find((g) => g.id === goalId);
-    if (!goal) return;
-    document.getElementById('goal-id').value = goal.id;
-    document.getElementById('goal-name').value = goal.name;
-    document.getElementById('goal-target').value = goal.target;
-    document.getElementById('goal-current').value = goal.current;
-    document.getElementById('goal-modal-title').textContent = 'Editar Meta';
-    document.getElementById('delete-goal-btn').style.display = 'block';
-    openModal(goalModal);
-  };
-
-  const deleteGoalBtn = document.getElementById('delete-goal-btn');
-  if (deleteGoalBtn) {
-    deleteGoalBtn.addEventListener('click', function () {
-      const id = document.getElementById('goal-id')?.value;
-      if (!id) return;
-      if (confirm('Tem certeza que deseja excluir esta meta?')) {
-        state.goals = state.goals.filter((g) => g.id !== id);
-        saveAndRerender();
-        closeGoalModal();
-      }
-    });
-  }
-
-  function closeGoalModal() {
-    closeModal(goalModal);
-    goalForm?.reset();
-    const goalIdEl = document.getElementById('goal-id');
-    if (goalIdEl) goalIdEl.value = '';
-    const title = document.getElementById('goal-modal-title');
-    if (title) title.textContent = 'Nova Meta Financeira';
-    const del = document.getElementById('delete-goal-btn');
-    if (del) del.style.display = 'none';
-  }
-
-  // --------------------------
-  // AÇÕES: USUÁRIOS, EXPORTAR
-  // --------------------------
-  userButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      state.currentUser = button.dataset.user;
-      localStorage.setItem('currentUser', state.currentUser);
-      updateAll();
-    });
+    };
+    lista.appendChild(div);
+    if (p.tipo==="pagar") totalPagar += p.valor;
+    else totalReceber += p.valor;
   });
+  document.getElementById("totalPagar").innerText = totalPagar.toFixed(2);
+  document.getElementById("totalReceber").innerText = totalReceber.toFixed(2);
+}
 
-  exportDataBtn?.addEventListener('click', exportData);
-  function exportData() {
-    const data = { transactions: state.transactions, goals: state.goals };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'dados_financeiros.json';
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  }
+// Gráficos
+let graficoGeral, graficoDespesasConta, graficoReceitasConta;
 
-  // --------------------------
-  // RENDERIZAÇÃO / ATUALIZAÇÃO
-  // --------------------------
-  function saveAndRerender() {
-    localStorage.setItem('transactions', JSON.stringify(state.transactions));
-    localStorage.setItem('goals', JSON.stringify(state.goals));
-    updateAll();
-  }
+function atualizarGraficos() {
+  // Geral
+  const ctx = document.getElementById("graficoGeral").getContext("2d");
+  if (graficoGeral) graficoGeral.destroy();
+  const porCategoria = {};
+  dados.lancamentos.forEach(l=>{
+    porCategoria[l.categoria] = (porCategoria[l.categoria]||0)+l.valor;
+  });
+  graficoGeral = new Chart(ctx, {
+    type:"pie",
+    data:{ labels:Object.keys(porCategoria), datasets:[{ data:Object.values(porCategoria) }] },
+  });
+  document.getElementById("legendaGeral").innerHTML = Object.entries(porCategoria).map(([c,v])=>`${c}: R$ ${v.toFixed(2)}`).join("<br>");
+  document.getElementById("tabelaGeral").innerHTML = "<b>Resumo:</b><br>"+document.getElementById("legendaGeral").innerHTML;
 
-  function updateAll() {
-    const filtered = filterTransactionsByMonth(state.transactions, state.currentDate);
-    renderSummary(filtered);
-    // Lista removida da tela inicial para manter apenas gráfico (pedido do usuário)
-    // renderTransactionList(filtered);
-    updateExpenseChart(filtered, state.expenseCategories);
-    renderGoals();
-    updateMonthDisplay();
-    updateUserUI();
-  }
+  // Despesas por conta
+  const ctxD = document.getElementById("graficoDespesasConta").getContext("2d");
+  if (graficoDespesasConta) graficoDespesasConta.destroy();
+  const despPorConta = {};
+  dados.lancamentos.filter(l=>l.tipo==="despesa").forEach(l=>{
+    despPorConta[l.conta]=(despPorConta[l.conta]||0)+l.valor;
+  });
+  graficoDespesasConta = new Chart(ctxD,{type:"pie",data:{labels:Object.keys(despPorConta),datasets:[{data:Object.values(despPorConta)}]}});
+  document.getElementById("tabelaDespesasConta").innerHTML = Object.entries(despPorConta).map(([c,v])=>`${c}: R$ ${v.toFixed(2)}`).join("<br>");
 
-  function filterTransactionsByMonth(transactions, date) {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    return transactions.filter((t) => {
-      const tDate = new Date(t.date + 'T00:00:00'); // força parsing local e evita fuso
-      return tDate.getFullYear() === year && tDate.getMonth() === month;
-    });
-  }
+  // Receitas por conta
+  const ctxR = document.getElementById("graficoReceitasConta").getContext("2d");
+  if (graficoReceitasConta) graficoReceitasConta.destroy();
+  const recPorConta = {};
+  dados.lancamentos.filter(l=>l.tipo==="receita").forEach(l=>{
+    recPorConta[l.conta]=(recPorConta[l.conta]||0)+l.valor;
+  });
+  graficoReceitasConta = new Chart(ctxR,{type:"pie",data:{labels:Object.keys(recPorConta),datasets:[{data:Object.values(recPorConta)}]}});
+  document.getElementById("tabelaReceitasConta").innerHTML = Object.entries(recPorConta).map(([c,v])=>`${c}: R$ ${v.toFixed(2)}`).join("<br>");
+}
 
-  function updateMonthDisplay() {
-    const el = document.getElementById('current-month-year');
-    if (el) el.textContent = state.currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-  }
+// Atualizar tudo
+function atualizarTudo() {
+  atualizarLancamentos();
+  atualizarMetas();
+  atualizarPagarReceber();
+  atualizarGraficos();
+}
 
-  function renderSummary(transactions) {
-    const income = transactions.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-    const expense = transactions.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-    const balance = income - expense;
-
-    const incomeEl = document.getElementById('month-income');
-    const expenseEl = document.getElementById('month-expense');
-    const balanceEl = document.getElementById('month-balance');
-    if (incomeEl) incomeEl.textContent = formatCurrency(income);
-    if (expenseEl) expenseEl.textContent = formatCurrency(expense);
-    if (balanceEl) {
-      balanceEl.textContent = formatCurrency(balance);
-      balanceEl.style.color = balance >= 0 ? 'var(--text-light)' : '#ff8a80';
-    }
-  }
-
-  function renderGoals() {
-    const list = document.getElementById('goal-list');
-    if (!list) return;
-    list.innerHTML = '';
-    if (state.goals.length === 0) {
-      list.innerHTML = '<li>Nenhuma meta definida.</li>';
-      return;
-    }
-    state.goals.forEach((goal) => {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <strong>${goal.name}</strong> - ${formatCurrency(goal.current)} / ${formatCurrency(goal.target)}
-        <button class="btn btn-ghost" onclick="editGoal('${goal.id}')">Editar</button>
-      `;
-      list.appendChild(li);
-    });
-  }
-
-  function updateUserUI() {
-    if (currentUserNameEl) currentUserNameEl.textContent = state.currentUser;
-    userButtons.forEach((button) => {
-      button.classList.toggle('active', button.dataset.user === state.currentUser);
-    });
-  }
-
-  // --------------------------
-  // LISTA POR TIPO (abrindo ao tocar em Despesas/Receitas)
-  // --------------------------
-  monthExpenseTap?.addEventListener('click', () => openListModal('expense'));
-  monthIncomeTap?.addEventListener('click', () => openListModal('income'));
-
-  function openListModal(type) {
-    const overlay = document.createElement('div');
-    overlay.className = 'list-modal-overlay';
-    const modal = document.createElement('div');
-    modal.className = 'list-modal';
-
-    const title = type === 'expense' ? 'Despesas do mês' : 'Receitas do mês';
-    const header = document.createElement('header');
-    header.innerHTML = `<h3>${title}</h3>`;
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'btn btn-ghost';
-    closeBtn.textContent = 'Fechar';
-    closeBtn.addEventListener('click', () => overlay.remove());
-    header.appendChild(closeBtn);
-
-    const content = document.createElement('div');
-
-    const list = filterTransactionsByMonth(state.transactions, state.currentDate)
-      .filter((t) => t.type === type)
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (list.length === 0) {
-      const empty = document.createElement('p');
-      empty.textContent = 'Nenhum lançamento.';
-      content.appendChild(empty);
-    } else {
-      list.forEach((t) => {
-        const row = document.createElement('div');
-        row.className = 'tx-row';
-        const info = document.createElement('div');
-        info.className = 'tx-info';
-        const top = document.createElement('div');
-        top.textContent = `${t.category} • ${t.user}`;
-        const bottom = document.createElement('small');
-        const d = new Date(t.date + 'T00:00:00');
-        bottom.textContent = `${d.toLocaleDateString('pt-BR')} • ${formatCurrency(t.amount)}`;
-        info.appendChild(top);
-        info.appendChild(bottom);
-
-        const actions = document.createElement('div');
-        actions.className = 'tx-actions';
-        const edit = document.createElement('button');
-        edit.className = 'btn btn-primary';
-        edit.textContent = 'Editar';
-        edit.addEventListener('click', () => editTransaction(t, overlay));
-        const del = document.createElement('button');
-        del.className = 'btn btn-danger';
-        del.textContent = 'Excluir';
-        del.addEventListener('click', () => deleteTransaction(t.id, overlay));
-        actions.appendChild(edit);
-        actions.appendChild(del);
-
-        row.appendChild(info);
-        row.appendChild(actions);
-        content.appendChild(row);
-      });
-    }
-
-    modal.appendChild(header);
-    modal.appendChild(content);
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-  }
-
-  function editTransaction(t, overlayToKeepOpen) {
-    // Preenche modal de transação
-    openModal(transactionModal);
-    ensureHiddenIdInput();
-    document.getElementById('transaction-id').value = t.id;
-    setTransactionType(t.type);
-    document.getElementById('amount').value = t.amount;
-    document.getElementById('description').value = t.description || '';
-    categorySelect.value = t.category;
-    document.getElementById('date').value = t.date; // já está em YYYY-MM-DD
-  }
-
-  function deleteTransaction(id, overlay) {
-    if (!confirm('Excluir este lançamento?')) return;
-    state.transactions = state.transactions.filter((x) => x.id !== id);
-    saveAndRerender();
-    // Reabre a listagem atualizada (fechamos e abrimos pela UX simples)
-    overlay?.remove();
-  }
-
-  // --------------------------
-  // FLOATING ACTION BUTTON (menu rápido)
-  // --------------------------
-  let fabMenuEl = null;
-  function makeFAB() {
-    if (!addTransactionBtn) return;
-    addTransactionBtn.title = 'Novo lançamento';
-  }
-
-  function openFABMenu() {
-    if (fabMenuEl) { closeFABMenu(); return; }
-    fabMenuEl = document.createElement('div');
-    fabMenuEl.className = 'fab-menu';
-
-    const btnDespesa = document.createElement('button');
-    btnDespesa.className = 'btn';
-    btnDespesa.textContent = '+ Despesa';
-    btnDespesa.addEventListener('click', () => {
-      openModal(transactionModal);
-      setTransactionType('expense');
-      transactionForm?.reset();
-      ensureHiddenIdInput();
-      document.getElementById('transaction-id').value = '';
-      setCurrentDate();
-      closeFABMenu();
-    });
-
-    const btnReceita = document.createElement('button');
-    btnReceita.className = 'btn';
-    btnReceita.textContent = '+ Receita';
-    btnReceita.addEventListener('click', () => {
-      openModal(transactionModal);
-      setTransactionType('income');
-      transactionForm?.reset();
-      ensureHiddenIdInput();
-      document.getElementById('transaction-id').value = '';
-      setCurrentDate();
-      closeFABMenu();
-    });
-
-    fabMenuEl.appendChild(btnDespesa);
-    fabMenuEl.appendChild(btnReceita);
-    document.body.appendChild(fabMenuEl);
-  }
-  function closeFABMenu() {
-    fabMenuEl?.remove();
-    fabMenuEl = null;
-  }
-
-  // --------------------------
-  // PLACEHOLDER BANCO
-  // --------------------------
-  window.connectBank = async function (bankName) {
-    try {
-      alert(`Integração com ${bankName} em desenvolvimento. Em breve estará disponível.`);
-    } catch (error) {
-      console.error('Erro na conexão:', error);
-      alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
-    }
-  };
-});
+// Início
+atualizarTudo();

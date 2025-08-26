@@ -1,6 +1,9 @@
 import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  // --------------------------
+  // STATE
+  // --------------------------
   const state = {
     transactions: JSON.parse(localStorage.getItem('transactions')) || [],
     goals: JSON.parse(localStorage.getItem('goals')) || [],
@@ -9,19 +12,27 @@ document.addEventListener('DOMContentLoaded', () => {
     currentDate: new Date(),
     expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros', 'Agua', 'Energia', 'Emprestimo'],
     incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
-    currentChartType: 'all',
+    currentChartType: 'all', // all | expense | income
   };
 
-  // Utilitários
-  const formatCurrency = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  const formatDateLocalISO = (d) => {
-    const date = new Date(d);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  };
+  // --------------------------
+  // UTILITÁRIOS
+  // --------------------------
+  function formatCurrency(value) {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
 
-  // Elementos
+  function formatDateLocalISO(date) {
+    const d = new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  // --------------------------
+  // ELEMENTOS
+  // --------------------------
   const navItems = document.querySelectorAll('.nav-item');
   const pages = document.querySelectorAll('.page');
+
   const addTransactionBtn = document.getElementById('add-transaction-btn');
   const transactionModal = document.getElementById('transaction-modal');
   const transactionForm = document.getElementById('transaction-form');
@@ -29,24 +40,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const typeIncomeBtn = document.getElementById('type-income-btn');
   const transactionTypeInput = document.getElementById('transaction-type');
   const categorySelect = document.getElementById('category');
+
   const addGoalBtn = document.getElementById('add-goal-btn');
   const goalModal = document.getElementById('goal-modal');
   const goalForm = document.getElementById('goal-form');
   const userButtons = document.querySelectorAll('.user-buttons button');
   const currentUserNameEl = document.getElementById('current-user-name');
   const exportDataBtn = document.getElementById('export-data-btn');
+
   const chartBtns = document.querySelectorAll('.chart-btn');
   const chartTitle = document.getElementById('chart-title');
   const chartDetails = document.getElementById('chart-details');
-  const cancelTxBtn = document.getElementById('cancel-btn');
-  const cancelGoalBtn = document.getElementById('cancel-goal-btn');
 
-  // Inicialização
-  createExpenseChart();
+  // --------------------------
+  // INICIALIZAÇÃO
+  // --------------------------
+  createExpenseChart(); // cria gráfico vazio
   setCurrentDate();
   updateAll();
 
-  // Navegação
+  // --------------------------
+  // NAVEGAÇÃO ENTRE PÁGINAS
+  // --------------------------
   navItems.forEach((item) => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
@@ -59,7 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Controle gráfico
+  // --------------------------
+  // CONTROLE DO GRÁFICO
+  // --------------------------
   chartBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       chartBtns.forEach((b) => b.classList.remove('active'));
@@ -92,10 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
       chartDetails.innerHTML = '<p>Nenhum dado para este mês.</p>';
       return;
     }
+
     const grouped = {};
     transactions.forEach((t) => {
       grouped[t.category] = (grouped[t.category] || 0) + t.amount;
     });
+
     Object.entries(grouped).forEach(([cat, val]) => {
       const row = document.createElement('div');
       row.className = 'chart-detail-row';
@@ -104,9 +123,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Transações
-  typeExpenseBtn?.addEventListener('click', () => setTransactionType('expense'));
-  typeIncomeBtn?.addEventListener('click', () => setTransactionType('income'));
+  // --------------------------
+  // FORM DE TRANSAÇÃO
+  // --------------------------
+  if (typeExpenseBtn) typeExpenseBtn.addEventListener('click', () => setTransactionType('expense'));
+  if (typeIncomeBtn) typeIncomeBtn.addEventListener('click', () => setTransactionType('income'));
 
   function setTransactionType(type) {
     transactionTypeInput.value = type;
@@ -126,44 +147,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  transactionForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const tx = {
-      id: Date.now().toString(),
-      type: transactionTypeInput.value,
-      amount: parseFloat(document.getElementById('amount').value || '0') || 0,
-      description: document.getElementById('description').value.trim(),
-      category: categorySelect.value,
-      date: document.getElementById('date').value || formatDateLocalISO(new Date()),
-      user: state.currentUser,
-    };
-    if (!tx.category || isNaN(tx.amount)) return alert('Preencha os campos corretamente.');
-    state.transactions.push(tx);
-    saveAndRerender();
-    transactionForm.reset();
-    setTransactionType('expense');
-    closeModal(transactionModal);
-  });
+  if (transactionForm) {
+    transactionForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const tx = {
+        id: Date.now().toString(),
+        type: transactionTypeInput.value,
+        amount: parseFloat(document.getElementById('amount').value || '0') || 0,
+        description: document.getElementById('description').value.trim(),
+        category: categorySelect.value,
+        date: document.getElementById('date').value || formatDateLocalISO(new Date()),
+        user: state.currentUser,
+      };
+      if (!tx.category || isNaN(tx.amount)) return alert('Preencha os campos corretamente.');
+      state.transactions.push(tx);
+      saveAndRerender();
+      transactionForm.reset();
+      setTransactionType('expense');
+      closeModal(transactionModal);
+    });
+  }
 
-  cancelTxBtn?.addEventListener('click', () => closeModal(transactionModal));
+  // --------------------------
+  // METAS
+  // --------------------------
+  if (goalForm) {
+    goalForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const goal = {
+        id: Date.now().toString(),
+        name: document.getElementById('goal-name').value,
+        target: parseFloat(document.getElementById('goal-target').value || '0'),
+        current: parseFloat(document.getElementById('goal-current').value || '0'),
+      };
+      state.goals.push(goal);
+      saveAndRerender();
+      closeModal(goalModal);
+    });
+  }
 
-  // Metas
-  goalForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const goal = {
-      id: Date.now().toString(),
-      name: document.getElementById('goal-name').value,
-      target: parseFloat(document.getElementById('goal-target').value || '0'),
-      current: parseFloat(document.getElementById('goal-current').value || '0'),
-    };
-    state.goals.push(goal);
-    saveAndRerender();
-    closeModal(goalModal);
-  });
-
-  cancelGoalBtn?.addEventListener('click', () => closeModal(goalModal));
-
-  // Exportar / Usuários
+  // --------------------------
+  // EXPORTAR & USUÁRIOS
+  // --------------------------
   userButtons.forEach((button) => {
     button.addEventListener('click', () => {
       state.currentUser = button.dataset.user;
@@ -181,7 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
     a.click(); URL.revokeObjectURL(url);
   });
 
-  // Renderização
+  // --------------------------
+  // RENDERIZAÇÃO
+  // --------------------------
   function saveAndRerender() {
     localStorage.setItem('transactions', JSON.stringify(state.transactions));
     localStorage.setItem('goals', JSON.stringify(state.goals));
@@ -210,4 +237,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const expense = transactions.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
     document.getElementById('month-income').textContent = formatCurrency(income);
     document.getElementById('month-expense').textContent = formatCurrency(expense);
-   
+    document.getElementById('month-balance').textContent = formatCurrency(income - expense);
+  }
+
+  function updateMonthDisplay() {
+    document.getElementById('current-month-year').textContent =
+      state.currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+  }
+
+  function setCurrentDate() {
+    const el = document.getElementById('date');
+    if (el) el.value = formatDateLocalISO(new Date());
+  }
+
+  function updateUserUI() {
+    currentUserNameEl.textContent = state.currentUser;
+    userButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.user === state.currentUser));
+  }
+
+  // --------------------------
+  // MODAIS
+  // --------------------------
+  function openModal(modal) { modal?.classList.add('active'); }
+  function closeModal(modal) { modal?.classList.remove('active'); }
+
+  addTransactionBtn?.addEventListener('click', () => openModal(transactionModal));
+  addGoalBtn?.addEventListener('click', () => openModal(goalModal));
+
+  // --------------------------
+  // BANCO MOCK
+  // --------------------------
+  window.connectBank = (bank) => {
+    alert(`Integração com ${bank} em desenvolvimento...`);
+  };
+});

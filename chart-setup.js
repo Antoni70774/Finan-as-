@@ -27,7 +27,8 @@ export function createExpenseChart() {
                         boxWidth: 12,
                         padding: 20,
                         font: {
-                            family: "'Roboto', sans-serif"
+                            family: "'Roboto', sans-serif",
+                            size: 14
                         }
                     }
                 },
@@ -35,11 +36,12 @@ export function createExpenseChart() {
                     callbacks: {
                         label: function(context) {
                             let label = context.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
+                            if (label) label += ': ';
                             if (context.parsed !== null) {
-                                label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed);
+                                label += new Intl.NumberFormat('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL'
+                                }).format(context.parsed);
                             }
                             return label;
                         }
@@ -54,11 +56,11 @@ export function createExpenseChart() {
 export function updateExpenseChart(transactions, categories) {
     if (!expenseChart) return;
 
-    const expenseData = categories.map(category => {
-        return transactions
+    const expenseData = categories.map(category =>
+        transactions
             .filter(t => t.type === 'expense' && t.category === category)
-            .reduce((sum, t) => sum + t.amount, 0);
-    });
+            .reduce((sum, t) => sum + t.amount, 0)
+    );
 
     const hasData = expenseData.some(d => d > 0);
     const chartContainer = expenseChart.canvas.closest('.chart-container');

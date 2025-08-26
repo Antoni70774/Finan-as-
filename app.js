@@ -1,159 +1,213 @@
-// Dados salvos em localStorage
-let dados = JSON.parse(localStorage.getItem("financeiro")) || {
-  lancamentos: [],
-  metas: { valorMeta: 10000, valorGuardado: 0 },
-  pagarReceber: []
-};
+import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
-const contasDespesas = ["Empréstimo","Cartão de Débito","Água","Energia","Gás","Vestiário","Investimento"];
+document.addEventListener('DOMContentLoaded', () => {
+  const state = {
+    transactions: JSON.parse(localStorage.getItem('transactions')) || [],
+    goals: JSON.parse(localStorage.getItem('goals')) || [],
+    currentUser: localStorage.getItem('currentUser') || 'Esposo',
+    users: ['Esposo', 'Esposa'],
+    currentDate: new Date(),
+    expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros', 'Agua', 'Energia', 'Emprestimo'],
+    incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
+    currentChartType: 'all',
+  };
 
-// Função troca abas
-function mostrarAba(id) {
-  document.querySelectorAll(".aba").forEach(el => el.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll("nav button").forEach(btn => btn.classList.remove("active"));
-  event.target.classList.add("active");
-  atualizarTudo();
-}
+  // Utilitários
+  const formatCurrency = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const formatDateLocalISO = (d) => {
+    const date = new Date(d);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  };
 
-// Salvar no localStorage
-function salvar() {
-  localStorage.setItem("financeiro", JSON.stringify(dados));
-}
+  // Elementos
+  const navItems = document.querySelectorAll('.nav-item');
+  const pages = document.querySelectorAll('.page');
+  const addTransactionBtn = document.getElementById('add-transaction-btn');
+  const transactionModal = document.getElementById('transaction-modal');
+  const transactionForm = document.getElementById('transaction-form');
+  const typeExpenseBtn = document.getElementById('type-expense-btn');
+  const typeIncomeBtn = document.getElementById('type-income-btn');
+  const transactionTypeInput = document.getElementById('transaction-type');
+  const categorySelect = document.getElementById('category');
+  const addGoalBtn = document.getElementById('add-goal-btn');
+  const goalModal = document.getElementById('goal-modal');
+  const goalForm = document.getElementById('goal-form');
+  const userButtons = document.querySelectorAll('.user-buttons button');
+  const currentUserNameEl = document.getElementById('current-user-name');
+  const exportDataBtn = document.getElementById('export-data-btn');
+  const chartBtns = document.querySelectorAll('.chart-btn');
+  const chartTitle = document.getElementById('chart-title');
+  const chartDetails = document.getElementById('chart-details');
+  const cancelTxBtn = document.getElementById('cancel-btn');
+  const cancelGoalBtn = document.getElementById('cancel-goal-btn');
 
-// Adicionar lançamento (receita ou despesa)
-function abrirLancamento() {
-  const tipo = prompt("Digite tipo: receita ou despesa");
-  if (!tipo) return;
+  // Inicialização
+  createExpenseChart();
+  setCurrentDate();
+  updateAll();
 
-  const valor = parseFloat(prompt("Digite o valor:"));
-  if (isNaN(valor)) return;
-
-  const categoria = tipo === "despesa" 
-    ? prompt("Digite categoria (ex: " + contasDespesas.join(", ") + ")") 
-    : prompt("Digite categoria da receita:");
-
-  const conta = prompt("Digite a conta (ex: Banco, Carteira, etc.)");
-  const data = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
-
-  dados.lancamentos.push({ tipo, valor, categoria, conta, data });
-  if (tipo === "receita") dados.metas.valorGuardado += valor;
-
-  salvar();
-  atualizarTudo();
-}
-
-// Exibir lançamentos
-function atualizarLancamentos() {
-  const lista = document.getElementById("listaLancamentos");
-  lista.innerHTML = "";
-  dados.lancamentos.forEach((l, i) => {
-    const div = document.createElement("div");
-    div.innerHTML = `${l.tipo.toUpperCase()} - R$ ${l.valor.toFixed(2)} (${l.categoria}) <small>${l.data}</small>`;
-    div.onclick = () => {
-      if (confirm("Deseja excluir este lançamento?")) {
-        if (l.tipo === "receita") dados.metas.valorGuardado -= l.valor;
-        dados.lancamentos.splice(i, 1);
-        salvar();
-        atualizarTudo();
-      }
-    };
-    lista.appendChild(div);
+  // Navegação
+  navItems.forEach((item) => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const pageId = item.dataset.page;
+      if (!pageId) return;
+      pages.forEach((p) => p.classList.remove('active'));
+      document.getElementById(pageId)?.classList.add('active');
+      navItems.forEach((n) => n.classList.remove('active'));
+      item.classList.add('active');
+    });
   });
-}
 
-// Atualizar metas
-function atualizarMetas() {
-  const { valorMeta, valorGuardado } = dados.metas;
-  document.getElementById("metaValor").innerText = `Meta: R$ ${valorGuardado.toFixed(2)} / R$ ${valorMeta.toFixed(2)}`;
-  const progresso = (valorGuardado / valorMeta) * 100;
-  document.getElementById("progress").style.width = progresso + "%";
-  document.getElementById("progress").innerText = progresso.toFixed(1) + "%";
+  // Controle gráfico
+  chartBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      chartBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.currentChartType = btn.dataset.type;
+      updateAll();
+    });
+  });
 
-  // previsão
-  const receitas = dados.lancamentos.filter(l => l.tipo === "receita");
-  const meses = new Set(receitas.map(r => r.data.substring(3,10))).size || 1;
-  const media = receitas.reduce((s,r)=>s+r.valor,0) / meses || 0;
-  const restante = valorMeta - valorGuardado;
-  if (media > 0 && restante > 0) {
-    const mesesRestantes = Math.ceil(restante / media);
-    const dataPrev = new Date();
-    dataPrev.setMonth(dataPrev.getMonth() + mesesRestantes);
-    document.getElementById("metaPrevisao").innerText = 
-      `Previsão: ${mesesRestantes} meses → ${dataPrev.toLocaleDateString("pt-BR",{month:"short", year:"numeric"})}`;
-  } else {
-    document.getElementById("metaPrevisao").innerText = "Previsão: --";
+  function renderChart(transactions) {
+    let filtered = transactions;
+    let title = 'Movimentação por Categoria';
+
+    if (state.currentChartType === 'expense') {
+      filtered = transactions.filter((t) => t.type === 'expense');
+      title = 'Despesas por Categoria';
+    } else if (state.currentChartType === 'income') {
+      filtered = transactions.filter((t) => t.type === 'income');
+      title = 'Receitas por Categoria';
+    }
+
+    chartTitle.textContent = title;
+    updateExpenseChart(filtered, [...state.expenseCategories, ...state.incomeCategories]);
+    renderChartDetails(filtered);
   }
-}
 
-// A Pagar / A Receber
-function atualizarPagarReceber() {
-  const lista = document.getElementById("listaPagarReceber");
-  lista.innerHTML = "";
-  let totalPagar = 0, totalReceber = 0;
-  dados.pagarReceber.forEach((p,i)=>{
-    const div = document.createElement("div");
-    div.innerHTML = `${p.tipo.toUpperCase()} - R$ ${p.valor.toFixed(2)} (${p.descricao})`;
-    div.onclick = ()=> {
-      if (confirm("Dar baixa neste lançamento?")) {
-        dados.pagarReceber.splice(i,1);
-        salvar(); atualizarTudo();
-      }
+  function renderChartDetails(transactions) {
+    chartDetails.innerHTML = '';
+    if (transactions.length === 0) {
+      chartDetails.innerHTML = '<p>Nenhum dado para este mês.</p>';
+      return;
+    }
+    const grouped = {};
+    transactions.forEach((t) => {
+      grouped[t.category] = (grouped[t.category] || 0) + t.amount;
+    });
+    Object.entries(grouped).forEach(([cat, val]) => {
+      const row = document.createElement('div');
+      row.className = 'chart-detail-row';
+      row.innerHTML = `<span>${cat}</span><span>${formatCurrency(val)}</span>`;
+      chartDetails.appendChild(row);
+    });
+  }
+
+  // Transações
+  typeExpenseBtn?.addEventListener('click', () => setTransactionType('expense'));
+  typeIncomeBtn?.addEventListener('click', () => setTransactionType('income'));
+
+  function setTransactionType(type) {
+    transactionTypeInput.value = type;
+    typeExpenseBtn.classList.toggle('active', type === 'expense');
+    typeIncomeBtn.classList.toggle('active', type === 'income');
+    updateCategoryOptions(type);
+  }
+
+  function updateCategoryOptions(type) {
+    categorySelect.innerHTML = '';
+    const categories = type === 'income' ? state.incomeCategories : state.expenseCategories;
+    categories.forEach((c) => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      categorySelect.appendChild(opt);
+    });
+  }
+
+  transactionForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const tx = {
+      id: Date.now().toString(),
+      type: transactionTypeInput.value,
+      amount: parseFloat(document.getElementById('amount').value || '0') || 0,
+      description: document.getElementById('description').value.trim(),
+      category: categorySelect.value,
+      date: document.getElementById('date').value || formatDateLocalISO(new Date()),
+      user: state.currentUser,
     };
-    lista.appendChild(div);
-    if (p.tipo==="pagar") totalPagar += p.valor;
-    else totalReceber += p.valor;
+    if (!tx.category || isNaN(tx.amount)) return alert('Preencha os campos corretamente.');
+    state.transactions.push(tx);
+    saveAndRerender();
+    transactionForm.reset();
+    setTransactionType('expense');
+    closeModal(transactionModal);
   });
-  document.getElementById("totalPagar").innerText = totalPagar.toFixed(2);
-  document.getElementById("totalReceber").innerText = totalReceber.toFixed(2);
-}
 
-// Gráficos
-let graficoGeral, graficoDespesasConta, graficoReceitasConta;
+  cancelTxBtn?.addEventListener('click', () => closeModal(transactionModal));
 
-function atualizarGraficos() {
-  // Geral
-  const ctx = document.getElementById("graficoGeral").getContext("2d");
-  if (graficoGeral) graficoGeral.destroy();
-  const porCategoria = {};
-  dados.lancamentos.forEach(l=>{
-    porCategoria[l.categoria] = (porCategoria[l.categoria]||0)+l.valor;
+  // Metas
+  goalForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const goal = {
+      id: Date.now().toString(),
+      name: document.getElementById('goal-name').value,
+      target: parseFloat(document.getElementById('goal-target').value || '0'),
+      current: parseFloat(document.getElementById('goal-current').value || '0'),
+    };
+    state.goals.push(goal);
+    saveAndRerender();
+    closeModal(goalModal);
   });
-  graficoGeral = new Chart(ctx, {
-    type:"pie",
-    data:{ labels:Object.keys(porCategoria), datasets:[{ data:Object.values(porCategoria) }] },
+
+  cancelGoalBtn?.addEventListener('click', () => closeModal(goalModal));
+
+  // Exportar / Usuários
+  userButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      state.currentUser = button.dataset.user;
+      localStorage.setItem('currentUser', state.currentUser);
+      updateAll();
+    });
   });
-  document.getElementById("legendaGeral").innerHTML = Object.entries(porCategoria).map(([c,v])=>`${c}: R$ ${v.toFixed(2)}`).join("<br>");
-  document.getElementById("tabelaGeral").innerHTML = "<b>Resumo:</b><br>"+document.getElementById("legendaGeral").innerHTML;
 
-  // Despesas por conta
-  const ctxD = document.getElementById("graficoDespesasConta").getContext("2d");
-  if (graficoDespesasConta) graficoDespesasConta.destroy();
-  const despPorConta = {};
-  dados.lancamentos.filter(l=>l.tipo==="despesa").forEach(l=>{
-    despPorConta[l.conta]=(despPorConta[l.conta]||0)+l.valor;
+  exportDataBtn?.addEventListener('click', () => {
+    const data = { transactions: state.transactions, goals: state.goals };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'dados_financeiros.json';
+    a.click(); URL.revokeObjectURL(url);
   });
-  graficoDespesasConta = new Chart(ctxD,{type:"pie",data:{labels:Object.keys(despPorConta),datasets:[{data:Object.values(despPorConta)}]}});
-  document.getElementById("tabelaDespesasConta").innerHTML = Object.entries(despPorConta).map(([c,v])=>`${c}: R$ ${v.toFixed(2)}`).join("<br>");
 
-  // Receitas por conta
-  const ctxR = document.getElementById("graficoReceitasConta").getContext("2d");
-  if (graficoReceitasConta) graficoReceitasConta.destroy();
-  const recPorConta = {};
-  dados.lancamentos.filter(l=>l.tipo==="receita").forEach(l=>{
-    recPorConta[l.conta]=(recPorConta[l.conta]||0)+l.valor;
-  });
-  graficoReceitasConta = new Chart(ctxR,{type:"pie",data:{labels:Object.keys(recPorConta),datasets:[{data:Object.values(recPorConta)}]}});
-  document.getElementById("tabelaReceitasConta").innerHTML = Object.entries(recPorConta).map(([c,v])=>`${c}: R$ ${v.toFixed(2)}`).join("<br>");
-}
+  // Renderização
+  function saveAndRerender() {
+    localStorage.setItem('transactions', JSON.stringify(state.transactions));
+    localStorage.setItem('goals', JSON.stringify(state.goals));
+    updateAll();
+  }
 
-// Atualizar tudo
-function atualizarTudo() {
-  atualizarLancamentos();
-  atualizarMetas();
-  atualizarPagarReceber();
-  atualizarGraficos();
-}
+  function updateAll() {
+    const filtered = filterTransactionsByMonth(state.transactions, state.currentDate);
+    renderSummary(filtered);
+    renderChart(filtered);
+    updateMonthDisplay();
+    updateUserUI();
+  }
 
-// Início
-atualizarTudo();
+  function filterTransactionsByMonth(transactions, date) {
+    const y = date.getFullYear();
+    const m = date.getMonth();
+    return transactions.filter((t) => {
+      const d = new Date(t.date + 'T00:00:00');
+      return d.getFullYear() === y && d.getMonth() === m;
+    });
+  }
+
+  function renderSummary(transactions) {
+    const income = transactions.filter((t) => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expense = transactions.filter((t) => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    document.getElementById('month-income').textContent = formatCurrency(income);
+    document.getElementById('month-expense').textContent = formatCurrency(expense);
+   

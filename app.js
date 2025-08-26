@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentUser: localStorage.getItem('currentUser') || 'Esposo',
     users: ['Esposo', 'Esposa'],
     currentDate: new Date(),
-    expenseCategories: ['Alimentacao', 'Empréstimo', 'laze', 'Cartão de Débito','Água','Energia','Gás','Vestiário', 'veiculo', 'Investimento' ],
+    expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros', 'Agua', 'Energia', 'Emprestimo'],
     incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
   };
 

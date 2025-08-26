@@ -1,1 +1,221 @@
-<html lang="pt-BR"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Controle Financeiro</title> <link rel="stylesheet" href="style.css"> <link rel="manifest" href="manifest.json"> <meta name="theme-color" content="#4A90E2"> <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"> <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet"> <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script> </head> <body> <div class="app-container"> <!-- Header --> <header class="app-header"> <h1>Visão Geral</h1> <div class="profile-icon"> <span class="material-icons-sharp">person_outline</span> </div> </header> <!-- Main Content --> <main id="app-main"> <!-- Dashboard Page --> <div id="dashboard-page" class="page active"> <div class="summary-card"> <div class="date-selector"> <span id="prev-month" class="material-icons-sharp">chevron_left</span> <h2 id="current-month-year"></h2> <span id="next-month" class="material-icons-sharp">chevron_right</span> </div> <div class="balance-info"> <p>Balanço do Mês</p> <h3 id="month-balance">R$ 0,00</h3> </div> <div class="income-expense"> <div class="income"> <span class="material-icons-sharp up">arrow_upward</span> <div> <p>Receitas</p> <h4 id="month-income">R$ 0,00</h4> </div> </div> <div class="expense"> <span class="material-icons-sharp down">arrow_downward</span> <div> <p>Despesas</p> <h4 id="month-expense">R$ 0,00</h4> </div> </div> </div> </div> <div class="chart-container"> <h3>Despesas por Categoria</h3> <canvas id="expense-chart"></canvas> </div> <div class="recent-transactions"> <h3>Transações Recentes</h3> <ul id="transaction-list"> <!-- Transactions will be injected here by JS --> </ul> </div> </div> <!-- Goals Page --> <div id="goals-page" class="page"> <div class="goals-header"> <h3>Metas Pessoais</h3> <button id="add-goal-btn" class="btn-primary">Nova Meta</button> </div> <div id="goals-list"> <!-- Goals will be injected here by JS --> </div> </div> <!-- Profile Page --> <div id="profile-page" class="page"> <h3>Perfil & Configurações</h3> <div class="profile-card"> <p><strong>Usuário Atual:</strong> <span id="current-user-name"></span></p> <div class="user-switcher"> <p>Trocar de usuário:</p> <div class="user-buttons"> <button class="btn-secondary" data-user="Esposo">Esposo</button> <button class="btn-secondary" data-user="Esposa">Esposa</button> </div> </div> <button id="export-data-btn" class="btn-secondary">Exportar Dados</button> </div> <div class="bank-connect"> <h4>Conexão Bancária</h4> <p>Selecione seu banco para conectar:</p> <div class="bank-integration"> <button class="bank-button" onclick="connectBank('nubank')"> <img src="assets/nubank-icon.png" alt="Nubank"> Nubank </button> <button class="bank-button" onclick="connectBank('itau')"> <img src="assets/itau-icon.png" alt="Itaú"> Itaú </button> <button class="bank-button" onclick="connectBank('caixa')"> <img src="assets/caixa-icon.png" alt="Caixa"> Caixa </button> </div> </div> </div> </main> <!-- Floating Action Button --> <button id="add-transaction-btn" class="fab"> <span class="material-icons-sharp">add</span> </button> <!-- Bottom Navigation --> <nav class="bottom-nav"> <a href="#" class="nav-item active" data-page="dashboard-page"> <span class="material-icons-sharp">home</span> <span class="nav-text">Início</span> </a> <a href="#" class="nav-item" data-page="goals-page"> <span class="material-icons-sharp">flag</span> <span class="nav-text">Metas</span> </a> <a href="#" class="nav-item" data-page="profile-page"> <span class="material-icons-sharp">person</span> <span class="nav-text">Perfil</span> </a> </nav> </div> <!-- Add Transaction Modal --> <div id="transaction-modal" class="modal-overlay"> <div class="modal-content"> <form id="transaction-form"> <h3>Nova Transação</h3> <div class="toggle-type"> <button type="button" id="type-expense-btn" class="toggle-btn active">Despesa</button> <button type="button" id="type-income-btn" class="toggle-btn">Receita</button> </div> <input type="hidden" id="transaction-type" value="expense"> <label for="amount">Valor</label> <input type="number" id="amount" placeholder="R$ 0,00" step="0.01" required> <label for="description">Descrição</label> <input type="text" id="description" placeholder="Ex: Almoço" required> <label for="category">Categoria</label> <select id="category" required> <!-- Options will be populated by JS --> </select> <label for="date">Data</label> <input type="date" id="date" required> <div class="modal-actions"> <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button> <button type="submit" class="btn-primary">Salvar</button> </div> </form> </div> </div> <!-- Correção do formulário de meta --> <div id="goal-modal" class="modal-overlay"> <div class="modal-content"> <form id="goal-form"> <h3 id="goal-modal-title">Nova Meta Financeira</h3> <input type="hidden" id="goal-id"> <label for="goal-name">Nome da Meta</label> <input type="text" id="goal-name" required> <label for="goal-target">Valor Alvo</label> <input type="number" id="goal-target" step="0.01" required> <label for="goal-current">Valor Atual</label> <input type="number" id="goal-current" step="0.01" required> <div class="modal-actions"> <button type="button" onclick="closeGoalModal()" class="btn-secondary">Cancelar</button> <button type="submit" class="btn-primary">Salvar</button> <button type="button" id="delete-goal-btn" class="btn-danger" style="display:none">Excluir</button> </div> </form> </div> </div> <script type="module" src="app.js"></script> <script> if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/service-worker.js') .then(registration => { console.log('ServiceWorker registrado com sucesso:', registration.scope); }) .catch(error => { console.log('Falha ao registrar ServiceWorker:', error); }); }); } </script> </body> </html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle Financeiro</title>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4A90E2">
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="app-header">
+      <h1>Visão Geral</h1>
+      <div class="profile-icon">
+        <span class="material-icons-sharp">person_outline</span>
+      </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main id="app-main">
+
+      <!-- Página Dashboard -->
+      <div id="dashboard-page" class="page active">
+
+        <!-- Card Resumo -->
+        <div class="summary-card">
+          <div class="date-selector">
+            <span id="prev-month" class="material-icons-sharp">chevron_left</span>
+            <h2 id="current-month-year"></h2>
+            <span id="next-month" class="material-icons-sharp">chevron_right</span>
+          </div>
+
+          <div class="balance-info">
+            <p>Balanço do Mês</p>
+            <h3 id="month-balance">R$ 0,00</h3>
+          </div>
+
+          <div class="income-expense">
+            <div class="income">
+              <span class="material-icons-sharp up">arrow_upward</span>
+              <div>
+                <p>Receitas</p>
+                <h4 id="month-income">R$ 0,00</h4>
+              </div>
+            </div>
+            <div class="expense">
+              <span class="material-icons-sharp down">arrow_downward</span>
+              <div>
+                <p>Despesas</p>
+                <h4 id="month-expense">R$ 0,00</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfico -->
+        <div class="chart-container">
+          <h3>Despesas por Categoria</h3>
+          <canvas id="expense-chart"></canvas>
+        </div>
+
+        <!-- Transações -->
+        <div class="recent-transactions">
+          <h3>Transações Recentes</h3>
+          <ul id="transaction-list"></ul>
+        </div>
+      </div>
+
+      <!-- Página Metas -->
+      <div id="goals-page" class="page">
+        <div class="goals-header">
+          <h3>Metas Pessoais</h3>
+          <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
+        </div>
+        <div id="goals-list"></div>
+      </div>
+
+      <!-- Página Perfil -->
+      <div id="profile-page" class="page">
+        <h3>Perfil & Configurações</h3>
+        <div class="profile-card">
+          <p><strong>Usuário Atual:</strong> <span id="current-user-name"></span></p>
+
+          <div class="user-switcher">
+            <p>Trocar de usuário:</p>
+            <div class="user-buttons">
+              <button class="btn-secondary" data-user="Esposo">Esposo</button>
+              <button class="btn-secondary" data-user="Esposa">Esposa</button>
+            </div>
+          </div>
+
+          <button id="export-data-btn" class="btn-secondary">Exportar Dados</button>
+        </div>
+
+        <!-- Integração Bancária -->
+        <div class="bank-connect">
+          <h4>Conexão Bancária</h4>
+          <p>Selecione seu banco para conectar:</p>
+          <div class="bank-integration">
+            <button class="bank-button" onclick="connectBank('nubank')">
+              <img src="assets/nubank-icon.png" alt="Nubank"> Nubank
+            </button>
+            <button class="bank-button" onclick="connectBank('itau')">
+              <img src="assets/itau-icon.png" alt="Itaú"> Itaú
+            </button>
+            <button class="bank-button" onclick="connectBank('caixa')">
+              <img src="assets/caixa-icon.png" alt="Caixa"> Caixa
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Botão de Ação Rápida -->
+    <button id="add-transaction-btn" class="fab">
+      <span class="material-icons-sharp">add</span>
+    </button>
+
+    <!-- Navegação Inferior -->
+    <nav class="bottom-nav">
+      <a href="#" class="nav-item active" data-page="dashboard-page">
+        <span class="material-icons-sharp">home</span>
+        <span class="nav-text">Início</span>
+      </a>
+      <a href="#" class="nav-item" data-page="goals-page">
+        <span class="material-icons-sharp">flag</span>
+        <span class="nav-text">Metas</span>
+      </a>
+      <a href="#" class="nav-item" data-page="profile-page">
+        <span class="material-icons-sharp">person</span>
+        <span class="nav-text">Perfil</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Modal Transação -->
+  <div id="transaction-modal" class="modal-overlay">
+    <div class="modal-content">
+      <form id="transaction-form">
+        <h3>Nova Transação</h3>
+
+        <div class="toggle-type">
+          <button type="button" id="type-expense-btn" class="toggle-btn active">Despesa</button>
+          <button type="button" id="type-income-btn" class="toggle-btn">Receita</button>
+        </div>
+        <input type="hidden" id="transaction-type" value="expense">
+
+        <label for="amount">Valor</label>
+        <input type="number" id="amount" placeholder="R$ 0,00" step="0.01" required>
+
+        <label for="description">Descrição</label>
+        <input type="text" id="description" placeholder="Ex: Almoço" required>
+
+        <label for="category">Categoria</label>
+        <select id="category" required></select>
+
+        <label for="date">Data</label>
+        <input type="date" id="date" required>
+
+        <div class="modal-actions">
+          <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Meta -->
+  <div id="goal-modal" class="modal-overlay">
+    <div class="modal-content">
+      <form id="goal-form">
+        <h3 id="goal-modal-title">Nova Meta Financeira</h3>
+        <input type="hidden" id="goal-id">
+
+        <label for="goal-name">Nome da Meta</label>
+        <input type="text" id="goal-name" required>
+
+        <label for="goal-target">Valor Alvo</label>
+        <input type="number" id="goal-target" step="0.01" required>
+
+        <label for="goal-current">Valor Atual</label>
+        <input type="number" id="goal-current" step="0.01" required>
+
+        <div class="modal-actions">
+          <button type="button" onclick="closeGoalModal()" class="btn-secondary">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar</button>
+          <button type="button" id="delete-goal-btn" class="btn-danger" style="display:none">Excluir</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('ServiceWorker registrado com sucesso:', registration.scope);
+          })
+          .catch(error => {
+            console.log('Falha ao registrar ServiceWorker:', error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>

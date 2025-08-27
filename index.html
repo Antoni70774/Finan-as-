@@ -18,6 +18,7 @@
             <h1>Visão Geral</h1>
             <div class="profile-icon">
                 <span class="material-icons-sharp">person_outline</span>
+                <span class="material-icons-sharp sino-lembrete" id="sino-lembrete">notifications_active</span>
             </div>
         </header>
 
@@ -56,9 +57,7 @@
                 <div id="chart-details" class="chart-details"></div>
                 <div class="recent-transactions">
                     <h3>Transações Recentes</h3>
-                    <ul id="transaction-list">
-                        <!-- Transactions injected by JS -->
-                    </ul>
+                    <ul id="transaction-list"></ul>
                 </div>
             </div>
 
@@ -66,9 +65,14 @@
             <div id="goals-page" class="page">
                 <h2>Metas Pessoais</h2>
                 <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
-                <div id="goal-list">
-                    <!-- Lista de metas via JS -->
-                </div>
+                <div id="goal-list"></div>
+            </div>
+
+            <!-- Payables Page -->
+            <div id="payables-page" class="page">
+                <h2>Despesas a Pagar</h2>
+                <button id="add-payable-btn" class="btn-primary">Nova Conta</button>
+                <div id="payable-list"></div>
             </div>
 
             <!-- Profile Page -->
@@ -158,6 +162,27 @@
                 </form>
             </div>
         </div>
+        <!-- Payable Modal -->
+        <div id="payable-modal" class="modal-overlay">
+            <div class="modal-content">
+                <form id="payable-form">
+                    <h3 id="payable-modal-title">Nova Conta a Pagar</h3>
+                    <input type="hidden" id="payable-id">
+                    <label for="payable-description">Descrição</label>
+                    <input type="text" id="payable-description" required>
+                    <label for="payable-category">Categoria</label>
+                    <input type="text" id="payable-category" required>
+                    <label for="payable-amount">Valor</label>
+                    <input type="number" id="payable-amount" step="0.01" required>
+                    <label for="payable-date">Data de Vencimento</label>
+                    <input type="date" id="payable-date" required>
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-payable-btn" class="btn-secondary">Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
@@ -168,6 +193,10 @@
             <button class="nav-item" data-page="goals-page">
                 <span class="material-icons-sharp">flag</span>
                 <span class="nav-text">Metas</span>
+            </button>
+            <button class="nav-item" data-page="payables-page">
+                <span class="material-icons-sharp">notifications</span>
+                <span class="nav-text">A Pagar</span>
             </button>
             <button class="nav-item" data-page="profile-page">
                 <span class="material-icons-sharp">person</span>

@@ -1,7 +1,7 @@
 let expenseChart = null;
 
 export function createExpenseChart() {
-    const ctx = document.getElementById('main-chart').getContext('2d');
+    const ctx = document.getElementById('expense-chart').getContext('2d');
     expenseChart = new Chart(ctx, {
         type: 'doughnut',
         data: {

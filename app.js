@@ -1,21 +1,10 @@
 import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // STATE MANAGEMENT
-    const state = {
-        transactions: JSON.parse(localStorage.getItem('transactions')) || [],
-        goals: JSON.parse(localStorage.getItem('goals')) || [],
-        currentUser: localStorage.getItem('currentUser') || 'Esposo',
-        users: ['Esposo', 'Esposa'],
-        currentDate: new Date(),
-        expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros'],
-        incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
-    };
-
-    // UI ELEMENTS
-    const pages = document.querySelectorAll('.page');
+    // Elementos da UI
     const navItems = document.querySelectorAll('.nav-item');
-    const addTransactionBtn = document.getElementById('add-transaction-btn');
+    const pages = document.querySelectorAll('.page');
+    const addButton = document.getElementById('add-transaction-btn');
     const transactionModal = document.getElementById('transaction-modal');
     const cancelBtn = document.getElementById('cancel-btn');
     const transactionForm = document.getElementById('transaction-form');
@@ -31,6 +20,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const userButtons = document.querySelectorAll('.user-buttons button');
     const currentUserNameEl = document.getElementById('current-user-name');
     const exportDataBtn = document.getElementById('export-data-btn');
+
+    // STATE MANAGEMENT
+    const state = {
+        transactions: JSON.parse(localStorage.getItem('transactions')) || [],
+        goals: JSON.parse(localStorage.getItem('goals')) || [],
+        currentUser: localStorage.getItem('currentUser') || 'Esposo',
+        users: ['Esposo', 'Esposa'],
+        currentDate: new Date(),
+        expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros'],
+        incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
+    };
 
     // INITIAL SETUP
     createExpenseChart();
@@ -95,9 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function openModal(modal) { modal.classList.add('active'); }
     function closeModal(modal) { modal.classList.remove('active'); }
 
-    addTransactionBtn.addEventListener('click', () => {
-        const modal = document.getElementById('transaction-modal');
-        modal.classList.add('active');
+    addButton.addEventListener('click', () => {
+        transactionModal.classList.add('active');
         document.getElementById('transaction-form').reset();
         setCurrentDate();
     });

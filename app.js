@@ -301,7 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const year = date.getFullYear();
         const month = date.getMonth();
         return transactions.filter(t => {
-            const tDate = new Date(t.date);
+            // Corrigido para comparar a data conforme digitada
+            const tDate = new Date(t.date + "T03:00:00"); // UTC-3 (Brasília)
             return tDate.getFullYear() === year && tDate.getMonth() === month;
         });
     }
@@ -312,6 +313,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function formatCurrency(value) {
         return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatDateBR(dateStr) {
+        // Garante que a data sempre seja exibida como digitada, sem desvio de fuso
+        // Adiciona o horário de Brasília para evitar problemas (UTC-3)
+        return new Date(dateStr + "T03:00:00").toLocaleDateString('pt-BR');
     }
 
     function renderSummary(transactions) {
@@ -352,13 +359,13 @@ document.addEventListener('DOMContentLoaded', () => {
             listEl.innerHTML = '<li>Nenhuma transação este mês.</li>';
             return;
         }
-        const sorted = [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
+        const sorted = [...transactions].sort((a,b) => new Date(b.date + "T03:00:00") - new Date(a.date + "T03:00:00"));
         sorted.slice(0, 10).forEach(t => {
             const item = document.createElement('li');
             item.className = 'transaction-item';
             item.dataset.id = t.id;
             const isIncome = t.type === 'income';
-            const date = new Date(t.date).toLocaleDateString('pt-BR');
+            const date = formatDateBR(t.date); // <-- Aqui usa a função corrigida
             item.innerHTML = `
                 <div class="transaction-icon ${isIncome ? 'income' : 'expense'}">
                     <span class="material-icons-sharp">${isIncome ? 'arrow_upward' : 'arrow_downward'}</span>
@@ -390,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="meta-title">${goal.name}</span>
                 <span class="meta-info">Alvo: <strong>${formatCurrency(goal.target)}</strong></span>
                 <span class="meta-info">Atual: <strong>${formatCurrency(goal.current)}</strong></span>
-                <span class="meta-info">Limite: <strong>${new Date(goal.date).toLocaleDateString('pt-BR')}</strong></span>
+                <span class="meta-info">Limite: <strong>${formatDateBR(goal.date)}</strong></span>
                 <div class="goal-actions">
                     <button class="btn-secondary" onclick="editGoal('${goal.id}')">Editar</button>
                     <button class="btn-danger" onclick="window.deleteGoal && deleteGoal('${goal.id}')">Excluir</button>

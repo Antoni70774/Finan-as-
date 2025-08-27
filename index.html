@@ -25,13 +25,12 @@
         <main id="app-main">
             <!-- Dashboard Page -->
             <div id="dashboard-page" class="page active">
-                <!-- Navegação de meses -->
                 <div class="month-nav">
                     <button id="prev-month" class="btn-secondary">&lt;</button>
                     <span id="current-month-year"></span>
                     <button id="next-month" class="btn-secondary">&gt;</button>
                 </div>
-                <div class="dashboard-summary">
+                <div class="dashboard-summary" id="dashboard-summary">
                     <div class="summary-item">
                         <span>Receita</span>
                         <h4 id="month-income">R$ 0,00</h4>
@@ -67,9 +66,9 @@
             <div id="goals-page" class="page">
                 <h2>Metas Pessoais</h2>
                 <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
-                <ul id="goal-list">
+                <div id="goal-list">
                     <!-- Lista de metas via JS -->
-                </ul>
+                </div>
             </div>
 
             <!-- Profile Page -->
@@ -110,11 +109,11 @@
         </button>
 
         <!-- Modals -->
-        <!-- Add Transaction Modal -->
+        <!-- Add Transaction Modal (Novo/Editar) -->
         <div id="transaction-modal" class="modal-overlay">
             <div class="modal-content">
                 <form id="transaction-form">
-                    <h3>Nova Transação</h3>
+                    <h3 id="transaction-modal-title">Nova Transação</h3>
                     <div class="toggle-type">
                         <button type="button" id="type-expense-btn" class="toggle-btn active">Despesa</button>
                         <button type="button" id="type-income-btn" class="toggle-btn">Receita</button>
@@ -128,9 +127,11 @@
                     <select id="category" required></select>
                     <label for="date">Data</label>
                     <input type="date" id="date" required>
-                    <div class="modal-actions">
+                    <input type="hidden" id="transaction-id">
+                    <div class="modal-actions" id="transaction-modal-actions">
                         <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button>
                         <button type="submit" class="btn-primary">Salvar</button>
+                        <button type="button" id="delete-transaction-btn" class="btn-danger" style="display:none;">Excluir</button>
                     </div>
                 </form>
             </div>

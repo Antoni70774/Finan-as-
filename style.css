@@ -15,15 +15,19 @@ body {
 
 .chart-card {
   position: relative;
-  width: 90%;
-  max-width: 380px;
+  width: 100%;
+  max-width: 30px;
   margin: 1rem auto;
 }
 
 .chart-card canvas {
   width: 100%;
-  height: 300px;
+  max-width: 100px;   /* largura máxima */
+  height: 100px;      /* altura fixa */
+  margin: 0 auto;     /* centraliza */
+  display: block;
 }
+
 
 .chart-center {
   position: absolute;

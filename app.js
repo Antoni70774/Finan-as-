@@ -1,7 +1,7 @@
 import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Seletores
+    // Elementos da UI
     const navItems = document.querySelectorAll('.nav-item');
     const pages = document.querySelectorAll('.page');
     const addButton = document.getElementById('add-transaction-btn');
@@ -15,44 +15,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionModalTitle = document.getElementById('transaction-modal-title');
     const transactionIdInput = document.getElementById('transaction-id');
     const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
-    const chartBtns = document.querySelectorAll('.chart-btn');
-    const chartTitle = document.getElementById('chart-title');
-    const chartDetails = document.getElementById('chart-details');
+    
     const addGoalBtn = document.getElementById('add-goal-btn');
     const goalModal = document.getElementById('goal-modal');
     const cancelGoalBtn = document.getElementById('cancel-goal-btn');
     const goalForm = document.getElementById('goal-form');
     const goalList = document.getElementById('goal-list');
-    const addPayableBtn = document.getElementById('add-payable-btn');
-    const payableModal = document.getElementById('payable-modal');
-    const cancelPayableBtn = document.getElementById('cancel-payable-btn');
-    const payableForm = document.getElementById('payable-form');
-    const payableList = document.getElementById('payable-list');
     const userButtons = document.querySelectorAll('.user-buttons button');
     const currentUserNameEl = document.getElementById('current-user-name');
     const exportDataBtn = document.getElementById('export-data-btn');
-    const sinoLembrete = document.getElementById('sino-lembrete');
+    const chartBtns = document.querySelectorAll('.chart-btn');
+    const chartTitle = document.getElementById('chart-title');
 
-    // Estado
+    // STATE MANAGEMENT
     const state = {
         transactions: JSON.parse(localStorage.getItem('transactions')) || [],
         goals: JSON.parse(localStorage.getItem('goals')) || [],
-        payables: JSON.parse(localStorage.getItem('payables')) || [],
         currentUser: localStorage.getItem('currentUser') || 'Esposo',
         users: ['Esposo', 'Esposa'],
         currentDate: new Date(),
         expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros'],
         incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
-        chartType: 'all'
+        chartType: 'all' // all, expense, income
     };
-
-    // Inicialização
+    
+    // INITIAL SETUP
     createExpenseChart();
     setCurrentDate();
     updateAll();
     registerServiceWorker();
 
-    // Navegação de mês
+    // DATE NAVIGATION
     document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
     document.getElementById('next-month').addEventListener('click', () => changeMonth(1));
     function changeMonth(direction) {
@@ -64,46 +57,50 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('date').value = today.toISOString().split('T')[0];
     }
 
-    // Navegação de páginas/abas
+    // NAVIGATION
     function navigateToPage(pageId) {
         pages.forEach(page => page.classList.remove('active'));
         const selectedPage = document.getElementById(pageId);
         if (selectedPage) selectedPage.classList.add('active');
         navItems.forEach(item => {
-            item.classList.toggle('active', item.getAttribute('data-page') === pageId);
+            item.classList.remove('active');
+            if (item.getAttribute('data-page') === pageId) item.classList.add('active');
         });
         const titles = {
             'dashboard-page': 'Visão Geral',
             'goals-page': 'Metas Pessoais',
-            'profile-page': 'Perfil',
-            'payables-page': 'Despesas a Pagar'
+            'profile-page': 'Perfil'
         };
         document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
-        if (pageId === 'payables-page') renderPayables();
     }
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
-            navigateToPage(item.getAttribute('data-page'));
+            const pageId = item.getAttribute('data-page');
+            if (pageId) navigateToPage(pageId);
         });
     });
 
-    // Modais
+    // MODAL HANDLING
     function openModal(modal) { modal.classList.add('active'); }
     function closeModal(modal) { modal.classList.remove('active'); }
 
-    addButton.addEventListener('click', () => openTransactionModal());
+    addButton.addEventListener('click', () => {
+        openTransactionModal();
+    });
     cancelBtn.addEventListener('click', () => closeModal(transactionModal));
     deleteTransactionBtn.addEventListener('click', () => {
         const id = transactionIdInput.value;
         if (!id) return;
         if (confirm("Deseja excluir esta transação?")) {
             state.transactions = state.transactions.filter(t => t.id !== id);
+            localStorage.setItem('transactions', JSON.stringify(state.transactions));
             saveAndRerender();
             closeModal(transactionModal);
         }
     });
 
+    // Transaction Modal - abrir para novo lançamento
     function openTransactionModal(transaction = null) {
         transactionForm.reset();
         setCurrentDate();
@@ -125,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(transactionModal);
     }
 
+    // TRANSACTION TYPE SELECT
     typeExpenseBtn.addEventListener('click', () => setTransactionType('expense'));
     typeIncomeBtn.addEventListener('click', () => setTransactionType('income'));
     function setTransactionType(type) {
@@ -144,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // TRANSACTION FORM SUBMISSION (novo ou editar)
     transactionForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const id = transactionIdInput.value;
@@ -160,11 +159,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (id) {
+            // Editar
             const idx = state.transactions.findIndex(t => t.id === id);
             if (idx > -1) {
                 state.transactions[idx] = { id, type, amount, description, category, date, user };
             }
         } else {
+            // Novo
             state.transactions.push({
                 id: Date.now().toString(),
                 type,
@@ -175,10 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 user
             });
         }
+        localStorage.setItem('transactions', JSON.stringify(state.transactions));
         saveAndRerender();
         closeModal(transactionModal);
     });
 
+    // Chart selector
     chartBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             chartBtns.forEach(b => b.classList.remove('active'));
@@ -188,9 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // GOAL
-    addGoalBtn.addEventListener('click', () => openModal(goalModal));
-    cancelGoalBtn.addEventListener('click', () => closeModal(goalModal));
+    // GOAL FORM SUBMISSION
     goalForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const goalId = document.getElementById('goal-id').value;
@@ -200,10 +201,12 @@ document.addEventListener('DOMContentLoaded', () => {
             current: parseFloat(document.getElementById('goal-current').value),
             date: document.getElementById('goal-date').value
         };
+
         if (!goalData.name || !goalData.target || isNaN(goalData.current)) {
             alert('Por favor, preencha todos os campos corretamente');
             return;
         }
+
         if (goalId) {
             const index = state.goals.findIndex(g => g.id === goalId);
             if (index !== -1) {
@@ -215,8 +218,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ...goalData
             });
         }
+
         saveAndRerender();
-        closeModal(goalModal);
+        closeGoalModal();
     });
 
     document.getElementById('delete-goal-btn').addEventListener('click', function() {
@@ -228,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Função global para editar meta
     window.editGoal = function(goalId) {
         const goal = state.goals.find(g => g.id === goalId);
         if (!goal) return;
@@ -241,74 +246,16 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(goalModal);
     };
 
-    // PAYABLE
-    addPayableBtn.addEventListener('click', () => openPayableModal());
-    cancelPayableBtn.addEventListener('click', () => closeModal(payableModal));
-    payableForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const payableId = document.getElementById('payable-id').value;
-        const payableData = {
-            description: document.getElementById('payable-description').value,
-            category: document.getElementById('payable-category').value,
-            amount: parseFloat(document.getElementById('payable-amount').value),
-            date: document.getElementById('payable-date').value,
-            paid: false
-        };
-        if (!payableData.description || !payableData.category || !payableData.amount || !payableData.date) {
-            alert('Preencha todos os campos');
-            return;
-        }
-        if (payableId) {
-            const index = state.payables.findIndex(p => p.id === payableId);
-            if (index !== -1) {
-                state.payables[index] = { ...state.payables[index], ...payableData };
-            }
-        } else {
-            state.payables.push({
-                id: Date.now().toString(),
-                ...payableData
-            });
-        }
-        saveAndRerender();
-        closeModal(payableModal);
-        renderPayables();
-    });
-
-    function openPayableModal(payable = null) {
-        payableForm.reset();
-        document.getElementById('payable-id').value = '';
-        document.getElementById('payable-modal-title').textContent = payable ? 'Editar Conta a Pagar' : 'Nova Conta a Pagar';
-        if (payable) {
-            document.getElementById('payable-id').value = payable.id;
-            document.getElementById('payable-description').value = payable.description;
-            document.getElementById('payable-category').value = payable.category;
-            document.getElementById('payable-amount').value = payable.amount;
-            document.getElementById('payable-date').value = payable.date;
-        }
-        openModal(payableModal);
-    }
-
-    window.markPayablePaid = function(id) {
-        const idx = state.payables.findIndex(p => p.id === id);
-        if (idx > -1) {
-            state.payables[idx].paid = !state.payables[idx].paid;
-            localStorage.setItem('payables', JSON.stringify(state.payables));
-            renderPayables();
-        }
-    };
-    window.deletePayable = function(id) {
-        if (confirm('Excluir esta conta?')) {
-            state.payables = state.payables.filter(p => p.id !== id);
-            localStorage.setItem('payables', JSON.stringify(state.payables));
-            renderPayables();
-        }
-    };
-    window.editPayable = function(id) {
-        const payable = state.payables.find(p => p.id === id);
-        if (!payable) return;
-        openPayableModal(payable);
+    // Função global para fechar modal de meta
+    window.closeGoalModal = function() {
+        closeModal(goalModal);
+        goalForm.reset();
+        document.getElementById('goal-id').value = '';
+        document.getElementById('goal-modal-title').textContent = 'Nova Meta Financeira';
+        document.getElementById('delete-goal-btn').style.display = 'none';
     };
 
+    // USER MANAGEMENT
     userButtons.forEach(button => {
         button.addEventListener('click', () => {
             state.currentUser = button.dataset.user;
@@ -317,12 +264,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // DATA EXPORT
     exportDataBtn.addEventListener('click', exportData);
     function exportData() {
         const data = {
             transactions: state.transactions,
             goals: state.goals,
-            payables: state.payables
         };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
         const downloadAnchorNode = document.createElement('a');
@@ -333,20 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadAnchorNode.remove();
     }
 
-    sinoLembrete.addEventListener('click', () => {
-        const hoje = new Date();
-        const lembretes = state.payables.filter(p => !p.paid && (new Date(p.date + "T03:00:00") - hoje <= 2 * 24 * 3600 * 1000 && new Date(p.date + "T03:00:00") > hoje));
-        if (lembretes.length > 0) {
-            alert("Contas próximas do vencimento:\n" + lembretes.map(p => `${p.description} - ${formatCurrency(p.amount)} em ${formatDateBR(p.date)}`).join('\n'));
-        } else {
-            alert("Nenhuma conta próxima do vencimento.");
-        }
-    });
-
+    // DATA & RENDERING
     function saveAndRerender() {
         localStorage.setItem('transactions', JSON.stringify(state.transactions));
         localStorage.setItem('goals', JSON.stringify(state.goals));
-        localStorage.setItem('payables', JSON.stringify(state.payables));
         updateAll();
     }
 
@@ -356,7 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTransactionList(filtered);
         updateMainChart(filtered);
         renderGoals();
-        renderPayables();
         updateMonthDisplay();
         updateUserUI();
     }
@@ -365,7 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const year = date.getFullYear();
         const month = date.getMonth();
         return transactions.filter(t => {
-            const tDate = new Date(t.date + "T03:00:00");
+            // Corrigido para comparar a data conforme digitada
+            const tDate = new Date(t.date + "T03:00:00"); // UTC-3 (Brasília)
             return tDate.getFullYear() === year && tDate.getMonth() === month;
         });
     }
@@ -379,56 +316,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function formatDateBR(dateStr) {
+        // Garante que a data sempre seja exibida como digitada, sem desvio de fuso
+        // Adiciona o horário de Brasília para evitar problemas (UTC-3)
         return new Date(dateStr + "T03:00:00").toLocaleDateString('pt-BR');
     }
 
-    // DISPLAY DE LANÇAMENTOS NOS CARDS RECEITA/DESPESA
     function renderSummary(transactions) {
-        const income = transactions.filter(t => t.type === 'income');
-        const expense = transactions.filter(t => t.type === 'expense');
-        const totalIncome = income.reduce((sum, t) => sum + t.amount, 0);
-        const totalExpense = expense.reduce((sum, t) => sum + t.amount, 0);
-        const balance = totalIncome - totalExpense;
+        const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        const balance = income - expense;
 
-        document.getElementById('month-income').textContent = formatCurrency(totalIncome);
-        document.getElementById('month-expense').textContent = formatCurrency(totalExpense);
+        document.getElementById('month-income').textContent = formatCurrency(income);
+        document.getElementById('month-expense').textContent = formatCurrency(expense);
         document.getElementById('month-balance').textContent = formatCurrency(balance);
         document.getElementById('month-balance').style.color = balance >= 0 ? 'var(--text-light)' : '#ff8a80';
-
-        renderSummaryDisplay('display-month-income', income);
-        renderSummaryDisplay('display-month-expense', expense);
     }
 
-    function renderSummaryDisplay(displayId, transactions) {
-        const display = document.getElementById(displayId);
-        if (!display) return;
-        if (transactions.length === 0) {
-            display.innerHTML = '<span class="card-empty">Nenhum lançamento.</span>';
-            return;
+    // FILTRO DO GRÁFICO
+    function updateMainChart(transactions) {
+        let cats = state.expenseCategories;
+        let filtered = transactions;
+        let title = 'Movimentação por Categoria';
+
+        if (state.chartType === 'expense') {
+            filtered = transactions.filter(t => t.type === 'expense');
+            cats = state.expenseCategories;
+            title = 'Despesas por Categoria';
+        } else if (state.chartType === 'income') {
+            filtered = transactions.filter(t => t.type === 'income');
+            cats = state.incomeCategories;
+            title = 'Receitas por Categoria';
         }
-        display.innerHTML = transactions.map(t => `
-            <div class="card-lancamento">
-                <span>${t.description} (${formatCurrency(t.amount)} em ${formatDateBR(t.date)})</span>
-                <button class="btn-secondary card-edit-btn" data-id="${t.id}">Editar</button>
-                <button class="btn-danger card-del-btn" data-id="${t.id}">Excluir</button>
-            </div>
-        `).join('');
-        display.querySelectorAll('.card-edit-btn').forEach(btn => {
-            btn.onclick = () => {
-                const transaction = state.transactions.find(tx => tx.id === btn.dataset.id);
-                if (transaction) openTransactionModal(transaction);
-            }
-        });
-        display.querySelectorAll('.card-del-btn').forEach(btn => {
-            btn.onclick = () => {
-                if (confirm('Deseja excluir este lançamento?')) {
-                    state.transactions = state.transactions.filter(tx => tx.id !== btn.dataset.id);
-                    saveAndRerender();
-                }
-            }
-        });
+        updateExpenseChart(filtered, cats);
+        chartTitle.textContent = title;
     }
 
+    // TRANSACTIONS
     function renderTransactionList(transactions) {
         const listEl = document.getElementById('transaction-list');
         listEl.innerHTML = '';
@@ -442,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             item.className = 'transaction-item';
             item.dataset.id = t.id;
             const isIncome = t.type === 'income';
-            const date = formatDateBR(t.date);
+            const date = formatDateBR(t.date); // <-- Aqui usa a função corrigida
             item.innerHTML = `
                 <div class="transaction-icon ${isIncome ? 'income' : 'expense'}">
                     <span class="material-icons-sharp">${isIncome ? 'arrow_upward' : 'arrow_downward'}</span>
@@ -460,27 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    window.showChartDetails = function(category, transactions) {
-        chartDetails.innerHTML = `<h4>Lançamentos de ${category}:</h4>` + transactions.map(t => `
-            <div class="chart-detail-item">
-                <span>${t.description} (${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)} em ${formatDateBR(t.date)})</span>
-                <button class="btn-secondary" onclick="window.editTransactionFromChart('${t.id}')">Editar</button>
-                <button class="btn-danger" onclick="window.deleteTransactionFromChart('${t.id}')">Excluir</button>
-            </div>
-        `).join('');
-    };
-    window.editTransactionFromChart = function(id) {
-        const transaction = state.transactions.find(t => t.id === id);
-        if (transaction) openTransactionModal(transaction);
-    };
-    window.deleteTransactionFromChart = function(id) {
-        if (confirm('Deseja excluir este lançamento?')) {
-            state.transactions = state.transactions.filter(t => t.id !== id);
-            saveAndRerender();
-            chartDetails.innerHTML = '';
-        }
-    };
-
+    // GOALS
     function renderGoals() {
         goalList.innerHTML = '';
         if (state.goals.length === 0) {
@@ -503,36 +406,13 @@ document.addEventListener('DOMContentLoaded', () => {
             goalList.appendChild(card);
         });
     }
+
     window.deleteGoal = function(goalId) {
         if (confirm('Tem certeza que deseja excluir esta meta?')) {
             state.goals = state.goals.filter(g => g.id !== goalId);
             saveAndRerender();
         }
     };
-
-    function renderPayables() {
-        payableList.innerHTML = '';
-        if (state.payables.length === 0) {
-            payableList.innerHTML = '<p>Nenhuma conta lançada.</p>';
-            return;
-        }
-        state.payables.forEach(p => {
-            payableList.innerHTML += `
-            <div class="goal-card">
-                <span class="meta-title">${p.description}</span>
-                <span class="meta-info">Categoria: ${p.category}</span>
-                <span class="meta-info">Valor: ${formatCurrency(p.amount)}</span>
-                <span class="meta-info">Vencimento: ${formatDateBR(p.date)}</span>
-                <span class="meta-info">Status: ${p.paid ? '<span style="color:green">Pago</span>' : '<span style="color:red">A pagar</span>'}</span>
-                <div class="goal-actions">
-                    <button class="btn-secondary" onclick="window.markPayablePaid('${p.id}')">${p.paid ? 'Desfazer' : 'Marcar Pago'}</button>
-                    <button class="btn-secondary" onclick="window.editPayable('${p.id}')">Editar</button>
-                    <button class="btn-danger" onclick="window.deletePayable('${p.id}')">Excluir</button>
-                </div>
-            </div>
-            `;
-        });
-    }
 
     function updateUserUI() {
         currentUserNameEl.textContent = state.currentUser;
@@ -552,6 +432,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         console.log('ServiceWorker registration failed: ', err);
                     });
             });
+        }
+    }
+
+    // Correção da integração bancária
+    window.connectBank = async function(bankName) {
+        try {
+            alert(`Integração com ${bankName} em desenvolvimento. Em breve estará disponível.`);
+            // Aqui você implementará a integração real quando tiver as credenciais
+        } catch (error) {
+            console.error('Erro na conexão:', error);
+            alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
         }
     }
 });

@@ -124,20 +124,25 @@
             </div>
         </main>
 
+        <!-- Floating Action Button -->
+        <button id="add-transaction-btn" class="fab">
+            <span class="material-icons-sharp">add</span>
+        </button>
+
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
-            <a href="#" class="nav-item active" data-page="dashboard-page">
+            <button class="nav-item active" data-page="dashboard-page">
                 <span class="material-icons-sharp">home</span>
                 <span class="nav-text">Início</span>
-            </a>
-            <a href="#" class="nav-item" data-page="goals-page">
+            </button>
+            <button class="nav-item" data-page="goals-page">
                 <span class="material-icons-sharp">flag</span>
                 <span class="nav-text">Metas</span>
-            </a>
-            <a href="#" class="nav-item" data-page="profile-page">
+            </button>
+            <button class="nav-item" data-page="profile-page">
                 <span class="material-icons-sharp">person</span>
                 <span class="nav-text">Perfil</span>
-            </a>
+            </button>
         </nav>
     </div>
 
@@ -201,10 +206,6 @@
                     .then(reg => console.log('SW registrado:', reg.scope))
                     .catch(err => console.log('Falha ao registrar SW:', err));
             });
-        }
-    </script>
-</body>
-</html>
         }
     </script>
 </body>

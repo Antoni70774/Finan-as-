@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle Financeiro</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="./estilo.css">
+    <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#4A90E2">
+    <link rel="icon" type="image/png" sizes="192x192" href="./ícone-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./ícone-512.png">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -108,15 +110,15 @@
                     <p>Selecione seu banco para conectar:</p>
                     <div class="bank-integration">
                         <button class="bank-button" onclick="connectBank('nubank')">
-                            <img src="assets/nubank-icon.png" alt="Nubank">
+                            <img src="./assets/nubank-icon.png" alt="Nubank">
                             Nubank
                         </button>
                         <button class="bank-button" onclick="connectBank('itau')">
-                            <img src="assets/itau-icon.png" alt="Itaú">
+                            <img src="./assets/itau-icon.png" alt="Itaú">
                             Itaú
                         </button>
                         <button class="bank-button" onclick="connectBank('caixa')">
-                            <img src="assets/caixa-icon.png" alt="Caixa">
+                            <img src="./assets/caixa-icon.png" alt="Caixa">
                             Caixa
                         </button>
                     </div>
@@ -197,6 +199,7 @@
         </div>
     </div>
 
+    <!-- Scripts -->
     <script type="module" src="./app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {

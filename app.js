@@ -99,16 +99,17 @@ document.addEventListener('DOMContentLoaded', () => {
         transactionModal.classList.add('active');
         document.getElementById('transaction-form').reset();
         setCurrentDate();
+        setTransactionType('expense'); // Default para despesa
     });
     cancelBtn.addEventListener('click', () => closeModal(transactionModal));
 
-    addGoalBtn.addEventListener('click', () => {
+    addGoalBtn && addGoalBtn.addEventListener('click', () => {
         goalForm.reset();
         openModal(goalModal);
     });
-    cancelGoalBtn.addEventListener('click', () => closeModal(goalModal));
+    cancelGoalBtn && cancelGoalBtn.addEventListener('click', () => closeModal(goalModal));
 
-    // TRANSACTION FORM
+    // TRANSACTION TYPE SELECT
     typeExpenseBtn.addEventListener('click', () => setTransactionType('expense'));
     typeIncomeBtn.addEventListener('click', () => setTransactionType('income'));
     
@@ -119,60 +120,96 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCategoryOptions(type);
     }
 
-    // Correção do formulário de transação
+    function updateCategoryOptions(type) {
+        categorySelect.innerHTML = '';
+        const cats = type === 'expense' ? state.expenseCategories : state.incomeCategories;
+        cats.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            categorySelect.appendChild(option);
+        });
+    }
+
+    // TRANSACTION FORM SUBMISSION
     transactionForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        const transaction = {
-            id: Date.now().toString(),
-            type: document.getElementById('transaction-type').value,
-            amount: parseFloat(document.getElementById('amount').value),
-            description: document.getElementById('description').value,
-            category: document.getElementById('category').value,
-            date: document.getElementById('date').value,
-            user: state.currentUser
-        };
+        const type = transactionTypeInput.value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        const description = document.getElementById('description').value;
+        const category = categorySelect.value;
+        const date = document.getElementById('date').value;
+        const user = state.currentUser;
 
-        state.transactions.push(transaction);
+        if (!amount || !description || !category || !date) {
+            alert('Preencha todos os campos');
+            return;
+        }
+
+        state.transactions.push({
+            id: Date.now().toString(),
+            type,
+            amount,
+            description,
+            category,
+            date,
+            user
+        });
+
+        localStorage.setItem('transactions', JSON.stringify(state.transactions));
         saveAndRerender();
-        document.getElementById('transaction-modal').classList.remove('active');
-        this.reset();
+        closeModal(transactionModal);
     });
 
-    // GOAL FORM
+    // GOAL FORM SUBMISSION
     goalForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        const goal = {
-            id: document.getElementById('goal-id').value || Date.now().toString(),
+        const goalId = document.getElementById('goal-id').value;
+        const goalData = {
             name: document.getElementById('goal-name').value,
             target: parseFloat(document.getElementById('goal-target').value),
-            current: parseFloat(document.getElementById('goal-current').value)
+            current: parseFloat(document.getElementById('goal-current').value),
+            date: document.getElementById('goal-date').value
         };
 
-        if (document.getElementById('goal-id').value) {
-            const index = state.goals.findIndex(g => g.id === goal.id);
+        if (!goalData.name || !goalData.target || isNaN(goalData.current)) {
+            alert('Por favor, preencha todos os campos corretamente');
+            return;
+        }
+
+        if (goalId) {
+            const index = state.goals.findIndex(g => g.id === goalId);
             if (index !== -1) {
-                state.goals[index] = goal;
+                state.goals[index] = { ...state.goals[index], ...goalData };
             }
         } else {
-            state.goals.push(goal);
+            state.goals.push({
+                id: Date.now().toString(),
+                ...goalData
+            });
         }
 
         saveAndRerender();
         closeGoalModal();
     });
 
+    document.getElementById('delete-goal-btn')?.addEventListener('click', function() {
+        const goalId = document.getElementById('goal-id').value;
+        if (confirm('Tem certeza que deseja excluir esta meta?')) {
+            state.goals = state.goals.filter(g => g.id !== goalId);
+            saveAndRerender();
+            closeModal(goalModal);
+        }
+    });
+
     // Função global para editar meta
     window.editGoal = function(goalId) {
         const goal = state.goals.find(g => g.id === goalId);
         if (!goal) return;
-
         document.getElementById('goal-id').value = goal.id;
         document.getElementById('goal-name').value = goal.name;
         document.getElementById('goal-target').value = goal.target;
         document.getElementById('goal-current').value = goal.current;
-        
         document.getElementById('goal-modal-title').textContent = 'Editar Meta';
         document.getElementById('delete-goal-btn').style.display = 'block';
         document.getElementById('goal-modal').classList.add('active');
@@ -195,10 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
             updateAll();
         });
     });
-    
+
     // DATA EXPORT
-    exportDataBtn.addEventListener('click', exportData);
-    
+    exportDataBtn && exportDataBtn.addEventListener('click', exportData);
     function exportData() {
         const data = {
             transactions: state.transactions,
@@ -258,7 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('month-balance').style.color = balance >= 0 ? 'var(--text-light)' : '#ff8a80';
     }
 
-    // Corrigido renderização de transações com data
     function renderTransactionList(transactions) {
         const listEl = document.getElementById('transaction-list');
         listEl.innerHTML = '';
@@ -266,15 +301,12 @@ document.addEventListener('DOMContentLoaded', () => {
             listEl.innerHTML = '<li>Nenhuma transação este mês.</li>';
             return;
         }
-        
         const sorted = [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
-
         sorted.slice(0, 10).forEach(t => {
             const item = document.createElement('li');
             item.className = 'transaction-item';
             const isIncome = t.type === 'income';
             const date = new Date(t.date).toLocaleDateString('pt-BR');
-            
             item.innerHTML = `
                 <div class="transaction-icon ${isIncome ? 'income' : 'expense'}">
                     <span class="material-icons-sharp">${isIncome ? 'arrow_upward' : 'arrow_downward'}</span>
@@ -291,54 +323,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Correção do sistema de metas
-    function handleGoalSubmit(e) {
-        e.preventDefault();
-        const goalId = document.getElementById('goal-id').value;
-        const goalData = {
-            name: document.getElementById('goal-name').value,
-            target: parseFloat(document.getElementById('goal-target').value),
-            current: parseFloat(document.getElementById('goal-current').value),
-            date: document.getElementById('goal-date').value
-        };
-
-        if (!goalData.name || !goalData.target || isNaN(goalData.current)) {
-            alert('Por favor, preencha todos os campos corretamente');
-            return;
-        }
-
-        if (goalId) {
-            const index = state.goals.findIndex(g => g.id === goalId);
-            if (index !== -1) {
-                state.goals[index] = { ...state.goals[index], ...goalData };
-            }
-        } else {
-            state.goals.push({
-                id: Date.now().toString(),
-                ...goalData
-            });
-        }
-
-        saveAndRerender();
-        closeGoalModal();
-    }
-
-    // Adicionar listener para deletar meta
-    document.getElementById('delete-goal-btn').addEventListener('click', function() {
-        const goalId = document.getElementById('goal-id').value;
-        if (confirm('Tem certeza que deseja excluir esta meta?')) {
-            state.goals = state.goals.filter(g => g.id !== goalId);
-            saveAndRerender();
-            closeModal(goalModal);
-        }
-    });
-
-    function closeGoalModal() {
-        document.getElementById('goal-modal').classList.remove('active');
-        document.getElementById('goal-form').reset();
-        document.getElementById('goal-id').value = '';
-        document.getElementById('goal-modal-title').textContent = 'Nova Meta Financeira';
-        document.getElementById('delete-goal-btn').style.display = 'none';
+    function renderGoals() {
+        // Implemente aqui a renderização das metas se necessário
+        // Exemplo: percorra state.goals e atualize o DOM conforme o layout da sua página
     }
 
     function updateUserUI() {

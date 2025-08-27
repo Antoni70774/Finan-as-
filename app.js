@@ -53,31 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // NAVIGATION
-    navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            const pageId = item.getAttribute('data-page');
-            
-            // Remove classe active de todas as páginas
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-            
-            // Ativa a página selecionada
-            document.getElementById(pageId).classList.add('active');
-            
-            // Atualiza navegação
-            document.querySelectorAll('.nav-item').forEach(nav => {
-                nav.classList.remove('active');
-            });
-            item.classList.add('active');
-        });
-    });
-
-    // Navegação
-    const navItems = document.querySelectorAll('.nav-item');
-    const pages = document.querySelectorAll('.page');
-
     function navigateToPage(pageId) {
         // Esconde todas as páginas
         pages.forEach(page => page.classList.remove('active'));
@@ -105,16 +80,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
     }
 
-    // Adiciona eventos de clique para navegação
+    // Event listeners para navegação
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             const pageId = item.getAttribute('data-page');
             if (pageId) {
                 navigateToPage(pageId);
-            } else if (item.id === 'add-transaction-btn') {
-                // Abre o modal de nova transação
-                document.getElementById('transaction-modal').classList.add('active');
             }
         });
     });

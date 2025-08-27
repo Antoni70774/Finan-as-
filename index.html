@@ -25,6 +25,12 @@
         <main id="app-main">
             <!-- Dashboard Page -->
             <div id="dashboard-page" class="page active">
+                <!-- Navegação de meses -->
+                <div class="month-nav">
+                    <button id="prev-month" class="btn-secondary">&lt;</button>
+                    <span id="current-month-year"></span>
+                    <button id="next-month" class="btn-secondary">&gt;</button>
+                </div>
                 <div class="dashboard-summary">
                     <div class="summary-item">
                         <span>Receita</span>
@@ -38,7 +44,6 @@
                         <span>Saldo</span>
                         <h4 id="month-balance">R$ 0,00</h4>
                     </div>
-                    <div id="current-month-year"></div>
                 </div>
                 <div class="chart-selector">
                     <button class="chart-btn active" data-type="all">Geral</button>

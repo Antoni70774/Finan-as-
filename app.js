@@ -74,6 +74,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Navegação
+    const navItems = document.querySelectorAll('.nav-item');
+    const pages = document.querySelectorAll('.page');
+
+    function navigateToPage(pageId) {
+        // Esconde todas as páginas
+        pages.forEach(page => page.classList.remove('active'));
+        
+        // Mostra a página selecionada
+        const selectedPage = document.getElementById(pageId);
+        if (selectedPage) {
+            selectedPage.classList.add('active');
+        }
+
+        // Atualiza os botões de navegação
+        navItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('data-page') === pageId) {
+                item.classList.add('active');
+            }
+        });
+
+        // Atualiza o título da página
+        const titles = {
+            'dashboard-page': 'Visão Geral',
+            'goals-page': 'Metas Pessoais',
+            'profile-page': 'Perfil'
+        };
+        document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
+    }
+
+    // Adiciona eventos de clique para navegação
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const pageId = item.getAttribute('data-page');
+            if (pageId) {
+                navigateToPage(pageId);
+            } else if (item.id === 'add-transaction-btn') {
+                // Abre o modal de nova transação
+                document.getElementById('transaction-modal').classList.add('active');
+            }
+        });
+    });
+
     // MODAL HANDLING
     function openModal(modal) { modal.classList.add('active'); }
     function closeModal(modal) { modal.classList.remove('active'); }

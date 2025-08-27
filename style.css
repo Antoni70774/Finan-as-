@@ -111,6 +111,22 @@ body, html {
     display: flex;
 }
 
+#transaction-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#transaction-form .form-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+#transaction-form .form-row label {
+    margin-bottom: 0;
+}
 .modal-content {
     background: #fff;
     padding: 25px 20px;

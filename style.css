@@ -50,7 +50,6 @@ body, html {
     position: relative;
 }
 
-/* PAGE NAVIGATION */
 .page { display: none; padding: 20px; }
 .page.active { display: block; }
 
@@ -89,7 +88,6 @@ body, html {
     border-radius: 14px;
 }
 
-/* FLOATING BUTTON */
 .fab {
     position: fixed;
     bottom: 84px;
@@ -109,7 +107,6 @@ body, html {
     justify-content: center;
 }
 
-/* MONTH NAV */
 .month-nav {
     display: flex;
     align-items: center;
@@ -131,7 +128,6 @@ body, html {
     background: #cee2fa;
 }
 
-/* DASHBOARD SUMMARY CARDS */
 .dashboard-summary {
     display: flex;
     flex-direction: row;

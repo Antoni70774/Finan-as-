@@ -127,6 +127,7 @@ body, html {
 /* CARD PRINCIPAL */
 .dashboard-summary {
     display: flex;
+    flex-direction: row;
     justify-content: center;
     gap: 26px;
     background: #fff;
@@ -322,6 +323,12 @@ body, html {
     justify-content: space-between;
     padding: 10px 0;
     border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.transaction-item:hover {
+    background: #f3f7fa;
 }
 
 .transaction-icon {
@@ -355,6 +362,44 @@ body, html {
     font-weight: 500;
 }
 
+/* Card de metas */
+.goal-card {
+    background: linear-gradient(135deg, #e7f0fe 74%, #f5faff 100%);
+    border-radius: 18px;
+    padding: 18px 24px;
+    box-shadow: 0 2px 12px rgba(80,130,230,0.08);
+    margin-bottom: 16px;
+    border: 2px solid #e4eaf7;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+}
+
+.goal-card .meta-title {
+    font-weight: 700;
+    color: #4A90E2;
+    font-size: 1.12em;
+    margin-bottom: 3px;
+}
+
+.goal-card .meta-info {
+    font-size: 15px;
+    color: #333;
+}
+
+.goal-card .goal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.goal-card .btn-secondary, .goal-card .btn-danger {
+    padding: 6px 14px;
+    font-size: 13px;
+}
+
+/* Bank/Usuário */
 .bank-button {
     border: none;
     background: #eee;
@@ -413,14 +458,14 @@ body, html {
         padding: 22px 6vw;
     }
     .dashboard-summary {
-        flex-direction: column;
-        gap: 13px;
-        padding: 14px 6px 8px 6px;
+        flex-direction: row;
+        gap: 9px;
+        padding: 14px 2px 8px 2px;
     }
     .summary-item {
-        min-width: unset;
+        min-width: 90px;
         width: 100%;
-        padding: 13px 10px;
+        padding: 10px 8px;
     }
     .bottom-nav {
         border-radius: 18px 18px 0 0;

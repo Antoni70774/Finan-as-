@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionModalTitle = document.getElementById('transaction-modal-title');
     const transactionIdInput = document.getElementById('transaction-id');
     const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
-    
+
     const addGoalBtn = document.getElementById('add-goal-btn');
     const goalModal = document.getElementById('goal-modal');
     const cancelGoalBtn = document.getElementById('cancel-goal-btn');
@@ -27,10 +27,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const chartBtns = document.querySelectorAll('.chart-btn');
     const chartTitle = document.getElementById('chart-title');
 
+    // Payables
+    const addPayableBtn = document.getElementById('add-payable-btn');
+    const payableModal = document.getElementById('payable-modal');
+    const cancelPayableBtn = document.getElementById('cancel-payable-btn');
+    const payableForm = document.getElementById('payable-form');
+    const payableList = document.getElementById('payable-list');
+
     // STATE MANAGEMENT
     const state = {
         transactions: JSON.parse(localStorage.getItem('transactions')) || [],
         goals: JSON.parse(localStorage.getItem('goals')) || [],
+        payables: JSON.parse(localStorage.getItem('payables')) || [],
         currentUser: localStorage.getItem('currentUser') || 'Esposo',
         users: ['Esposo', 'Esposa'],
         currentDate: new Date(),
@@ -38,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
         chartType: 'all' // all, expense, income
     };
-    
+
     // INITIAL SETUP
     createExpenseChart();
     setCurrentDate();
@@ -69,9 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const titles = {
             'dashboard-page': 'Visão Geral',
             'goals-page': 'Metas Pessoais',
+            'payables-page': 'Despesas a Pagar',
             'profile-page': 'Perfil'
         };
         document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
+        if (pageId === 'payables-page') renderPayables();
     }
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
@@ -270,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = {
             transactions: state.transactions,
             goals: state.goals,
+            payables: state.payables
         };
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
         const downloadAnchorNode = document.createElement('a');
@@ -280,10 +291,80 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadAnchorNode.remove();
     }
 
+    // PAYABLES LOGIC
+    addPayableBtn.addEventListener('click', () => openPayableModal());
+    cancelPayableBtn.addEventListener('click', () => closeModal(payableModal));
+    payableForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const payableId = document.getElementById('payable-id').value;
+        const payableData = {
+            description: document.getElementById('payable-description').value,
+            category: document.getElementById('payable-category').value,
+            amount: parseFloat(document.getElementById('payable-amount').value),
+            date: document.getElementById('payable-date').value,
+            paid: false
+        };
+        if (!payableData.description || !payableData.category || !payableData.amount || !payableData.date) {
+            alert('Preencha todos os campos');
+            return;
+        }
+        if (payableId) {
+            const index = state.payables.findIndex(p => p.id === payableId);
+            if (index !== -1) {
+                state.payables[index] = { ...state.payables[index], ...payableData };
+            }
+        } else {
+            state.payables.push({
+                id: Date.now().toString(),
+                ...payableData
+            });
+        }
+        localStorage.setItem('payables', JSON.stringify(state.payables));
+        saveAndRerender();
+        closeModal(payableModal);
+        renderPayables();
+    });
+
+    function openPayableModal(payable = null) {
+        payableForm.reset();
+        document.getElementById('payable-id').value = '';
+        document.getElementById('payable-modal-title').textContent = payable ? 'Editar Conta a Pagar' : 'Nova Conta a Pagar';
+        if (payable) {
+            document.getElementById('payable-id').value = payable.id;
+            document.getElementById('payable-description').value = payable.description;
+            document.getElementById('payable-category').value = payable.category;
+            document.getElementById('payable-amount').value = payable.amount;
+            document.getElementById('payable-date').value = payable.date;
+        }
+        openModal(payableModal);
+    }
+
+    window.markPayablePaid = function(id) {
+        const idx = state.payables.findIndex(p => p.id === id);
+        if (idx > -1) {
+            state.payables[idx].paid = !state.payables[idx].paid;
+            localStorage.setItem('payables', JSON.stringify(state.payables));
+            renderPayables();
+        }
+    };
+    window.deletePayable = function(id) {
+        if (confirm('Excluir esta conta?')) {
+            state.payables = state.payables.filter(p => p.id !== id);
+            localStorage.setItem('payables', JSON.stringify(state.payables));
+            renderPayables();
+        }
+    };
+    window.editPayable = function(id) {
+        const payable = state.payables.find(p => p.id === id);
+        if (!payable) return;
+        openPayableModal(payable);
+    };
+
     // DATA & RENDERING
     function saveAndRerender() {
         localStorage.setItem('transactions', JSON.stringify(state.transactions));
         localStorage.setItem('goals', JSON.stringify(state.goals));
+        localStorage.setItem('payables', JSON.stringify(state.payables));
         updateAll();
     }
 
@@ -293,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTransactionList(filtered);
         updateMainChart(filtered);
         renderGoals();
+        renderPayables();
         updateMonthDisplay();
         updateUserUI();
     }
@@ -301,8 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const year = date.getFullYear();
         const month = date.getMonth();
         return transactions.filter(t => {
-            // Corrigido para comparar a data conforme digitada
-            const tDate = new Date(t.date + "T03:00:00"); // UTC-3 (Brasília)
+            const tDate = new Date(t.date + "T03:00:00");
             return tDate.getFullYear() === year && tDate.getMonth() === month;
         });
     }
@@ -316,8 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function formatDateBR(dateStr) {
-        // Garante que a data sempre seja exibida como digitada, sem desvio de fuso
-        // Adiciona o horário de Brasília para evitar problemas (UTC-3)
         return new Date(dateStr + "T03:00:00").toLocaleDateString('pt-BR');
     }
 
@@ -351,7 +430,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chartTitle.textContent = title;
     }
 
-    // TRANSACTIONS
     function renderTransactionList(transactions) {
         const listEl = document.getElementById('transaction-list');
         listEl.innerHTML = '';
@@ -365,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
             item.className = 'transaction-item';
             item.dataset.id = t.id;
             const isIncome = t.type === 'income';
-            const date = formatDateBR(t.date); // <-- Aqui usa a função corrigida
+            const date = formatDateBR(t.date);
             item.innerHTML = `
                 <div class="transaction-icon ${isIncome ? 'income' : 'expense'}">
                     <span class="material-icons-sharp">${isIncome ? 'arrow_upward' : 'arrow_downward'}</span>
@@ -383,7 +461,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // GOALS
     function renderGoals() {
         goalList.innerHTML = '';
         if (state.goals.length === 0) {
@@ -414,6 +491,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    function renderPayables() {
+        payableList.innerHTML = '';
+        if (state.payables.length === 0) {
+            payableList.innerHTML = '<p>Nenhuma conta lançada.</p>';
+            return;
+        }
+        state.payables.forEach(p => {
+            payableList.innerHTML += `
+            <div class="goal-card">
+                <span class="meta-title">${p.description}</span>
+                <span class="meta-info">Categoria: ${p.category}</span>
+                <span class="meta-info">Valor: ${formatCurrency(p.amount)}</span>
+                <span class="meta-info">Vencimento: ${formatDateBR(p.date)}</span>
+                <span class="meta-info">Status: ${p.paid ? '<span style="color:green">Pago</span>' : '<span style="color:red">A pagar</span>'}</span>
+                <div class="goal-actions">
+                    <button class="btn-secondary" onclick="window.markPayablePaid('${p.id}')">${p.paid ? 'Desfazer' : 'Marcar Pago'}</button>
+                    <button class="btn-secondary" onclick="window.editPayable('${p.id}')">Editar</button>
+                    <button class="btn-danger" onclick="window.deletePayable('${p.id}')">Excluir</button>
+                </div>
+            </div>
+            `;
+        });
+    }
+
     function updateUserUI() {
         currentUserNameEl.textContent = state.currentUser;
         userButtons.forEach(button => {
@@ -439,7 +540,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.connectBank = async function(bankName) {
         try {
             alert(`Integração com ${bankName} em desenvolvimento. Em breve estará disponível.`);
-            // Aqui você implementará a integração real quando tiver as credenciais
         } catch (error) {
             console.error('Erro na conexão:', error);
             alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);

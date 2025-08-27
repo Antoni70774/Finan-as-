@@ -1,6 +1,7 @@
 import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Seletores
     const navItems = document.querySelectorAll('.nav-item');
     const pages = document.querySelectorAll('.page');
     const addButton = document.getElementById('add-transaction-btn');
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportDataBtn = document.getElementById('export-data-btn');
     const sinoLembrete = document.getElementById('sino-lembrete');
 
+    // Estado
     const state = {
         transactions: JSON.parse(localStorage.getItem('transactions')) || [],
         goals: JSON.parse(localStorage.getItem('goals')) || [],
@@ -50,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAll();
     registerServiceWorker();
 
+    // Navegação de mês
     document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
     document.getElementById('next-month').addEventListener('click', () => changeMonth(1));
     function changeMonth(direction) {
@@ -61,14 +64,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('date').value = today.toISOString().split('T')[0];
     }
 
-    // Navegação
+    // Navegação de páginas/abas
     function navigateToPage(pageId) {
         pages.forEach(page => page.classList.remove('active'));
         const selectedPage = document.getElementById(pageId);
         if (selectedPage) selectedPage.classList.add('active');
         navItems.forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('data-page') === pageId) item.classList.add('active');
+            item.classList.toggle('active', item.getAttribute('data-page') === pageId);
         });
         const titles = {
             'dashboard-page': 'Visão Geral',
@@ -82,12 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
-            const pageId = item.getAttribute('data-page');
-            if (pageId) navigateToPage(pageId);
+            navigateToPage(item.getAttribute('data-page'));
         });
     });
 
-    // Modal handling
+    // Modais
     function openModal(modal) { modal.classList.add('active'); }
     function closeModal(modal) { modal.classList.remove('active'); }
 

@@ -16,6 +16,7 @@ body, html {
     box-shadow: 0 8px 40px rgba(80,130,230,0.11);
 }
 
+/* HEADER */
 .app-header {
     display: flex;
     align-items: center;
@@ -25,6 +26,16 @@ body, html {
     padding: 20px 18px 16px 18px;
     border-radius: 0 0 24px 24px;
     box-shadow: 0 2px 20px rgba(80,130,230,0.09);
+    position: relative;
+}
+
+.sino-lembrete {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 26px;
+    color: #ffd700;
+    cursor: pointer;
 }
 
 .profile-icon {
@@ -36,16 +47,12 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
-.page {
-    display: none;
-    padding: 20px;
-}
-
-.page.active {
-    display: block;
-}
+/* PAGE NAVIGATION */
+.page { display: none; padding: 20px; }
+.page.active { display: block; }
 
 .bottom-nav {
     position: fixed;
@@ -82,6 +89,7 @@ body, html {
     border-radius: 14px;
 }
 
+/* FLOATING BUTTON */
 .fab {
     position: fixed;
     bottom: 84px;
@@ -101,6 +109,7 @@ body, html {
     justify-content: center;
 }
 
+/* MONTH NAV */
 .month-nav {
     display: flex;
     align-items: center;
@@ -108,7 +117,6 @@ body, html {
     gap: 8px;
     margin-bottom: 16px;
 }
-
 .month-nav button {
     padding: 6px 12px;
     border: none;
@@ -119,56 +127,79 @@ body, html {
     font-weight: bold;
     cursor: pointer;
 }
-
 .month-nav button:active, .month-nav button:focus {
     background: #cee2fa;
 }
 
-/* CARD PRINCIPAL */
+/* DASHBOARD SUMMARY CARDS */
 .dashboard-summary {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 26px;
+    align-items: stretch;
+    gap: 10px;
     background: #fff;
     border-radius: 22px;
     box-shadow: 0 6px 28px rgba(80,130,230,0.10);
-    padding: 22px 12px 18px 12px;
+    padding: 16px 8px;
     margin-bottom: 18px;
-    align-items: center;
-    position: relative;
-    overflow: visible;
+    flex-wrap: wrap;
 }
 
 .summary-item {
+    flex: 1 1 0px;
+    min-width: 0;
+    max-width: 140px;
     background: linear-gradient(135deg, #e7f0fe 74%, #f5faff 100%);
     border-radius: 16px;
-    padding: 18px 22px;
+    padding: 10px 6px 9px 6px;
     box-shadow: 0 2px 12px rgba(80,130,230,0.08);
-    min-width: 96px;
     text-align: center;
-    transition: box-shadow 0.2s;
     border: 2px solid #e4eaf7;
-}
-
-.summary-item:hover {
-    box-shadow: 0 4px 18px rgba(80,130,230,0.15);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: hidden;
 }
 
 .summary-item span {
     color: #4A90E2;
     font-weight: 600;
-    display: block;
-    margin-bottom: 7px;
-    font-size: 15px;
-    letter-spacing: 0.1em;
+    font-size: 13px;
+    margin-bottom: 4px;
 }
 
 .summary-item h4 {
     margin: 0;
-    font-size: 1.25em;
+    font-size: 1em; /* REDUZIDO para não ultrapassar */
     font-weight: 700;
-    letter-spacing: 0.02em;
+    word-break: break-all;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Display de lançamentos nos cards Receita e Despesa */
+.summary-display {
+    margin-top: 6px;
+    width: 100%;
+    max-height: 85px;
+    overflow-y: auto;
+    background: #f7faff;
+    border-radius: 8px;
+    padding: 4px 2px;
+    font-size: 12px;
+}
+.card-lancamento {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    margin-bottom: 2px;
+}
+.card-empty {
+    color: #bdbdbd;
 }
 
 /* MODAL LANÇAMENTO */
@@ -181,11 +212,9 @@ body, html {
     justify-content: center;
     z-index: 200;
 }
-
 .modal-overlay.active {
     display: flex;
 }
-
 .modal-content {
     background: #fff;
     padding: 34px 26px 20px 26px;
@@ -195,20 +224,17 @@ body, html {
     max-width: 96vw;
     transition: box-shadow 0.2s;
 }
-
-#transaction-form h3 {
+#transaction-form h3, #goal-form h3, #payable-form h3 {
     margin-bottom: 20px;
     font-size: 1.4em;
     font-weight: 700;
     color: #333;
 }
-
 .toggle-type {
     display: flex;
     gap: 14px;
     margin-bottom: 18px;
 }
-
 .toggle-btn {
     flex: 1;
     padding: 14px 0 12px 0;
@@ -222,23 +248,22 @@ body, html {
     transition: background 0.18s, color 0.18s;
     outline: none;
 }
-
 .toggle-btn.active {
     background: #4A90E2;
     color: #fff;
     box-shadow: 0 2px 12px rgba(80,130,230,0.12);
 }
-
-#transaction-form label {
+#transaction-form label, #goal-form label, #payable-form label {
     font-weight: 500;
     margin-bottom: 5px;
     display: block;
     color: #444;
     font-size: 15px;
 }
-
 #transaction-form input,
-#transaction-form select {
+#transaction-form select,
+#goal-form input,
+#payable-form input {
     border: 1.5px solid #e0e4ed;
     border-radius: 10px;
     padding: 11px 12px;
@@ -250,20 +275,19 @@ body, html {
     transition: border 0.2s, box-shadow 0.2s;
     box-sizing: border-box;
 }
-
 #transaction-form input:focus,
-#transaction-form select:focus {
+#transaction-form select:focus,
+#goal-form input:focus,
+#payable-form input:focus {
     border-color: #4A90E2;
     box-shadow: 0 2px 10px rgba(80,130,230,0.10);
 }
-
 .modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
     margin-top: 18px;
 }
-
 .btn-primary, .btn-secondary, .btn-danger {
     border-radius: 10px;
     padding: 12px 26px;
@@ -273,33 +297,27 @@ body, html {
     cursor: pointer;
     transition: background 0.18s, color 0.18s;
 }
-
 .btn-primary {
     background: #4A90E2;
     color: #fff;
     box-shadow: 0 2px 10px rgba(80,130,230,0.14);
 }
-
 .btn-primary:hover {
     background: #3575b8;
 }
-
 .btn-secondary {
     background: #f0f2f5;
     color: #4A90E2;
 }
-
 .btn-danger {
     background: #ff3d3d;
     color: #fff;
 }
-
 .chart-selector {
     display: flex;
     gap: 12px;
     margin-bottom: 10px;
 }
-
 .chart-btn {
     flex: 1;
     border: none;
@@ -311,12 +329,20 @@ body, html {
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
 }
-
 .chart-btn.active {
     background: #4A90E2;
     color: #fff;
 }
-
+.chart-details {
+    margin-top: 18px;
+    margin-bottom: 10px;
+}
+.chart-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
 .transaction-item {
     display: flex;
     align-items: center;
@@ -326,11 +352,9 @@ body, html {
     cursor: pointer;
     transition: background 0.15s;
 }
-
 .transaction-item:hover {
     background: #f3f7fa;
 }
-
 .transaction-icon {
     width: 32px;
     height: 32px;
@@ -341,28 +365,23 @@ body, html {
     margin-right: 10px;
     font-size: 21px;
 }
-
 .transaction-icon.income {
     background: #e6f7ee;
     color: #2bc47d;
 }
-
 .transaction-icon.expense {
     background: #ffe6e6;
     color: #ff3d3d;
 }
-
 .transaction-amount.income {
     color: #2bc47d;
     font-weight: 500;
 }
-
 .transaction-amount.expense {
     color: #ff3d3d;
     font-weight: 500;
 }
-
-/* Card de metas */
+/* Card de metas/pagar */
 .goal-card {
     background: linear-gradient(135deg, #e7f0fe 74%, #f5faff 100%);
     border-radius: 18px;
@@ -375,31 +394,25 @@ body, html {
     gap: 8px;
     position: relative;
 }
-
 .goal-card .meta-title {
     font-weight: 700;
     color: #4A90E2;
     font-size: 1.12em;
     margin-bottom: 3px;
 }
-
 .goal-card .meta-info {
     font-size: 15px;
     color: #333;
 }
-
 .goal-card .goal-actions {
     display: flex;
     gap: 8px;
     margin-top: 8px;
 }
-
 .goal-card .btn-secondary, .goal-card .btn-danger {
     padding: 6px 14px;
     font-size: 13px;
 }
-
-/* Bank/Usuário */
 .bank-button {
     border: none;
     background: #eee;
@@ -414,22 +427,18 @@ body, html {
     font-size: 15px;
     transition: background 0.2s;
 }
-
 .bank-button img {
     width: 24px;
     height: 24px;
     margin-right: 7px;
 }
-
 .bank-button:hover {
     background: #4A90E2;
     color: #fff;
 }
-
 .user-buttons {
     margin-top: 12px;
 }
-
 .user-buttons button {
     border: none;
     background: #eee;
@@ -440,12 +449,10 @@ body, html {
     font-size: 14px;
     cursor: pointer;
 }
-
 .user-buttons button.active {
     background: #4A90E2;
     color: #fff;
 }
-
 /* Responsivo/mobile */
 @media (max-width: 540px) {
     .app-container {
@@ -469,16 +476,6 @@ body, html {
     }
     .bottom-nav {
         border-radius: 18px 18px 0 0;
-    }
-    
-    /* Sino no topo */
-    .sino-lembrete {
-        position: absolute;
-        top: 10px;
-        right: 60px;
-        font-size: 28px;
-        color: #ffd700;
-        cursor: pointer;
     }
     .summary-display {
         margin-top: 6px;

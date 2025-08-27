@@ -35,10 +35,12 @@
                     <div class="summary-item">
                         <span>Receita</span>
                         <h4 id="month-income">R$ 0,00</h4>
+                        <div id="display-month-income" class="summary-display"></div>
                     </div>
                     <div class="summary-item">
                         <span>Despesa</span>
                         <h4 id="month-expense">R$ 0,00</h4>
+                        <div id="display-month-expense" class="summary-display"></div>
                     </div>
                     <div class="summary-item">
                         <span>Saldo</span>
@@ -112,8 +114,7 @@
             <span class="material-icons-sharp">add</span>
         </button>
 
-        <!-- Modals -->
-        <!-- Add Transaction Modal (Novo/Editar) -->
+        <!-- Transaction Modal -->
         <div id="transaction-modal" class="modal-overlay">
             <div class="modal-content">
                 <form id="transaction-form">
@@ -147,13 +148,13 @@
                     <h3 id="goal-modal-title">Nova Meta Financeira</h3>
                     <input type="hidden" id="goal-id">
                     <label for="goal-name">Nome</label>
-                    <input type="text" id="goal-name" name="goal-name" required>
+                    <input type="text" id="goal-name" required>
                     <label for="goal-target">Valor alvo</label>
-                    <input type="number" id="goal-target" name="goal-target" step="0.01" required>
+                    <input type="number" id="goal-target" step="0.01" required>
                     <label for="goal-current">Valor atual</label>
-                    <input type="number" id="goal-current" name="goal-current" step="0.01" required>
+                    <input type="number" id="goal-current" step="0.01" required>
                     <label for="goal-date">Data limite</label>
-                    <input type="date" id="goal-date" name="goal-date" required>
+                    <input type="date" id="goal-date" required>
                     <div class="modal-actions">
                         <button type="button" id="cancel-goal-btn" class="btn-secondary">Cancelar</button>
                         <button type="submit" class="btn-primary">Salvar</button>
@@ -165,6 +166,7 @@
         <!-- Payable Modal -->
         <div id="payable-modal" class="modal-overlay">
             <div class="modal-content">
+                <!-- CORRIGIDO: todos campos e ids alinhados com JS -->
                 <form id="payable-form">
                     <h3 id="payable-modal-title">Nova Conta a Pagar</h3>
                     <input type="hidden" id="payable-id">

@@ -2,7 +2,13 @@ import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const state = {
-    transactions: JSON.parse(localStorage.getItem('transactions')) || []
+    transactions: JSON.parse(localStorage.getItem('transactions')) || [],
+    goals: JSON.parse(localStorage.getItem('goals')) || [],
+    currentUser: localStorage.getItem('currentUser') || 'Esposo',
+    users: ['Esposo', 'Esposa'],
+    currentDate: new Date(),
+    expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros', 'Agua', 'Energia', 'Emprestimo'],
+    incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
   };
 
   createExpenseChart();aimport { createExpenseChart, updateExpenseChart } from './chart-setup.js';

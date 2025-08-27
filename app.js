@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser: localStorage.getItem('currentUser') || 'Esposo',
         users: ['Esposo', 'Esposa'],
         currentDate: new Date(),
-        expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros'],
+        expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Emprestimo', 'Cartão de Crédito', 'Energia', 'Agua', 'Gas', 'Internet', 'Investimento', 'Outros'],
         incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
         chartType: 'all' // all, expense, income
     };

@@ -11,6 +11,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function render() {
     const total = state.transactions.reduce((s,t) => s+t.amount,0);
     document.getElementById('month-balance').textContent = formatCurrency(total);
+    const income = state.transactions.filter(t => t.type === 'income')
+                 .reduce((s,t)=>s+t.amount,0);
+      const expense = state.transactions.filter(t => t.type === 'expense')
+                       .reduce((s,t)=>s+t.amount,0);
+      const balance = income - expense;
+      
+      document.getElementById('month-balance').textContent = formatCurrency(balance);
+      document.getElementById('month-income').textContent = formatCurrency(income);
+      document.getElementById('month-expense').textContent = formatCurrency(expense);
+
 
     const grouped = {};
     state.transactions.forEach(t=>{

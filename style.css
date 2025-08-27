@@ -479,5 +479,25 @@ body, html {
         font-size: 28px;
         color: #ffd700;
         cursor: pointer;
-}
+    }
+    .summary-display {
+        margin-top: 6px;
+        width: 100%;
+        max-height: 120px;
+        overflow-y: auto;
+        background: #f7faff;
+        border-radius: 8px;
+        padding: 6px 3px;
+        font-size: 13px;
+    }
+    .card-lancamento {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 5px;
+        margin-bottom: 4px;
+    }
+    .card-empty {
+        color: #bdbdbd;
+    }
 }

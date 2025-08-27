@@ -27,6 +27,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const chartBtns = document.querySelectorAll('.chart-btn');
     const chartTitle = document.getElementById('chart-title');
 
+    // Função para exibir lançamentos de receita/despesa em displays nos cartões
+    function renderSummary(transactions) {
+        const income = transactions.filter(t => t.type === 'income');
+        const expense = transactions.filter(t => t.type === 'expense');
+        const totalIncome = income.reduce((sum, t) => sum + t.amount, 0);
+        const totalExpense = expense.reduce((sum, t) => sum + t.amount, 0);
+        const balance = totalIncome - totalExpense;
+
+        document.getElementById('month-income').textContent = formatCurrency(totalIncome);
+        document.getElementById('month-expense').textContent = formatCurrency(totalExpense);
+        document.getElementById('month-balance').textContent = formatCurrency(balance);
+        document.getElementById('month-balance').style.color = balance >= 0 ? 'var(--text-light)' : '#ff8a80';
+
+        // Display lançamentos de receita
+        renderSummaryDisplay('month-income', income);
+        // Display lançamentos de despesa
+        renderSummaryDisplay('month-expense', expense);
+    }
+
+    function renderSummaryDisplay(cardId, transactions) {
+        let card = document.getElementById(cardId).parentElement;
+        let displayId = `display-${cardId}`;
+        let display = card.querySelector(`#${displayId}`);
+        if (!display) {
+            display = document.createElement('div');
+            display.id = displayId;
+            display.className = 'summary-display';
+            card.appendChild(display);
+        }
+        if (transactions.length === 0) {
+            display.innerHTML = '<span class="card-empty">Nenhum lançamento.</span>';
+            return;
+        }
+        display.innerHTML = transactions.map(t => `
+            <div class="card-lancamento">
+                <span>${t.description} (${formatCurrency(t.amount)} em ${formatDateBR(t.date)})</span>
+                <button class="btn-secondary card-edit-btn" data-id="${t.id}">Editar</button>
+                <button class="btn-danger card-del-btn" data-id="${t.id}">Excluir</button>
+            </div>
+        `).join('');
+        // Adiciona eventos
+        display.querySelectorAll('.card-edit-btn').forEach(btn => {
+            btn.onclick = () => {
+                const transaction = state.transactions.find(tx => tx.id === btn.dataset.id);
+                if (transaction) openTransactionModal(transaction);
+            }
+        });
+        display.querySelectorAll('.card-del-btn').forEach(btn => {
+            btn.onclick = () => {
+                if (confirm('Deseja excluir este lançamento?')) {
+                    state.transactions = state.transactions.filter(tx => tx.id !== btn.dataset.id);
+                    saveAndRerender();
+                }
+            }
+        });
+    }
+    
     // STATE MANAGEMENT
     const state = {
         transactions: JSON.parse(localStorage.getItem('transactions')) || [],

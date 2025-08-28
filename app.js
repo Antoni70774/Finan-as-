@@ -580,15 +580,80 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = 'goal-card';
             card.innerHTML = `
                 <span class="meta-title">${goal.name}</span>
-                <span class="meta-info">Alvo: <strong>${formatCurrency(goal.target)}</strong></span>
-                <span class="meta-info">Atual: <strong>${formatCurrency(goal.current)}</strong></span>
-                <span class="meta-info">Limite: <strong>${formatDateBR(goal.date)}</strong></span>
+                <canvas id="goal-chart-${goal.id}" width="120" height="120"></canvas>
+                <div class="meta-info">Alvo: <strong>${formatCurrency(goal.target)}</strong></div>
+                <div class="meta-info">Atual: <strong>${formatCurrency(goal.current)}</strong></div>
+                <div class="meta-info">Faltam: <strong>${formatCurrency(goal.target - goal.current)}</strong></div>
+                <div class="meta-info">Prazo: <strong>${formatDateBR(goal.date)}</strong></div>
                 <div class="goal-actions">
                     <button class="btn-secondary" onclick="editGoal('${goal.id}')">Editar</button>
                     <button class="btn-danger" onclick="window.deleteGoal && deleteGoal('${goal.id}')">Excluir</button>
                 </div>
             `;
             goalList.appendChild(card);
+        });
+    }
+
+    function renderGoals() {
+        goalList.innerHTML = '';
+        if (state.goals.length === 0) {
+            goalList.innerHTML = '<p>Nenhuma meta financeira cadastrada.</p>';
+            return;
+        }
+    
+        state.goals.forEach(goal => {
+            const card = document.createElement('div');
+            card.className = 'goal-card';
+            card.innerHTML = `
+                <span class="meta-title">${goal.name}</span>
+                <canvas id="goal-chart-${goal.id}" width="120" height="120"></canvas>
+                <div class="meta-info">Alvo: <strong>${formatCurrency(goal.target)}</strong></div>
+                <div class="meta-info">Atual: <strong>${formatCurrency(goal.current)}</strong></div>
+                <div class="meta-info">Faltam: <strong>${formatCurrency(goal.target - goal.current)}</strong></div>
+                <div class="meta-info">Prazo: <strong>${formatDateBR(goal.date)}</strong></div>
+                <div class="goal-actions">
+                    <button class="btn-secondary" onclick="editGoal('${goal.id}')">Editar</button>
+                    <button class="btn-danger" onclick="window.deleteGoal && deleteGoal('${goal.id}')">Excluir</button>
+                </div>
+            `;
+            goalList.appendChild(card);
+    
+            // === Novo: gráfico circular ===
+            const ctx = card.querySelector(`#goal-chart-${goal.id}`).getContext("2d");
+            const percent = (goal.current / goal.target) * 100;
+            new Chart(ctx, {
+                type: "doughnut",
+                data: {
+                    datasets: [{
+                        data: [goal.current, Math.max(0, goal.target - goal.current)],
+                        backgroundColor: ["#4CAF50", "#E0E0E0"],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: "75%",
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+    
+            // Texto no meio do gráfico (percentual)
+            Chart.register({
+                id: "centerText",
+                beforeDraw(chart) {
+                    const { width, height, ctx } = chart;
+                    ctx.restore();
+                    ctx.font = "bold 14px Roboto";
+                    ctx.fillStyle = "#333";
+                    ctx.textBaseline = "middle";
+                    const text = `${Math.round(percent)}%`;
+                    const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                    const textY = height / 2;
+                    ctx.fillText(text, textX, textY);
+                    ctx.save();
+                }
+            });
         });
     }
 
@@ -620,7 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
             `;
-        });
+        });    
     }
 
     function updateUserUI() {
@@ -690,10 +755,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const diff = (due - today) / (1000 * 60 * 60 * 24);
             return diff >= 0 && diff <= 3 && !p.paid;
         });
-        if (upcoming.length > 0) {
-            alert(`⚠️ Você tem ${upcoming.length} conta(s) que vencem nos próximos 3 dias!`);
+    
+        const bellEl = document.getElementById('notification-bell');
+        if (bellEl) {
+            if (upcoming.length > 0) {
+                bellEl.innerHTML = `🔔<span class="badge">${upcoming.length}</span>`;
+            } else {
+                bellEl.innerHTML = "🔔";
+            }
+        } else {
+            // fallback caso não tenha sino
+            if (upcoming.length > 0) {
+                alert(`⚠️ Você tem ${upcoming.length} conta(s) que vencem nos próximos 3 dias!`);
+            }
         }
     }
+
 
     // 3. Resumo Anual
     function renderAnnualSummary() {

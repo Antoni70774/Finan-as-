@@ -17,21 +17,28 @@ const categoriasFixas = [
   'Outros'
 ];
 
-const coresCategorias = [
-  '#4A90E2', // Alimentação
-  '#2bc47d', // Transporte
-  '#ff3d3d', // Moradia
-  '#ffd700', // Lazer
-  '#ff8a80', // Saúde
-  '#e67e22', // Empréstimo
-  '#e74c3c', // Cartão de Crédito
-  '#1abc9c', // Energia
-  '#95a5a6', // Água
-  '#f39c12', // Gás
-  '#16a085', // Internet
-  '#c0392b', // Investimento
-  '#f1c40f'  // Outros
-];
+const coresCategorias = {
+  'Alimentação': '#4A90E2',
+  'Transporte': '#2bc47d',
+  'Moradia': '#ff3d3d',
+  'Lazer': '#ffd700',
+  'Saúde': '#ff8a80',
+  'Empréstimo': '#e67e22',
+  'Cartão de Crédito': '#e74c3c',
+  'Energia': '#1abc9c',
+  'Água': '#95a5a6',
+  'Gás': '#f39c12',
+  'Internet': '#16a085',
+  'Investimento': '#c0392b',
+  'Outros': '#f1c40f'
+};
+
+const coresReceita = {
+  'Salário': '#4A90E2',
+  'Combustível': '#2bc47d',
+  'Aluguel': '#ff3d3d',
+  'Outros': '#ffd700'
+};
 
 /**
  * Cria o gráfico de despesas/receitas por categoria.
@@ -42,10 +49,10 @@ export function createExpenseChart() {
   chartInstance = new window.Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: categoriasFixas,
+      labels: [],
       datasets: [{
-        data: new Array(categoriasFixas.length).fill(0), // inicia com 0
-        backgroundColor: coresCategorias,
+        data: [],
+        backgroundColor: [],
         borderWidth: 1
       }]
     },
@@ -60,11 +67,11 @@ export function createExpenseChart() {
 
 /**
  * Atualiza o gráfico conforme os dados filtrados.
- * Não perde dados já lançados - só atualiza a visualização.
  * @param {Array} transactions - Array de lançamentos (filtrados por mês ou tipo)
  * @param {Array} categories - Array de categorias (despesa ou receita)
+ * @param {String} tipo - 'despesa' ou 'receita'
  */
-export function updateExpenseChart(transactions, categories) {
+export function updateExpenseChart(transactions, categories, tipo = 'despesa') {
   if (!chartInstance) return;
   lastTransactions = transactions;
 
@@ -72,11 +79,12 @@ export function updateExpenseChart(transactions, categories) {
     transactions.filter(t => t.category === cat).reduce((sum, t) => sum + t.amount, 0)
   );
 
+  const paleta = tipo === 'receita' ? coresReceita : coresCategorias;
+
   chartInstance.data.labels = categories;
   chartInstance.data.datasets[0].data = data;
   chartInstance.data.datasets[0].backgroundColor = categories.map(cat => {
-    const idx = categoriasFixas.indexOf(cat);
-    return coresCategorias[idx] || '#cccccc';
+    return paleta[cat] || '#cccccc';
   });
 
   chartInstance.update();
@@ -87,11 +95,11 @@ export function updateExpenseChart(transactions, categories) {
  * Mostra detalhes dos lançamentos da categoria clicada.
  */
 function chartClickHandler(evt, elements) {
-    if (!elements.length) return;
-    const idx = elements[0].index;
-    const cat = chartInstance.data.labels[idx];
-    const filtered = lastTransactions.filter(t => t.category === cat);
-    if (typeof window.showChartDetails === "function") {
-        window.showChartDetails(cat, filtered);
-    }
+  if (!elements.length) return;
+  const idx = elements[0].index;
+  const cat = chartInstance.data.labels[idx];
+  const filtered = lastTransactions.filter(t => t.category === cat);
+  if (typeof window.showChartDetails === "function") {
+    window.showChartDetails(cat, filtered);
+  }
 }

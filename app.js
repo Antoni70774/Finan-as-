@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
         chartType: 'all' // all, expense, income
     };
-
+    
     // INITIAL SETUP
     createExpenseChart();
     setCurrentDate();
@@ -92,6 +92,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+     // Texto no meio do gráfico (percentual)
+    Chart.register({
+      id: "centerText",
+      beforeDraw: function (chart) {
+        const { width } = chart;
+        const { height } = chart;
+        const ctx = chart.ctx;
+        ctx.restore();
+        const fontSize = (height / 100).toFixed(2);
+        ctx.font = `${fontSize}em sans-serif`;
+        ctx.textBaseline = "middle";
+        const text = `${chart.config.data.datasets[0].data[0]}%`;
+        const textX = Math.round((width - ctx.measureText(text).width) / 2);
+        const textY = height / 2;
+        ctx.fillText(text, textX, textY);
+        ctx.save();
+      }
+    });
+    
     // MODAL HANDLING
     function openModal(modal) { modal.classList.add('active'); }
     function closeModal(modal) { modal.classList.remove('active'); }
@@ -322,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // GOAL FORM SUBMISSION
     goalForm.addEventListener('submit', function(e) {
         e.preventDefault();
+    
         const goalId = document.getElementById('goal-id').value;
         const goalData = {
             name: document.getElementById('goal-name').value,
@@ -329,12 +349,12 @@ document.addEventListener('DOMContentLoaded', () => {
             current: parseFloat(document.getElementById('goal-current').value),
             date: document.getElementById('goal-date').value
         };
-
-        if (!goalData.name || !goalData.target || isNaN(goalData.current)) {
-            alert('Por favor, preencha todos os campos corretamente');
+    
+        if (!goalData.name || isNaN(goalData.target) || isNaN(goalData.current) || !goalData.date) {
+            alert("Preencha todos os campos corretamente.");
             return;
         }
-
+    
         if (goalId) {
             const index = state.goals.findIndex(g => g.id === goalId);
             if (index !== -1) {
@@ -346,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ...goalData
             });
         }
-
+    
         saveAndRerender();
         closeGoalModal();
     });
@@ -575,31 +595,6 @@ document.addEventListener('DOMContentLoaded', () => {
             goalList.innerHTML = '<p>Nenhuma meta financeira cadastrada.</p>';
             return;
         }
-        state.goals.forEach(goal => {
-            const card = document.createElement('div');
-            card.className = 'goal-card';
-            card.innerHTML = `
-                <span class="meta-title">${goal.name}</span>
-                <canvas id="goal-chart-${goal.id}" width="120" height="120"></canvas>
-                <div class="meta-info">Alvo: <strong>${formatCurrency(goal.target)}</strong></div>
-                <div class="meta-info">Atual: <strong>${formatCurrency(goal.current)}</strong></div>
-                <div class="meta-info">Faltam: <strong>${formatCurrency(goal.target - goal.current)}</strong></div>
-                <div class="meta-info">Prazo: <strong>${formatDateBR(goal.date)}</strong></div>
-                <div class="goal-actions">
-                    <button class="btn-secondary" onclick="editGoal('${goal.id}')">Editar</button>
-                    <button class="btn-danger" onclick="window.deleteGoal && deleteGoal('${goal.id}')">Excluir</button>
-                </div>
-            `;
-            goalList.appendChild(card);
-        });
-    }
-
-    function renderGoals() {
-        goalList.innerHTML = '';
-        if (state.goals.length === 0) {
-            goalList.innerHTML = '<p>Nenhuma meta financeira cadastrada.</p>';
-            return;
-        }
     
         state.goals.forEach(goal => {
             const card = document.createElement('div');
@@ -635,23 +630,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     plugins: {
                         legend: { display: false }
                     }
-                }
-            });
-    
-            // Texto no meio do gráfico (percentual)
-            Chart.register({
-                id: "centerText",
-                beforeDraw(chart) {
-                    const { width, height, ctx } = chart;
-                    ctx.restore();
-                    ctx.font = "bold 14px Roboto";
-                    ctx.fillStyle = "#333";
-                    ctx.textBaseline = "middle";
-                    const text = `${Math.round(percent)}%`;
-                    const textX = Math.round((width - ctx.measureText(text).width) / 2);
-                    const textY = height / 2;
-                    ctx.fillText(text, textX, textY);
-                    ctx.save();
                 }
             });
         });
@@ -825,5 +803,8 @@ document.addEventListener('DOMContentLoaded', () => {
         checkUpcomingPayables();
         updateProfileReports();
     }
+
+    updateAll();
+    updateProfileReports(); // Garante que os resumos sejam atualizados
 
 });

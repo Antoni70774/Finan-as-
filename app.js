@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
         chartType: 'all' // all, expense, income
     };
-    
+
     // INITIAL SETUP
     createExpenseChart();
     setCurrentDate();
@@ -92,25 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-     // Texto no meio do gráfico (percentual)
-    Chart.register({
-      id: "centerText",
-      beforeDraw: function (chart) {
-        const { width } = chart;
-        const { height } = chart;
-        const ctx = chart.ctx;
-        ctx.restore();
-        const fontSize = (height / 100).toFixed(2);
-        ctx.font = `${fontSize}em sans-serif`;
-        ctx.textBaseline = "middle";
-        const text = `${chart.config.data.datasets[0].data[0]}%`;
-        const textX = Math.round((width - ctx.measureText(text).width) / 2);
-        const textY = height / 2;
-        ctx.fillText(text, textX, textY);
-        ctx.save();
-      }
-    });
-    
     // MODAL HANDLING
     function openModal(modal) { modal.classList.add('active'); }
     function closeModal(modal) { modal.classList.remove('active'); }
@@ -341,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // GOAL FORM SUBMISSION
     goalForm.addEventListener('submit', function(e) {
         e.preventDefault();
-    
         const goalId = document.getElementById('goal-id').value;
         const goalData = {
             name: document.getElementById('goal-name').value,
@@ -349,12 +329,12 @@ document.addEventListener('DOMContentLoaded', () => {
             current: parseFloat(document.getElementById('goal-current').value),
             date: document.getElementById('goal-date').value
         };
-    
-        if (!goalData.name || isNaN(goalData.target) || isNaN(goalData.current) || !goalData.date) {
-            alert("Preencha todos os campos corretamente.");
+
+        if (!goalData.name || !goalData.target || isNaN(goalData.current)) {
+            alert('Por favor, preencha todos os campos corretamente');
             return;
         }
-    
+
         if (goalId) {
             const index = state.goals.findIndex(g => g.id === goalId);
             if (index !== -1) {
@@ -366,7 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ...goalData
             });
         }
-    
+
         saveAndRerender();
         closeGoalModal();
     });
@@ -595,43 +575,20 @@ document.addEventListener('DOMContentLoaded', () => {
             goalList.innerHTML = '<p>Nenhuma meta financeira cadastrada.</p>';
             return;
         }
-    
         state.goals.forEach(goal => {
             const card = document.createElement('div');
             card.className = 'goal-card';
             card.innerHTML = `
                 <span class="meta-title">${goal.name}</span>
-                <canvas id="goal-chart-${goal.id}" width="120" height="120"></canvas>
-                <div class="meta-info">Alvo: <strong>${formatCurrency(goal.target)}</strong></div>
-                <div class="meta-info">Atual: <strong>${formatCurrency(goal.current)}</strong></div>
-                <div class="meta-info">Faltam: <strong>${formatCurrency(goal.target - goal.current)}</strong></div>
-                <div class="meta-info">Prazo: <strong>${formatDateBR(goal.date)}</strong></div>
+                <span class="meta-info">Alvo: <strong>${formatCurrency(goal.target)}</strong></span>
+                <span class="meta-info">Atual: <strong>${formatCurrency(goal.current)}</strong></span>
+                <span class="meta-info">Limite: <strong>${formatDateBR(goal.date)}</strong></span>
                 <div class="goal-actions">
                     <button class="btn-secondary" onclick="editGoal('${goal.id}')">Editar</button>
                     <button class="btn-danger" onclick="window.deleteGoal && deleteGoal('${goal.id}')">Excluir</button>
                 </div>
             `;
             goalList.appendChild(card);
-    
-            // === Novo: gráfico circular ===
-            const ctx = card.querySelector(`#goal-chart-${goal.id}`).getContext("2d");
-            const percent = (goal.current / goal.target) * 100;
-            new Chart(ctx, {
-                type: "doughnut",
-                data: {
-                    datasets: [{
-                        data: [goal.current, Math.max(0, goal.target - goal.current)],
-                        backgroundColor: ["#4CAF50", "#E0E0E0"],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    cutout: "75%",
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
         });
     }
 
@@ -663,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
             `;
-        });    
+        });
     }
 
     function updateUserUI() {
@@ -696,115 +653,4 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
         }
     }
-
-        // ========== NOVAS FUNÇÕES ==========
-
-    // 1. Relatório Mensal
-    function renderMonthlyReport() {
-        const container = document.getElementById('monthly-report');
-        if (!container) return;
-
-        const monthTransactions = filterTransactionsByMonth(state.transactions, state.currentDate);
-        const income = monthTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-        const expense = monthTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-        const balance = income - expense;
-
-        // Categoria mais gasta
-        const categoryTotals = {};
-        monthTransactions.filter(t => t.type === 'expense').forEach(t => {
-            categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
-        });
-        const topCategory = Object.entries(categoryTotals).sort((a,b) => b[1]-a[1])[0];
-
-        container.innerHTML = `
-            <h3>Relatório Mensal (${state.currentDate.toLocaleString('pt-BR',{month:'long',year:'numeric'})})</h3>
-            <p><strong>Receitas:</strong> ${formatCurrency(income)}</p>
-            <p><strong>Despesas:</strong> ${formatCurrency(expense)}</p>
-            <p><strong>Saldo:</strong> ${formatCurrency(balance)}</p>
-            <p><strong>Categoria mais gasta:</strong> ${topCategory ? topCategory[0] + ' ('+ formatCurrency(topCategory[1]) +')' : 'Nenhuma'}</p>
-        `;
-    }
-
-    // 2. Aviso de contas próximas do vencimento
-    function checkUpcomingPayables() {
-        const today = new Date();
-        const upcoming = state.payables.filter(p => {
-            const due = new Date(p.date + "T03:00:00");
-            const diff = (due - today) / (1000 * 60 * 60 * 24);
-            return diff >= 0 && diff <= 3 && !p.paid;
-        });
-    
-        const bellEl = document.getElementById('notification-bell');
-        if (bellEl) {
-            if (upcoming.length > 0) {
-                bellEl.innerHTML = `🔔<span class="badge">${upcoming.length}</span>`;
-            } else {
-                bellEl.innerHTML = "🔔";
-            }
-        } else {
-            // fallback caso não tenha sino
-            if (upcoming.length > 0) {
-                alert(`⚠️ Você tem ${upcoming.length} conta(s) que vencem nos próximos 3 dias!`);
-            }
-        }
-    }
-
-
-    // 3. Resumo Anual
-    function renderAnnualSummary() {
-        const container = document.getElementById('annual-summary');
-        if (!container) return;
-
-        const year = new Date().getFullYear();
-        const summary = Array.from({ length: 12 }, (_, i) => ({
-            month: i,
-            income: 0,
-            expense: 0,
-            balance: 0
-        }));
-
-        state.transactions.forEach(t => {
-            const d = new Date(t.date + "T03:00:00");
-            if (d.getFullYear() === year) {
-                const idx = d.getMonth();
-                if (t.type === 'income') summary[idx].income += t.amount;
-                else summary[idx].expense += t.amount;
-                summary[idx].balance = summary[idx].income - summary[idx].expense;
-            }
-        });
-
-        let html = `<h3>Resumo Anual (${year})</h3>
-        <table class="annual-table">
-            <thead>
-                <tr><th>Mês</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr>
-            </thead><tbody>`;
-        summary.forEach(m => {
-            html += `<tr>
-                <td>${new Date(year, m.month).toLocaleString('pt-BR',{month:'long'})}</td>
-                <td>${formatCurrency(m.income)}</td>
-                <td>${formatCurrency(m.expense)}</td>
-                <td style="color:${m.balance>=0?'green':'red'}">${formatCurrency(m.balance)}</td>
-            </tr>`;
-        });
-        html += `</tbody></table>`;
-        container.innerHTML = html;
-    }
-
-    // Chamadas automáticas ao atualizar
-    function updateProfileReports() {
-        renderMonthlyReport();
-        renderAnnualSummary();
-    }
-
-    // Modificar updateAll para incluir os novos relatórios + alerta
-    const originalUpdateAll = updateAll;
-    updateAll = function() {
-        originalUpdateAll();
-        checkUpcomingPayables();
-        updateProfileReports();
-    }
-
-    updateAll();
-    updateProfileReports(); // Garante que os resumos sejam atualizados
-
 });

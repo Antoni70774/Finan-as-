@@ -1,3 +1,4 @@
+// --- app.js ---
 import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser: localStorage.getItem('currentUser') || 'Esposo',
         users: ['Esposo', 'Esposa'],
         currentDate: new Date(),
-        expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Emprestimo', 'Cartão de Crédito', 'Energia', 'Agua', 'Gas', 'Internet', 'Investimento', 'Outros'],
+        expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Outros'],
         incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
         chartType: 'all' // all, expense, income
     };
@@ -175,9 +176,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.transactions[idx] = { id, type, amount, description, category, date, user };
             }
         } else {
-            // Novo
+            // Novo (ID único garantido)
             state.transactions.push({
-                id: Date.now().toString(),
+                id: crypto.randomUUID(),
                 type,
                 amount,
                 description,
@@ -200,6 +201,123 @@ document.addEventListener('DOMContentLoaded', () => {
             updateAll();
         });
     });
+
+    // DATA & RENDERING
+    function saveAndRerender() {
+        localStorage.setItem('transactions', JSON.stringify(state.transactions));
+        localStorage.setItem('goals', JSON.stringify(state.goals));
+        localStorage.setItem('payables', JSON.stringify(state.payables));
+        updateAll();
+    }
+
+    function updateAll() {
+        const monthFiltered = filterTransactionsByMonth(state.transactions, state.currentDate);
+
+        // aplica filtro igual ao gráfico para as transações recentes
+        let transactionsForDisplay = monthFiltered;
+        if (state.chartType === 'expense') {
+            transactionsForDisplay = monthFiltered.filter(t => t.type === 'expense');
+        } else if (state.chartType === 'income') {
+            transactionsForDisplay = monthFiltered.filter(t => t.type === 'income');
+        }
+
+        renderSummary(monthFiltered);                 // resumo geral
+        renderTransactionList(transactionsForDisplay); // lista segue filtro
+        updateMainChart(monthFiltered);               // gráfico usa filtro interno
+        renderGoals();
+        renderPayables();
+        updateMonthDisplay();
+        updateUserUI();
+    }
+
+    function filterTransactionsByMonth(transactions, date) {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        return transactions.filter(t => {
+            const tDate = new Date(t.date + "T03:00:00");
+            return tDate.getFullYear() === year && tDate.getMonth() === month;
+        });
+    }
+
+    function updateMainChart(transactions) {
+        let cats = state.expenseCategories;
+        let filtered = transactions;
+        let title = 'Movimentação por Categoria';
+
+        if (state.chartType === 'expense') {
+            filtered = transactions.filter(t => t.type === 'expense');
+            cats = state.expenseCategories;
+            title = 'Despesas por Categoria';
+        } else if (state.chartType === 'income') {
+            filtered = transactions.filter(t => t.type === 'income');
+            cats = state.incomeCategories;
+            title = 'Receitas por Categoria';
+        }
+        updateExpenseChart(filtered, cats);
+        chartTitle.textContent = title;
+    }
+
+    function renderTransactionList(transactions) {
+        const listEl = document.getElementById('transaction-list');
+        listEl.innerHTML = '';
+        if (transactions.length === 0) {
+            listEl.innerHTML = '<li>Nenhuma transação neste filtro.</li>';
+            return;
+        }
+        const sorted = [...transactions].sort((a,b) => new Date(b.date + "T03:00:00") - new Date(a.date + "T03:00:00"));
+        sorted.forEach(t => {   // removido slice(0,10) → agora mostra todas
+            const item = document.createElement('li');
+            item.className = 'transaction-item';
+            item.dataset.id = t.id;
+            const isIncome = t.type === 'income';
+            const date = formatDateBR(t.date);
+            item.innerHTML = `
+                <div class="transaction-icon ${isIncome ? 'income' : 'expense'}">
+                    <span class="material-icons-sharp">${isIncome ? 'arrow_upward' : 'arrow_downward'}</span>
+                </div>
+                <div class="transaction-details">
+                    <p>${t.description}</p>
+                    <span>${t.category} • ${t.user} • ${date}</span>
+                </div>
+                <div class="transaction-amount ${isIncome ? 'income' : 'expense'}">
+                    ${isIncome ? '+' : '-'} ${formatCurrency(t.amount)}
+                </div>
+            `;
+            item.addEventListener('click', () => openTransactionModal(t));
+            listEl.appendChild(item);
+        });
+    }
+
+    // Helpers
+    function formatCurrency(value) {
+        return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+    function formatDateBR(dateStr) {
+        return new Date(dateStr + "T03:00:00").toLocaleDateString('pt-BR');
+    }
+    function renderSummary(transactions) {
+        const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        const balance = income - expense;
+
+        document.getElementById('month-income').textContent = formatCurrency(income);
+        document.getElementById('month-expense').textContent = formatCurrency(expense);
+        document.getElementById('month-balance').textContent = formatCurrency(balance);
+        document.getElementById('month-balance').style.color = balance >= 0 ? 'var(--text-light)' : '#ff8a80';
+    }
+
+    function updateMonthDisplay() {
+        document.getElementById('current-month-year').textContent =
+            state.currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+    }
+
+    function updateUserUI() {
+        currentUserNameEl.textContent = state.currentUser;
+        userButtons.forEach(button => {
+            button.classList.toggle('active', button.dataset.user === state.currentUser);
+        });
+    }
+
 
     // GOAL FORM SUBMISSION
     goalForm.addEventListener('submit', function(e) {
@@ -368,16 +486,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAll();
     }
 
-    function updateAll() {
-        const filtered = filterTransactionsByMonth(state.transactions, state.currentDate);
-        renderSummary(filtered);
-        renderTransactionList(filtered);
-        updateMainChart(filtered);
-        renderGoals();
-        renderPayables();
-        updateMonthDisplay();
-        updateUserUI();
-    }
 
     function filterTransactionsByMonth(transactions, date) {
         const year = date.getFullYear();
@@ -438,7 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         const sorted = [...transactions].sort((a,b) => new Date(b.date + "T03:00:00") - new Date(a.date + "T03:00:00"));
-        sorted.slice(0, 10).forEach(t => {
+        sorted.forEach(t => {
             const item = document.createElement('li');
             item.className = 'transaction-item';
             item.dataset.id = t.id;

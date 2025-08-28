@@ -653,4 +653,100 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
         }
     }
+
+        // ========== NOVAS FUNÇÕES ==========
+
+    // 1. Relatório Mensal
+    function renderMonthlyReport() {
+        const container = document.getElementById('monthly-report');
+        if (!container) return;
+
+        const monthTransactions = filterTransactionsByMonth(state.transactions, state.currentDate);
+        const income = monthTransactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+        const expense = monthTransactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+        const balance = income - expense;
+
+        // Categoria mais gasta
+        const categoryTotals = {};
+        monthTransactions.filter(t => t.type === 'expense').forEach(t => {
+            categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
+        });
+        const topCategory = Object.entries(categoryTotals).sort((a,b) => b[1]-a[1])[0];
+
+        container.innerHTML = `
+            <h3>Relatório Mensal (${state.currentDate.toLocaleString('pt-BR',{month:'long',year:'numeric'})})</h3>
+            <p><strong>Receitas:</strong> ${formatCurrency(income)}</p>
+            <p><strong>Despesas:</strong> ${formatCurrency(expense)}</p>
+            <p><strong>Saldo:</strong> ${formatCurrency(balance)}</p>
+            <p><strong>Categoria mais gasta:</strong> ${topCategory ? topCategory[0] + ' ('+ formatCurrency(topCategory[1]) +')' : 'Nenhuma'}</p>
+        `;
+    }
+
+    // 2. Aviso de contas próximas do vencimento
+    function checkUpcomingPayables() {
+        const today = new Date();
+        const upcoming = state.payables.filter(p => {
+            const due = new Date(p.date + "T03:00:00");
+            const diff = (due - today) / (1000 * 60 * 60 * 24);
+            return diff >= 0 && diff <= 3 && !p.paid;
+        });
+        if (upcoming.length > 0) {
+            alert(`⚠️ Você tem ${upcoming.length} conta(s) que vencem nos próximos 3 dias!`);
+        }
+    }
+
+    // 3. Resumo Anual
+    function renderAnnualSummary() {
+        const container = document.getElementById('annual-summary');
+        if (!container) return;
+
+        const year = new Date().getFullYear();
+        const summary = Array.from({ length: 12 }, (_, i) => ({
+            month: i,
+            income: 0,
+            expense: 0,
+            balance: 0
+        }));
+
+        state.transactions.forEach(t => {
+            const d = new Date(t.date + "T03:00:00");
+            if (d.getFullYear() === year) {
+                const idx = d.getMonth();
+                if (t.type === 'income') summary[idx].income += t.amount;
+                else summary[idx].expense += t.amount;
+                summary[idx].balance = summary[idx].income - summary[idx].expense;
+            }
+        });
+
+        let html = `<h3>Resumo Anual (${year})</h3>
+        <table class="annual-table">
+            <thead>
+                <tr><th>Mês</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr>
+            </thead><tbody>`;
+        summary.forEach(m => {
+            html += `<tr>
+                <td>${new Date(year, m.month).toLocaleString('pt-BR',{month:'long'})}</td>
+                <td>${formatCurrency(m.income)}</td>
+                <td>${formatCurrency(m.expense)}</td>
+                <td style="color:${m.balance>=0?'green':'red'}">${formatCurrency(m.balance)}</td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    }
+
+    // Chamadas automáticas ao atualizar
+    function updateProfileReports() {
+        renderMonthlyReport();
+        renderAnnualSummary();
+    }
+
+    // Modificar updateAll para incluir os novos relatórios + alerta
+    const originalUpdateAll = updateAll;
+    updateAll = function() {
+        originalUpdateAll();
+        checkUpcomingPayables();
+        updateProfileReports();
+    }
+
 });

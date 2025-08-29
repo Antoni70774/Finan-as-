@@ -18,7 +18,18 @@
             <h1>Visão Geral</h1>
             <div class="profile-icon">
                 <span class="material-icons-sharp">person_outline</span>
-                <span class="material-icons-sharp sino-lembrete" id="sino-lembrete">notifications_active</span>
+                <div id="alert-icon" onclick="abrirAlerta()">
+                  🔔 <span id="alert-count" class="badge">0</span>
+                </div>
+                
+                <!-- Modal de alerta -->
+                <div id="alert-modal" class="modal">
+                  <div class="modal-content">
+                    <h3>Contas a vencer</h3>
+                    <ul id="alert-list"></ul>
+                    <button onclick="fecharAlerta()">Fechar</button>
+                  </div>
+                </div>
             </div>
         </header>
 

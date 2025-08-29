@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // ✅ NOVA FUNÇÃO: Resumo por Categoria com ícones
-    function renderCategorySummary(transactions) {
+        function renderCategorySummary(transactions) {
         const container = document.getElementById('category-summary');
         if (!container) return;
     
@@ -564,12 +564,15 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = `category-card ${data.type}`;
     
             card.innerHTML = `
-                <div class="category-info">
-                    <span class="material-icons-sharp category-icon">${icon}</span>
-                    <span class="category-name">${category}</span>
+                <div class="category-icon">
+                    <span class="material-icons-sharp">${icon}</span>
                 </div>
-                <span class="category-amount">R$ ${data.total.toFixed(2)}</span>
+                <div class="category-info">
+                    <span class="category-name">${category}</span>
+                    <span class="category-amount">R$ ${data.total.toFixed(2)}</span>
+                </div>
             `;
+    
             container.appendChild(card);
         });
     }

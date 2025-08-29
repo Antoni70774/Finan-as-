@@ -516,4 +516,9 @@ body, html {
       color: #4A90E2;
     }
 
+    #goal-progress-chart {
+      width: 200px;
+      height: 200px;
+    }
+
 }

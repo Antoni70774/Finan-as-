@@ -521,4 +521,23 @@ body, html {
       height: 200px;
     }
 
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 10px;
+    }
+    
+    .category-card {
+      background-color: #f1f5f9;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      color: #333;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
 }

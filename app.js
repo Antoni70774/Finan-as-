@@ -767,7 +767,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const proximas = contas.filter(conta => {
         const venc = new Date(conta.dataVencimento);
         const dias = (venc - hoje) / (1000 * 60 * 60 * 24);
-        return dias >= 0 && dias <= 5;
+        return dias >= 0 && dias <= 5 && !conta.paid;
       });
     
       document.getElementById('alert-count').textContent = proximas.length;

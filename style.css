@@ -520,7 +520,7 @@ body, html {
       width: 200px;
       height: 200px;
     }
-
+    
     .category-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -531,10 +531,11 @@ body, html {
     .category-card {
       background-color: #f1f5f9;
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 12px;
       font-weight: 500;
       color: #333;
       box-shadow: 0 1px 4px rgba(0,0,0,0.05);
@@ -546,30 +547,29 @@ body, html {
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     
-    .category-info {
-      display: flex;
-      align-items: center;
-      gap: 6px;
+    .category-icon {
+      font-size: 28px;
+      color: #4A90E2;
     }
     
-    .category-icon {
-      font-size: 18px;
-      color: #666;
+    .category-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     
     .category-name {
       font-size: 13px;
+      font-weight: 600;
       color: #444;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100px;
+      margin-top: 4px;
     }
     
     .category-amount {
       font-size: 14px;
       font-weight: bold;
       color: #222;
+      margin-top: 2px;
     }
 
 }

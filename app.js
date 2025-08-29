@@ -575,6 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
             goalList.innerHTML = '<p>Nenhuma meta financeira cadastrada.</p>';
             return;
         }
+    
         state.goals.forEach(goal => {
             const card = document.createElement('div');
             card.className = 'goal-card';
@@ -594,8 +595,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="btn-danger" onclick="window.deleteGoal && deleteGoal('${goal.id}')">Excluir</button>
               </div>
             `;
-
+    
             goalList.appendChild(card);
+    
+            // Cálculo da sugestão mensal
+            const restante = goal.target - goal.current;
+            const mesesRestantes = Math.max(
+                Math.ceil((new Date(goal.date) - new Date()) / (1000 * 60 * 60 * 24 * 30)),
+                1
+            );
+            const sugestao = restante / mesesRestantes;
+            document.getElementById(`monthly-${goal.id}`).textContent =
+                `Sugestão: R$ ${sugestao.toFixed(2)} por mês`;
+    
+            // Gráfico de progresso
+            const ctx = document.getElementById(`goal-chart-${goal.id}`).getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Concluído', 'Restante'],
+                    datasets: [{
+                        data: [goal.current, restante],
+                        backgroundColor: ['#4A90E2', '#e0e0e0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            });
         });
     }
 
@@ -663,72 +695,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('goal-modal').classList.remove('active');
     });
 
-    function createGoalProgressChart() {
-      const canvas = document.getElementById('goal-progress-chart');
-      if (!canvas) return;
-    
-      const ctx = canvas.getContext('2d');
-    
-      // Pegando a primeira meta como exemplo
-      const goals = JSON.parse(localStorage.getItem('goals')) || [];
-      if (goals.length === 0) return;
-    
-      const goal = goals[0]; // ou selecione dinamicamente
-    
-      const percent = Math.min((goal.current / goal.target) * 100, 100);
-    
-      new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Concluído', 'Restante'],
-          datasets: [{
-            data: [percent, 100 - percent],
-            backgroundColor: ['#4A90E2', '#e0e4ed']
-          }]
-    },
-    options: {
-      plugins: {
-        legend: { display: false }
-      },
-      cutout: '70%'
-    }
-  });
-
-  // Sugestão mensal
- const percent = Math.min((goal.current / goal.target) * 100, 100);
-    const restante = goal.target - goal.current;
-    const mesesRestantes = Math.max(
-      Math.ceil((new Date(goal.date) - new Date()) / (1000 * 60 * 60 * 24 * 30)),
-      1
-    );
-    const sugestao = restante / mesesRestantes;
-    
-    document.getElementById(`monthly-${goal.id}`).textContent =
-      `Sugestão: R$ ${sugestao.toFixed(2)} por mês`;
-    
-    const ctx = document.getElementById(`goal-chart-${goal.id}`).getContext('2d');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Concluído', 'Restante'],
-        datasets: [{
-          data: [goal.current, restante],
-          backgroundColor: ['#4A90E2', '#e0e0e0'],
-          borderWidth: 0
-        }]
-      },
-      options: {
-        cutout: '70%',
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false }
-        }
-      }
-    });
-
-    window.addEventListener('DOMContentLoaded', () => {
-      createGoalProgressChart();
-    });
 
     // Correção da integração bancária
     window.connectBank = async function(bankName) {

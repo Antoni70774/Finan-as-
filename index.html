@@ -18,12 +18,7 @@
             <h1>Visão Geral</h1>
             <div class="profile-icon">
                 <span class="material-icons-sharp">person_outline</span>
-                
-                <!-- Sino de notificações -->
-                <div id="notification-bell" class="notification-bell">
-                    <span class="material-icons-sharp">notifications</span>
-                    <span class="badge" style="display:none;">0</span>
-                </div>
+                <span class="material-icons-sharp sino-lembrete" id="sino-lembrete">notifications_active</span>
             </div>
         </header>
 
@@ -74,8 +69,6 @@
                 <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
                 <div id="goal-list"></div>
             </div>
-
-            <!-- Payables Page -->
             <div id="payables-page" class="page">
                 <h2>Despesas a Pagar</h2>
                 <button id="add-payable-btn" class="btn-primary">Nova Conta</button>
@@ -87,10 +80,6 @@
                 <h2>Perfil</h2>
                 <div>
                     <span>Usuário atual: <span id="current-user-name"></span></span>
-                    <div class="user-buttons">
-                        <button data-user="Esposo">Esposo</button>
-                        <button data-user="Esposa">Esposa</button>
-                    </div>
                 </div>
                 <div class="bank-connect">
                     <h4>Conexão Bancária</h4>
@@ -109,38 +98,10 @@
                             Caixa
                         </button>
                     </div>
-                </div> <!-- fecha bank-connect -->
-                
-                <!-- Relatório Mensal -->
-                <div id="monthly-report" class="profile-section">
-                    <h3>Relatório Mensal</h3>
-                    <div id="monthly-report-content">
-                        <p>Nenhum dado carregado ainda.</p>
-                    </div>
                 </div>
-                
-                <!-- Aviso de Contas Próximas -->
-                <div id="upcoming-payables" class="profile-section">
-                    <h3>Contas Próximas do Vencimento</h3>
-                    <ul id="upcoming-payables-list"></ul>
-                </div>
-                
-                <!-- Resumo Anual -->
-                <div id="annual-summary" class="profile-section">
-                    <h3>Resumo Anual</h3>
-                    <div id="annual-summary-content">
-                        <p>Nenhum dado disponível.</p>
-                    </div>
-                </div>
-                
                 <button id="export-data-btn" class="btn-secondary">Exportar Dados</button>
             </div>
         </main>
-
-        <!-- Floating Action Button -->
-        <button id="add-transaction-btn" class="fab">
-            <span class="material-icons-sharp">add</span>
-        </button>
 
         <!-- Transaction Modal -->
         <div id="transaction-modal" class="modal-overlay">
@@ -224,6 +185,9 @@
                 <span class="material-icons-sharp">flag</span>
                 <span class="nav-text">Metas</span>
             </button>
+            <button id="add-transaction-btn" class="fab">
+                <span class="material-icons-sharp">add</span>
+            </button>
             <button class="nav-item" data-page="payables-page">
                 <span class="material-icons-sharp">notifications</span>
                 <span class="nav-text">A Pagar</span>
@@ -236,4 +200,12 @@
     </div>
     <script type="module" src="app.js"></script>
 </body>
+</html>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+    </div>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
 </html>

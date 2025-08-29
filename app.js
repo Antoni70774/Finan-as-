@@ -630,6 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // GRAFICO DA META A ALCANÇA
     function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -654,6 +655,49 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cancel-goal-btn').addEventListener('click', () => {
       document.getElementById('goal-modal').classList.remove('active');
     });
+
+    function createGoalProgressChart() {
+  const canvas = document.getElementById('goal-progress-chart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+
+  // Pegando a primeira meta como exemplo
+  const goals = JSON.parse(localStorage.getItem('goals')) || [];
+  if (goals.length === 0) return;
+
+  const goal = goals[0]; // ou selecione dinamicamente
+
+  const percent = Math.min((goal.current / goal.target) * 100, 100);
+
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Concluído', 'Restante'],
+      datasets: [{
+        data: [percent, 100 - percent],
+        backgroundColor: ['#4A90E2', '#e0e4ed']
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { display: false }
+      },
+      cutout: '70%'
+    }
+  });
+
+  // Sugestão mensal
+  const mesesRestantes = Math.max(
+    Math.ceil((new Date(goal.date) - new Date()) / (1000 * 60 * 60 * 24 * 30)),
+    1
+  );
+  const restante = goal.target - goal.current;
+  const sugestao = restante / mesesRestantes;
+
+  document.getElementById('monthly-amount').textContent =
+    `Sugestão: R$ ${sugestao.toFixed(2)} por mês`;
+}
 
     window.addEventListener('DOMContentLoaded', () => {
       createGoalProgressChart();

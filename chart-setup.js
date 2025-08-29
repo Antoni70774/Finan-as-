@@ -58,7 +58,15 @@ export function createExpenseChart() {
     },
     options: {
       plugins: {
-        legend: { position: 'bottom' }
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const valor = context.parsed;
+              return `${context.label}: R$ ${valor.toFixed(2)}`;
+            }
+          }
+        }
       },
       onClick: chartClickHandler
     }
@@ -87,7 +95,7 @@ export function updateExpenseChart(transactions, categories, tipo = 'despesa') {
     return paleta[cat] || '#cccccc';
   });
 
-  chartInstance.update();
+  chartInstance.update('active');
 }
 
 /**

@@ -558,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="transaction-details">
                     <p>${t.description}</p>
-                    <span>${t.category} • ${t.user} • ${date}</span>
+                    <span>${t.category} • ${date}</span>
                 </div>
                 <div class="transaction-amount ${isIncome ? 'income' : 'expense'}">
                     ${isIncome ? '+' : '-'} ${formatCurrency(t.amount)}

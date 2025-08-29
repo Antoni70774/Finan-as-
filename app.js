@@ -519,7 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('month-balance').style.color = balance >= 0 ? 'var(--text-light)' : '#ff8a80';
     }
 
-    // FILTRO DO GRÁFICO
+   // FILTRO DO GRÁFICO
     function updateMainChart(transactions) {
         let cats = state.expenseCategories;
         let filtered = transactions;
@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCategorySummary(filtered);
     }
     
-    // ✅ NOVA FUNÇÃO: Resumo por Categoria
+    // ✅ NOVA FUNÇÃO: Resumo por Categoria com ícones
     function renderCategorySummary(transactions) {
         const container = document.getElementById('category-summary');
         if (!container) return;
@@ -553,21 +553,51 @@ document.addEventListener('DOMContentLoaded', () => {
     
         transactions.forEach(t => {
             if (!summary[t.category]) {
-                summary[t.category] = 0;
+                summary[t.category] = { total: 0, type: t.type };
             }
-            summary[t.category] += t.amount;
+            summary[t.category].total += t.amount;
         });
     
-        Object.entries(summary).forEach(([category, total]) => {
+        Object.entries(summary).forEach(([category, data]) => {
+            const icon = getCategoryIcon(category);
             const card = document.createElement('div');
-            card.className = 'category-card';
+            card.className = `category-card ${data.type}`;
+    
             card.innerHTML = `
-                <span>${category}</span>
-                <span>R$ ${total.toFixed(2)}</span>
+                <div class="category-info">
+                    <span class="material-icons-sharp category-icon">${icon}</span>
+                    <span class="category-name">${category}</span>
+                </div>
+                <span class="category-amount">R$ ${data.total.toFixed(2)}</span>
             `;
             container.appendChild(card);
         });
     }
+    
+    // ✅ FUNÇÃO AUXILIAR: Ícones por categoria
+    function getCategoryIcon(category) {
+        const icons = {
+            'Alimentação': 'restaurant',
+            'Transporte': 'directions_bus',
+            'Moradia': 'home',
+            'Lazer': 'sports_esports',
+            'Saúde': 'local_hospital',
+            'Empréstimo': 'account_balance',
+            'Cartão de Crédito': 'credit_card',
+            'Energia': 'bolt',
+            'Água': 'water_drop',
+            'Gás': 'local_fire_department',
+            'Internet': 'wifi',
+            'Investimento': 'trending_up',
+            'Outros': 'category',
+            'Salário': 'attach_money',
+            'Combustível': 'local_gas_station',
+            'Aluguel': 'business'
+        };
+        return icons[category] || 'category';
+    }
+    
+    // ✅ LISTA DE TRANSAÇÕES
     function renderTransactionList(transactions) {
         const listEl = document.getElementById('transaction-list');
         listEl.innerHTML = '';

@@ -586,7 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="meta-info">Limite: <strong>${formatDateBR(goal.date)}</strong></span>
             
               <div class="goal-visual">
-                <canvas id="goal-chart-${goal.id}" width="120" height="120"></canvas>
+                <canvas id="goal-chart-${goal.id}" width="70" height="70"></canvas>
                 <p class="monthly-suggestion" id="monthly-${goal.id}"></p>
               </div>
             

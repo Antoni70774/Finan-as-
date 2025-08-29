@@ -644,6 +644,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    document.getElementById('add-goal-btn').addEventListener('click', () => {
+      document.getElementById('goal-modal').classList.add('active');
+      document.getElementById('goal-form').reset();
+      document.getElementById('goal-modal-title').textContent = 'Nova Meta Financeira';
+      document.getElementById('delete-goal-btn').style.display = 'none';
+    });
+
+    document.getElementById('cancel-goal-btn').addEventListener('click', () => {
+      document.getElementById('goal-modal').classList.remove('active');
+    });
+
     // Correção da integração bancária
     window.connectBank = async function(bankName) {
         try {

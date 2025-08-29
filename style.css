@@ -6,6 +6,12 @@ body, html {
     color: #343a40;
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .app-container {
     max-width: 480px;
     margin: 0 auto;
@@ -54,15 +60,35 @@ body, html {
 .page.active { display: block; }
 
 .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    background-color: #fff;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-    padding: 10px 0; /* Adicionado para espaçamento */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100vw; /* ocupa toda a largura da tela */
+  max-width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+  z-index: 1000;
+  padding: 8px 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .bottom-nav {
+    font-size: 12px;
+  }
+
+  .nav-item {
+    flex: 1;
+    text-align: center;
+  }
+
+  .material-icons-sharp {
+    font-size: 20px;
+  }
 }
 
 .nav-item {

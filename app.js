@@ -524,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let cats = state.expenseCategories;
         let filtered = transactions;
         let title = 'Movimentação por Categoria';
-
+    
         if (state.chartType === 'expense') {
             filtered = transactions.filter(t => t.type === 'expense');
             cats = state.expenseCategories;
@@ -534,10 +534,40 @@ document.addEventListener('DOMContentLoaded', () => {
             cats = state.incomeCategories;
             title = 'Receitas por Categoria';
         }
+    
         updateExpenseChart(filtered, cats);
         chartTitle.textContent = title;
+    
+        // ✅ NOVO: Atualiza o resumo por categoria
+        renderCategorySummary(filtered);
     }
-
+    
+    // ✅ NOVA FUNÇÃO: Resumo por Categoria
+    function renderCategorySummary(transactions) {
+        const container = document.getElementById('category-summary');
+        if (!container) return;
+    
+        container.innerHTML = '';
+    
+        const summary = {};
+    
+        transactions.forEach(t => {
+            if (!summary[t.category]) {
+                summary[t.category] = 0;
+            }
+            summary[t.category] += t.amount;
+        });
+    
+        Object.entries(summary).forEach(([category, total]) => {
+            const card = document.createElement('div');
+            card.className = 'category-card';
+            card.innerHTML = `
+                <span>${category}</span>
+                <span>R$ ${total.toFixed(2)}</span>
+            `;
+            container.appendChild(card);
+        });
+    }
     function renderTransactionList(transactions) {
         const listEl = document.getElementById('transaction-list');
         listEl.innerHTML = '';

@@ -15,7 +15,7 @@ body, html {
 .app-container {
     max-width: 480px;
     margin: 0 auto;
-    background: #fff;
+    background: #eaf1fb;
     min-height: 100vh;
     position: relative;
     padding-bottom: 70px;
@@ -163,7 +163,7 @@ body, html {
     justify-content: center;
     align-items: stretch;
     gap: 10px;
-    background: #fff;
+    background: #eaf1fb;
     border-radius: 22px;
     box-shadow: 0 6px 28px rgba(80,130,230,0.10);
     padding: 16px 8px;
@@ -378,7 +378,7 @@ body, html {
     transition: background 0.15s;
 }
 .transaction-item:hover {
-    background: #f3f7fa;
+    background: #eaf1fb;
 }
 .transaction-icon {
     width: 32px;

@@ -228,6 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPayables();
         updateMonthDisplay();
         updateUserUI();
+        
+        verificarContasAVencer(state.payables);
     }
 
     function filterTransactionsByMonth(transactions, date) {
@@ -758,6 +760,33 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('goal-modal').classList.remove('active');
     });
 
+
+    // Sino de Alerta de Contas a Vencer
+    function verificarContasAVencer(contas) {
+      const hoje = new Date();
+      const proximas = contas.filter(conta => {
+        const venc = new Date(conta.dataVencimento);
+        const dias = (venc - hoje) / (1000 * 60 * 60 * 24);
+        return dias >= 0 && dias <= 5;
+      });
+    
+      document.getElementById('alert-count').textContent = proximas.length;
+      const lista = document.getElementById('alert-list');
+      lista.innerHTML = '';
+      proximas.forEach(conta => {
+        const item = document.createElement('li');
+        item.textContent = `${conta.nome} - vence em ${Math.ceil((new Date(conta.dataVencimento) - hoje) / (1000 * 60 * 60 * 24))} dias`;
+        lista.appendChild(item);
+      });
+    }
+    
+    function abrirAlerta() {
+      document.getElementById('alert-modal').style.display = 'block';
+    }
+    
+    function fecharAlerta() {
+      document.getElementById('alert-modal').style.display = 'none';
+    }
 
     // Correção da integração bancária
     window.connectBank = async function(bankName) {

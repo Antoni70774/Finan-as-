@@ -579,15 +579,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'goal-card';
             card.innerHTML = `
-                <span class="meta-title">${goal.name}</span>
-                <span class="meta-info">Alvo: <strong>${formatCurrency(goal.target)}</strong></span>
-                <span class="meta-info">Atual: <strong>${formatCurrency(goal.current)}</strong></span>
-                <span class="meta-info">Limite: <strong>${formatDateBR(goal.date)}</strong></span>
-                <div class="goal-actions">
-                    <button class="btn-secondary" onclick="editGoal('${goal.id}')">Editar</button>
-                    <button class="btn-danger" onclick="window.deleteGoal && deleteGoal('${goal.id}')">Excluir</button>
-                </div>
+              <span class="meta-title">${goal.name}</span>
+              <span class="meta-info">Alvo: <strong>${formatCurrency(goal.target)}</strong></span>
+              <span class="meta-info">Atual: <strong>${formatCurrency(goal.current)}</strong></span>
+              <span class="meta-info">Limite: <strong>${formatDateBR(goal.date)}</strong></span>
+            
+              <div class="goal-visual">
+                <canvas id="goal-chart-${goal.id}" width="180" height="180"></canvas>
+                <p class="monthly-suggestion" id="monthly-${goal.id}"></p>
+              </div>
+            
+              <div class="goal-actions">
+                <button class="btn-secondary" onclick="editGoal('${goal.id}')">Editar</button>
+                <button class="btn-danger" onclick="window.deleteGoal && deleteGoal('${goal.id}')">Excluir</button>
+              </div>
             `;
+
             goalList.appendChild(card);
         });
     }
@@ -657,27 +664,27 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function createGoalProgressChart() {
-  const canvas = document.getElementById('goal-progress-chart');
-  if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-
-  // Pegando a primeira meta como exemplo
-  const goals = JSON.parse(localStorage.getItem('goals')) || [];
-  if (goals.length === 0) return;
-
-  const goal = goals[0]; // ou selecione dinamicamente
-
-  const percent = Math.min((goal.current / goal.target) * 100, 100);
-
-  new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Concluído', 'Restante'],
-      datasets: [{
-        data: [percent, 100 - percent],
-        backgroundColor: ['#4A90E2', '#e0e4ed']
-      }]
+      const canvas = document.getElementById('goal-progress-chart');
+      if (!canvas) return;
+    
+      const ctx = canvas.getContext('2d');
+    
+      // Pegando a primeira meta como exemplo
+      const goals = JSON.parse(localStorage.getItem('goals')) || [];
+      if (goals.length === 0) return;
+    
+      const goal = goals[0]; // ou selecione dinamicamente
+    
+      const percent = Math.min((goal.current / goal.target) * 100, 100);
+    
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Concluído', 'Restante'],
+          datasets: [{
+            data: [percent, 100 - percent],
+            backgroundColor: ['#4A90E2', '#e0e4ed']
+          }]
     },
     options: {
       plugins: {
@@ -688,16 +695,36 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Sugestão mensal
-  const mesesRestantes = Math.max(
-    Math.ceil((new Date(goal.date) - new Date()) / (1000 * 60 * 60 * 24 * 30)),
-    1
-  );
-  const restante = goal.target - goal.current;
-  const sugestao = restante / mesesRestantes;
-
-  document.getElementById('monthly-amount').textContent =
-    `Sugestão: R$ ${sugestao.toFixed(2)} por mês`;
-}
+ const percent = Math.min((goal.current / goal.target) * 100, 100);
+    const restante = goal.target - goal.current;
+    const mesesRestantes = Math.max(
+      Math.ceil((new Date(goal.date) - new Date()) / (1000 * 60 * 60 * 24 * 30)),
+      1
+    );
+    const sugestao = restante / mesesRestantes;
+    
+    document.getElementById(`monthly-${goal.id}`).textContent =
+      `Sugestão: R$ ${sugestao.toFixed(2)} por mês`;
+    
+    const ctx = document.getElementById(`goal-chart-${goal.id}`).getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Concluído', 'Restante'],
+        datasets: [{
+          data: [goal.current, restante],
+          backgroundColor: ['#4A90E2', '#e0e0e0'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        cutout: '70%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false }
+        }
+      }
+    });
 
     window.addEventListener('DOMContentLoaded', () => {
       createGoalProgressChart();

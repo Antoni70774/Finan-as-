@@ -193,7 +193,7 @@ body, html {
 
 .summary-item h4 {
     margin: 0;
-    font-size: 1em; /* REDUZIDO para não ultrapassar */
+    font-size: 0.8em; /* REDUZIDO para não ultrapassar */
     font-weight: 700;
     word-break: break-all;
     max-width: 100%;

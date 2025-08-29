@@ -655,6 +655,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('goal-modal').classList.remove('active');
     });
 
+    window.addEventListener('DOMContentLoaded', () => {
+      createGoalProgressChart();
+    });
+
     // Correção da integração bancária
     window.connectBank = async function(bankName) {
         try {

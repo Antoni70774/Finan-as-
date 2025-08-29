@@ -2,7 +2,7 @@ body, html {
     margin: 0;
     padding: 0;
     font-family: 'Roboto', Arial, sans-serif;
-    background: #ececf1;
+    background: linear-gradient(to bottom right, #f0f4ff, #ffffff);
     color: #343a40;
 }
 
@@ -514,6 +514,11 @@ body, html {
       font-weight: bold;
       font-size: 16px;
       color: #4A90E2;
+    }
+
+    #goal-progress-chart {
+      width: 200px;
+      height: 200px;
     }
 
 }

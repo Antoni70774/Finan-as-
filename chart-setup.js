@@ -34,10 +34,10 @@ const coresCategorias = {
 };
 
 const coresReceita = {
-  'Salário': '#4A90E2',
-  'Combustível': '#2bc47d',
-  'Aluguel': '#ff3d3d',
-  'Outros': '#ffd700'
+  'Salário': '#1E90FF',
+  'Combustível': '#FF4500',
+  'Aluguel': '#32CD32',
+  'Outros': '#800080'
 };
 
 /**

@@ -65,19 +65,21 @@
 
             <!-- Goals Page -->
             <div id="goals-page" class="page">
-                <h2>Metas Pessoais</h2>
-                <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
-                <div id="goal-list"></div>
+              <h2>Metas Pessoais</h2>
+              <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
+              <div id="goal-list"></div>
+            
+              <!-- Gráfico da meta -->
+              <div id="goal-visual-card" class="goal-card">
+                <canvas id="goal-progress-chart" width="200" height="200"></canvas>
+                <p id="monthly-amount" class="monthly-suggestion"></p>
+              </div>
             </div>
+            
             <div id="payables-page" class="page">
                 <h2>Despesas a Pagar</h2>
                 <button id="add-payable-btn" class="btn-primary">Nova Conta</button>
                 <div id="payable-list"></div>
-            </div>
-
-            <div id="goal-visual-card" class="goal-card">
-              <canvas id="goal-progress-chart" width="200" height="200"></canvas>
-              <p id="monthly-amount" class="monthly-suggestion"></p>
             </div>
 
             <!-- Profile Page -->

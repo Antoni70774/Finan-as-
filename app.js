@@ -763,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sino de Alerta de Contas a Vencer
     function verificarContasAVencer(contas) {
-      const hoje = new Date();
+      const hoje = new Date('2025-08-29');
       const proximas = contas.filter(conta => {
         const venc = new Date(conta.dataVencimento);
         const dias = (venc - hoje) / (1000 * 60 * 60 * 24);

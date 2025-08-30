@@ -782,7 +782,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const vencimento = new Date(conta.vencimento);
           const dias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
           const item = document.createElement('li');
-          item.textContent = `${conta.nome} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
+          item.textContent = `${conta.description} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
           alertList.appendChild(item);
         });
       }
@@ -797,6 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('alert-modal');
       if (modal) modal.classList.add('active');
     }
+    
     function fecharAlerta() {
       const modal = document.getElementById('alert-modal');
       if (modal) modal.classList.remove('active');

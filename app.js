@@ -765,26 +765,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function verificarContasAVencer(contas) {
       const hoje = new Date();
       const proximas = contas.filter(conta => {
-        const vencimento = new Date(conta.vencimento);
+        const vencimento = new Date(conta.date);
         const dias = (vencimento - hoje) / (1000 * 60 * 60 * 24);
         return dias >= 0 && dias <= 5 && !conta.paid;
       });
     
-      // Atualiza contador
       document.getElementById('alert-count').textContent = proximas.length;
     
-      // Atualiza lista de contas
       const lista = document.getElementById('alert-list');
       lista.innerHTML = '';
       proximas.forEach(conta => {
-        const vencimento = new Date(conta.vencimento);
+        const vencimento = new Date(conta.date);
         const dias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
         const item = document.createElement('li');
-        item.textContent = `${conta.nome} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
+        item.textContent = `${conta.description} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
         lista.appendChild(item);
       });
     
-      // Aplica animação no ícone
       document.getElementById('alert-icon').classList.toggle('ativo', proximas.length > 0);
     }
     

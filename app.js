@@ -762,30 +762,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Sino de Alerta de Contas a Vencer
-    function verificarContasAVencer(contas) {
+    function verificarContasAVencer() {
       const hoje = new Date();
       const proximas = contas.filter(conta => {
         const vencimento = new Date(conta.vencimento);
-        const dias = (vencimento - hoje) / (1000 * 60 * 60 * 24);
+        const dias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
         return dias >= 0 && dias <= 5 && !conta.paid;
       });
     
       // Atualiza contador
-      document.getElementById('alert-count').textContent = proximas.length;
+      const alertCount = document.getElementById('alert-count');
+      alertCount.textContent = proximas.length;
     
       // Atualiza lista de contas
-      const lista = document.getElementById('alert-list');
-      lista.innerHTML = '';
+      const alertList = document.getElementById('alert-list');
+      alertList.innerHTML = '';
       proximas.forEach(conta => {
         const vencimento = new Date(conta.vencimento);
         const dias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
         const item = document.createElement('li');
         item.textContent = `${conta.nome} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
-        lista.appendChild(item);
+        alertList.appendChild(item);
       });
     
       // Aplica animação no ícone
-      document.getElementById('alert-icon').classList.toggle('ativo', proximas.length > 0);
+      const alertIcon = document.getElementById('alert-icon');
+      alertIcon.classList.toggle('ativo', proximas.length > 0);
     }
     
     function abrirAlerta() {

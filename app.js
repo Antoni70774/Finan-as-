@@ -761,8 +761,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // Sino de Alerta de Contas a Vencer
-    function verificarContasAVencer() {
+    // 🔔 Sino de Alerta de Contas a Vencer
+    function verificarContasAVencer(contas) {
       const hoje = new Date();
       const proximas = contas.filter(conta => {
         const vencimento = new Date(conta.vencimento);
@@ -772,29 +772,37 @@ document.addEventListener('DOMContentLoaded', () => {
     
       // Atualiza contador
       const alertCount = document.getElementById('alert-count');
-      alertCount.textContent = proximas.length;
+      if (alertCount) alertCount.textContent = proximas.length;
     
       // Atualiza lista de contas
       const alertList = document.getElementById('alert-list');
-      alertList.innerHTML = '';
-      proximas.forEach(conta => {
-        const vencimento = new Date(conta.vencimento);
-        const dias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
-        const item = document.createElement('li');
-        item.textContent = `${conta.nome} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
-        alertList.appendChild(item);
-      });
+      if (alertList) {
+        alertList.innerHTML = '';
+        proximas.forEach(conta => {
+          const vencimento = new Date(conta.vencimento);
+          const dias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+          const item = document.createElement('li');
+          item.textContent = `${conta.nome} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
+          alertList.appendChild(item);
+        });
+      }
     
       // Aplica animação no ícone
       const alertIcon = document.getElementById('alert-icon');
-      alertIcon.classList.toggle('ativo', proximas.length > 0);
+      if (alertIcon) alertIcon.classList.toggle('ativo', proximas.length > 0);
     }
     
+    // 🟢 Função para abrir o modal de alerta
     function abrirAlerta() {
-      document.getElementById('alert-modal').classList.add('active');
+      const modal = document.getElementById('alert-modal');
+      if (modal) modal.classList.add('active');
     }
-    
-    // Correção da integração bancária
+    function fecharAlerta() {
+      const modal = document.getElementById('alert-modal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    // 🏦 Correção da integração bancária
     window.connectBank = async function(bankName) {
       try {
         alert(`Integração com ${bankName} em desenvolvimento. Em breve estará disponível.`);
@@ -803,5 +811,3 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
       }
 };
-
-

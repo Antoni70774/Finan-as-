@@ -760,49 +760,89 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // 🔔 Sino de Alerta de Contas a Vencer
-    function verificarContasAVencer(contas) {
+    // Função para calcular dias restantes
+    function diasRestantes(dataVencimento) {
+      const hoje = new Date();
+      const vencimento = new Date(dataVencimento);
+      return Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+    }
+    
+    // Função para verificar contas a vencer
+    function verificarContasAVencer() {
       const hoje = new Date();
       const proximas = contas.filter(conta => {
-        const vencimento = new Date(conta.vencimento);
-        const dias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+        const dias = diasRestantes(conta.dueDate);
         return dias >= 0 && dias <= 5 && !conta.paid;
       });
     
-      // Atualiza contador
+      // Atualiza contador no sino
       const alertCount = document.getElementById('alert-count');
       if (alertCount) alertCount.textContent = proximas.length;
     
-      // Atualiza lista de contas
+      // Atualiza lista de contas no modal
       const alertList = document.getElementById('alert-list');
       if (alertList) {
         alertList.innerHTML = '';
         proximas.forEach(conta => {
-          const vencimento = new Date(conta.vencimento);
-          const dias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+          const dias = diasRestantes(conta.dueDate);
           const item = document.createElement('li');
-          item.textContent = `${conta.nome} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
+          item.textContent = `${conta.description} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
           alertList.appendChild(item);
         });
       }
     
-      // Aplica animação no ícone
+      // Aplica animação no ícone do sino
       const alertIcon = document.getElementById('alert-icon');
       if (alertIcon) alertIcon.classList.toggle('ativo', proximas.length > 0);
+    
+      return proximas;
     }
     
-    // 🟢 Função para abrir o modal de alerta
+    // Função para abrir o modal de alerta
     function abrirAlerta() {
       const modal = document.getElementById('alert-modal');
-      if (modal) modal.classList.add('active');
+      modal.classList.add('active');
+    
+      const lista = document.getElementById('alert-list');
+      lista.innerHTML = ''; // Limpa a lista antes de preencher
+    
+      const contasAVencer = verificarContasAVencer();
+    
+      if (contasAVencer.length === 0) {
+        const item = document.createElement('li');
+        item.textContent = 'Nenhuma conta a vencer nos próximos dias.';
+        lista.appendChild(item);
+      } else {
+        contasAVencer.forEach(conta => {
+          const dias = diasRestantes(conta.dueDate);
+          const item = document.createElement('li');
+          item.textContent = `${conta.description} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
+          lista.appendChild(item);
+        });
+      }
     }
-
+    
+    // Função para fechar o modal de alerta
+    function fecharAlerta() {
+      const modal = document.getElementById('alert-modal');
+      modal.classList.remove('active');
+    }
+    
+    // Adiciona o evento de clique no ícone do sino
+    document.addEventListener('DOMContentLoaded', () => {
+      const icon = document.getElementById('alert-icon');
+      if (icon) {
+        icon.addEventListener('click', abrirAlerta);
+      }
+    });
+    
     // Correção da integração bancária
     window.connectBank = async function(bankName) {
-        try {
-            alert(`Integração com ${bankName} em desenvolvimento. Em breve estará disponível.`);
-        } catch (error) {
-            console.error('Erro na conexão:', error);
-            alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
-        }
-    }
-});
+      try {
+        alert(`Integração com ${bankName} em desenvolvimento. Em breve estará disponível.`);
+      } catch (error) {
+        console.error('Erro na conexão:', error);
+        alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
+      }
+    };
+

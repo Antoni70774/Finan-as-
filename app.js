@@ -834,6 +834,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (icon) {
         icon.addEventListener('click', abrirAlerta);
       }
+         // ✅ Chama a verificação assim que a página carrega
+          verificarContasAVencer();
     });
     
     // Correção da integração bancária

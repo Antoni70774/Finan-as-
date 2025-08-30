@@ -228,8 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPayables();
         updateMonthDisplay();
         updateUserUI();
-        
-        verificarContasAVencer(state.payables);
     }
 
     function filterTransactionsByMonth(transactions, date) {
@@ -782,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const vencimento = new Date(conta.vencimento);
           const dias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
           const item = document.createElement('li');
-          item.textContent = `${conta.description} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
+          item.textContent = `${conta.nome} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
           alertList.appendChild(item);
         });
       }
@@ -797,18 +795,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('alert-modal');
       if (modal) modal.classList.add('active');
     }
-    
-    function fecharAlerta() {
-      const modal = document.getElementById('alert-modal');
-      if (modal) modal.classList.remove('active');
-    }
 
-    // 🏦 Correção da integração bancária
+    // Correção da integração bancária
     window.connectBank = async function(bankName) {
-      try {
-        alert(`Integração com ${bankName} em desenvolvimento. Em breve estará disponível.`);
-      } catch (error) {
-        console.error('Erro na conexão:', error);
-        alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
-      }
-};
+        try {
+            alert(`Integração com ${bankName} em desenvolvimento. Em breve estará disponível.`);
+        } catch (error) {
+            console.error('Erro na conexão:', error);
+            alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
+        }
+    }
+});

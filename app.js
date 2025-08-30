@@ -763,38 +763,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sino de Alerta de Contas a Vencer
     function verificarContasAVencer(contas) {
-      const hoje = new Date('2025-08-29');
+      const hoje = new Date();
       const proximas = contas.filter(conta => {
-        const venc = new Date(conta.dataVencimento);
-        const dias = (venc - hoje) / (1000 * 60 * 60 * 24);
+        const vencimento = new Date(conta.vencimento);
+        const dias = (vencimento - hoje) / (1000 * 60 * 60 * 24);
         return dias >= 0 && dias <= 5 && !conta.paid;
       });
     
+      // Atualiza contador
       document.getElementById('alert-count').textContent = proximas.length;
+    
+      // Atualiza lista de contas
       const lista = document.getElementById('alert-list');
       lista.innerHTML = '';
       proximas.forEach(conta => {
+        const vencimento = new Date(conta.vencimento);
+        const dias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
         const item = document.createElement('li');
-        item.textContent = `${conta.nome} - vence em ${Math.ceil((new Date(conta.dataVencimento) - hoje) / (1000 * 60 * 60 * 24))} dias`;
+        item.textContent = `${conta.nome} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
         lista.appendChild(item);
       });
+    
+      // Aplica animação no ícone
+      document.getElementById('alert-icon').classList.toggle('ativo', proximas.length > 0);
     }
     
     function abrirAlerta() {
-      document.getElementById('alert-modal').style.display = 'block';
+      document.getElementById('alert-modal').classList.add('active');
     }
     
-    function fecharAlerta() {
-      document.getElementById('alert-modal').style.display = 'none';
-    }
-
     // Correção da integração bancária
     window.connectBank = async function(bankName) {
-        try {
-            alert(`Integração com ${bankName} em desenvolvimento. Em breve estará disponível.`);
-        } catch (error) {
-            console.error('Erro na conexão:', error);
-            alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
-        }
-    }
-});
+      try {
+        alert(`Integração com ${bankName} em desenvolvimento. Em breve estará disponível.`);
+      } catch (error) {
+        console.error('Erro na conexão:', error);
+        alert(`Não foi possível conectar ao ${bankName}. Tente novamente mais tarde.`);
+      }
+};

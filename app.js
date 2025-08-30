@@ -759,75 +759,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // 🔔 Sino de Alerta de Contas a Vencer
-    // Função para verificar contas a vencer
-    function verificarContasAVencer() {
-      const hoje = new Date();
-      const proximas = state.payables.filter(conta => { // Mudando de 'contas' para 'state.payables'
-        const dias = diasRestantes(conta.date); // Certifique-se de que a propriedade de data esteja correta
-        return dias >= 0 && dias <= 5 && !conta.paid; // Conta não paga e com vencimento dentro de 5 dias
-      });
-    
-      // Atualiza contador no sino
-      const alertCount = document.getElementById('alert-count');
-      if (alertCount) alertCount.textContent = proximas.length;
-    
-      // Atualiza lista de contas no modal
-      const alertList = document.getElementById('alert-list');
-      if (alertList) {
-        alertList.innerHTML = ''; // Limpa a lista antes de preencher
-        proximas.forEach(conta => {
-          const dias = diasRestantes(conta.date);
-          const item = document.createElement('li');
-          item.textContent = `${conta.description} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
-          alertList.appendChild(item);
-        });
-      }
-    
-      // Aplica animação no ícone do sino
-      const alertIcon = document.getElementById('alert-icon');
-      if (alertIcon) alertIcon.classList.toggle('ativo', proximas.length > 0); // animação pulsante
-    
-      return proximas;
-    }
-    
-    // Função para abrir o modal de alerta
-    function abrirAlerta() {
+    // Abre o modal de alertas
+    window.abrirAlerta = function () {
       const modal = document.getElementById('alert-modal');
       modal.classList.add('active');
-    
-      const lista = document.getElementById('alert-list');
-      lista.innerHTML = ''; // Limpa a lista antes de preencher
-    
-      const contasAVencer = verificarContasAVencer();
-    
-      if (contasAVencer.length === 0) {
-        const item = document.createElement('li');
-        item.textContent = 'Nenhuma conta a vencer nos próximos dias.';
-        lista.appendChild(item);
-      } else {
-        contasAVencer.forEach(conta => {
-          const dias = diasRestantes(conta.date);
-          const item = document.createElement('li');
-          item.textContent = `${conta.description} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
-          lista.appendChild(item);
-        });
-      }
     }
     
-    // Função para fechar o modal de alerta
-    function fecharAlerta() {
+    // Fecha o modal de alertas
+    window.fecharAlerta = function () {
       const modal = document.getElementById('alert-modal');
       modal.classList.remove('active');
     }
     
-    // Adiciona o evento de clique no ícone do sino
-    document.addEventListener('DOMContentLoaded', () => {
-      const icon = document.getElementById('alert-icon');
-      if (icon) {
-        icon.addEventListener('click', abrirAlerta); // Função de clique
-      }
-      verificarContasAVencer(); // Chama a verificação assim que a página carrega
+    // Função para verificar contas próximas do vencimento
+    function verificarContasAVencer() {
+      const hoje = new Date();
+      const proximas = state.payables.filter(conta => {
+        const dias = diasRestantes(conta.date);
+        return dias >= 0 && dias <= 5; // até 5 dias do vencimento
+      });
+    
+      const alertIcon = document.getElementById('alert-icon');
+      const alertCount = document.getElementById('alert-count');
+      const alertList = document.getElementById('alert-list');
+    
+      alertCount.textContent = proximas.length;
+      alertIcon.classList.toggle('ativo', proximas.length > 0);
+    
+      alertList.innerHTML = proximas.length
+        ? proximas.map(c => `<li>${c.description} - vence em ${c.date}</li>`).join('')
+        : "<li>Nenhuma conta próxima do vencimento</li>";
+    }
+    
+    // ⚡ Chamar após carregar/alterar contas
+    verificarContasAVencer();   // Chama a verificação assim que a página carrega
     });
     
     // Correção da integração bancária

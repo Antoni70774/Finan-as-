@@ -760,19 +760,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // 🔔 Sino de Alerta de Contas a Vencer
-    // Função para calcular dias restantes
-    function diasRestantes(dataVencimento) {
-      const hoje = new Date();
-      const vencimento = new Date(dataVencimento);
-      return Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
-    }
-    
     // Função para verificar contas a vencer
     function verificarContasAVencer() {
       const hoje = new Date();
-      const proximas = contas.filter(conta => {
-        const dias = diasRestantes(conta.dueDate);
-        return dias >= 0 && dias <= 5 && !conta.paid;
+      const proximas = state.payables.filter(conta => { // Mudando de 'contas' para 'state.payables'
+        const dias = diasRestantes(conta.date); // Certifique-se de que a propriedade de data esteja correta
+        return dias >= 0 && dias <= 5 && !conta.paid; // Conta não paga e com vencimento dentro de 5 dias
       });
     
       // Atualiza contador no sino
@@ -782,9 +775,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Atualiza lista de contas no modal
       const alertList = document.getElementById('alert-list');
       if (alertList) {
-        alertList.innerHTML = '';
+        alertList.innerHTML = ''; // Limpa a lista antes de preencher
         proximas.forEach(conta => {
-          const dias = diasRestantes(conta.dueDate);
+          const dias = diasRestantes(conta.date);
           const item = document.createElement('li');
           item.textContent = `${conta.description} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
           alertList.appendChild(item);
@@ -793,7 +786,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
       // Aplica animação no ícone do sino
       const alertIcon = document.getElementById('alert-icon');
-      if (alertIcon) alertIcon.classList.toggle('ativo', proximas.length > 0);
+      if (alertIcon) alertIcon.classList.toggle('ativo', proximas.length > 0); // animação pulsante
     
       return proximas;
     }
@@ -814,7 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lista.appendChild(item);
       } else {
         contasAVencer.forEach(conta => {
-          const dias = diasRestantes(conta.dueDate);
+          const dias = diasRestantes(conta.date);
           const item = document.createElement('li');
           item.textContent = `${conta.description} - vence em ${dias} dia${dias > 1 ? 's' : ''}`;
           lista.appendChild(item);
@@ -832,10 +825,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('DOMContentLoaded', () => {
       const icon = document.getElementById('alert-icon');
       if (icon) {
-        icon.addEventListener('click', abrirAlerta);
+        icon.addEventListener('click', abrirAlerta); // Função de clique
       }
-         // ✅ Chama a verificação assim que a página carrega
-          verificarContasAVencer();
+      verificarContasAVencer(); // Chama a verificação assim que a página carrega
     });
     
     // Correção da integração bancária

@@ -154,12 +154,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function abrirResumoAnual() {
-      // lógica para abrir a aba de resumo anual
-      document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-      });
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.getElementById('resumo-anual-page').classList.add('active');
       menuFlutuante.style.display = 'none';
+    
+      const transacoes = state.transactions;
+      const receitaTotal = transacoes.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
+      const despesaTotal = transacoes.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+      const saldoTotal = receitaTotal - despesaTotal;
+    
+      document.getElementById("annual-revenue").textContent = receitaTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      document.getElementById("annual-expense").textContent = despesaTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      document.getElementById("annual-balance").textContent = saldoTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     }
     
     function abrirConfig() {
@@ -918,6 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('goal-modal').classList.remove('active');
     });
 
+    window.abrirResumoMensal = abrirResumoMensal;
     window.abrirResumoAnual = abrirResumoAnual;
     window.abrirPagina = abrirPagina;
     window.exportarDados = exportarDados;

@@ -198,7 +198,7 @@
                 <span class="material-icons-sharp">notifications</span>
             </button>
             <button class="nav-item profile-trigger">
-              <span class="material-icons-sharp">person_outline</span>
+              <span class="material-icons-sharp">menu</span>
             </button>
         </nav>
         <!-- Menu lateral do perfil -->
@@ -211,7 +211,17 @@
             <li onclick="abrirConfig()">⚙️ Configurações</li>
           </ul>
         </div>
-    
+    <!-- Resumo Anual -->
+    <div id="annual-summary-page" class="page">
+      <h2>Resumo Anual</h2>
+      <div class="summary-boxes">
+        <div class="box"><h4>Receita Total</h4><p id="annual-revenue">R$ 0,00</p></div>
+        <div class="box"><h4>Despesa Total</h4><p id="annual-expense">R$ 0,00</p></div>
+        <div class="box"><h4>Saldo Acumulado</h4><p id="annual-balance">R$ 0,00</p></div>
+      </div>
+      <canvas id="annual-chart" width="100%" height="300"></canvas>
+    </div>
+
     <!-- Modal de alerta -->
                 <div id="alert-modal" class="modal">
                   <div class="modal-content">

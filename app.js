@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionModalTitle = document.getElementById('transaction-modal-title');
     const transactionIdInput = document.getElementById('transaction-id');
     const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
+    const perfilTrigger = document.querySelector('.profile-trigger');
+    const menuPerfil = document.getElementById('menu-perfil');
 
     const addGoalBtn = document.getElementById('add-goal-btn');
     const goalModal = document.getElementById('goal-modal');
@@ -79,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'dashboard-page': 'Visão Geral',
             'goals-page': 'Metas Pessoais',
             'payables-page': 'Despesas a Pagar',
-            'profile-page': 'Perfil'
+            'profile-page': 'Menu'
         };
         document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
         if (pageId === 'payables-page') renderPayables();
@@ -110,6 +112,37 @@ document.addEventListener('DOMContentLoaded', () => {
             closeModal(transactionModal);
         }
     });
+
+    perfilTrigger.addEventListener('click', () => {
+      menuPerfil.classList.toggle('ativo');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!menuPerfil.contains(e.target) && !perfilTrigger.contains(e.target)) {
+        menuPerfil.style.display = 'none';
+      }
+    });
+
+    window.abrirPagina = function(pageId) {
+      navigateToPage(pageId);
+      menuPerfil.style.display = 'none';
+    };
+    
+    window.abrirResumoAnual = function() {
+      navigateToPage('annual-summary-page');
+      menuPerfil.style.display = 'none';
+    };
+    
+    window.abrirConfig = function() {
+      alert('Configurações ainda não implementadas.');
+      menuPerfil.style.display = 'none';
+    };
+    
+    window.exportarDados = function() {
+      exportData(); // já existe no seu app.js
+      menuPerfil.style.display = 'none';
+    };
+    
 
     // Funções globais para abrir/fechar modal
     window.abrirAlerta = function () {

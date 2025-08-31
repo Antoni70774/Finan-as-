@@ -220,6 +220,24 @@ document.addEventListener('DOMContentLoaded', () => {
       atualizarNomeDoMes();
     }
 
+    //✅ Fecha as opçoes da aba menu quando clica fora
+    document.addEventListener("click", function (event) {
+      const menu = document.getElementById("menu-perfil");
+      const botaoMenu = document.getElementById("menu-botao");
+    
+      // Verifica se o menu está visível
+      const menuVisivel = menu.style.display === "block";
+    
+      // Se o menu estiver visível e o clique for fora do menu e do botão
+      if (
+        menuVisivel &&
+        !menu.contains(event.target) &&
+        !botaoMenu.contains(event.target)
+      ) {
+        menu.style.display = "none";
+      }
+    });
+
     //✅ Alerta de Conta a Vencer
     window.abrirAlerta = function () {
       document.getElementById('alert-modal').classList.add('active');

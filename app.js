@@ -179,6 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
       closeModal(payableModal);
     });
 
+    // Botão "Nova Conta"
+    document.getElementById('new-payable-btn').addEventListener('click', () => {
+      document.getElementById('payable-id').value = '';
+      document.getElementById('payable-form').reset();
+      openModal(payableModal);
+    });
+
     // Transaction Modal - abrir para novo lançamento
     function openTransactionModal(transaction = null) {
         transactionForm.reset();

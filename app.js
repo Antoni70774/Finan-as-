@@ -155,15 +155,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sempre que salvar uma nova conta, atualiza alertas
     payableForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const id = document.getElementById('payable-id').value || Date.now().toString();
-      const payable = {
-        id,
-        description: document.getElementById('payable-description').value,
-        category: document.getElementById('payable-category').value,
-        amount: parseFloat(document.getElementById('payable-amount').value),
-        date: document.getElementById('payable-date').value
-      };
+  e.preventDefault();
+  const id = document.getElementById('payable-id').value || Date.now().toString();
+  const payable = {
+    id,
+    description: document.getElementById('payable-description').value,
+    category: document.getElementById('payable-category').value,
+    amount: parseFloat(document.getElementById('payable-amount').value),
+    date: document.getElementById('payable-date').value,
+    paid: false
+  };
+
+  // ✅ Verificação contra duplicidade
+  const duplicada = state.payables.some(p =>
+        p.description === payable.description &&
+        p.date === payable.date &&
+        p.amount === payable.amount &&
+        p.category === payable.category &&
+        p.id !== id
+      );
+    
+      if (duplicada) {
+        alert('Essa conta já foi lançada.');
+        return;
+      }
     
       // Salvar ou atualizar
       const index = state.payables.findIndex(p => p.id === id);
@@ -172,12 +187,13 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         state.payables.push(payable);
       }
-      localStorage.setItem('payables', JSON.stringify(state.payables));
     
-      renderPayables();           // re-renderiza lista
-      verificarContasAVencer();   // ⚡ atualiza alerta
+      localStorage.setItem('payables', JSON.stringify(state.payables));
+      renderPayables();
+      verificarContasAVencer();
       closeModal(payableModal);
     });
+
 
     // Botão "Nova Conta"
     document.getElementById('add-payable-btn').addEventListener('click', () => {

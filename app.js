@@ -20,9 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuBotao = document.querySelector('.profile-trigger');
     const menuFlutuante = document.getElementById('menu-flutuante');
     
-    menuBotao.addEventListener('click', () => {
-      menuFlutuante.classList.toggle('active');
-    });
+    if (menuBotao && menuFlutuante) {
+      menuBotao.addEventListener('click', () => {
+        menuFlutuante.classList.toggle('active');
+      });
+    }
     
     const transBtn = document.getElementById("transBtn");
     const transContainer = document.getElementById("transContainer");

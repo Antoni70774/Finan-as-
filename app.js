@@ -204,6 +204,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    function abrirResumoMensal() {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById('resumo-mensal-page').classList.add('active');
+      menuFlutuante.style.display = 'none';
+      carregarResumoMensal();
+      atualizarNomeDoMes();
+    }
+
     //✅ Alerta de Conta a Vencer
     window.abrirAlerta = function () {
       document.getElementById('alert-modal').classList.add('active');

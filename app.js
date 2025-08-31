@@ -500,40 +500,6 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadAnchorNode.remove();
     }
 
-    // PAYABLES LOGIC
-    addPayableBtn.addEventListener('click', () => openPayableModal());
-    cancelPayableBtn.addEventListener('click', () => closeModal(payableModal));
-    payableForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const payableId = document.getElementById('payable-id').value;
-        const payableData = {
-            description: document.getElementById('payable-description').value,
-            category: document.getElementById('payable-category').value,
-            amount: parseFloat(document.getElementById('payable-amount').value),
-            date: document.getElementById('payable-date').value,
-            paid: false
-        };
-        if (!payableData.description || !payableData.category || !payableData.amount || !payableData.date) {
-            alert('Preencha todos os campos');
-            return;
-        }
-        if (payableId) {
-            const index = state.payables.findIndex(p => p.id === payableId);
-            if (index !== -1) {
-                state.payables[index] = { ...state.payables[index], ...payableData };
-            }
-        } else {
-            state.payables.push({
-                id: Date.now().toString(),
-                ...payableData
-            });
-        }
-        localStorage.setItem('payables', JSON.stringify(state.payables));
-        saveAndRerender();
-        closeModal(payableModal);
-        renderPayables();
-    });
-
     function openPayableModal(payable = null) {
         payableForm.reset();
         document.getElementById('payable-id').value = '';

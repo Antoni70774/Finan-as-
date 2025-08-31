@@ -143,7 +143,10 @@ document.addEventListener('DOMContentLoaded', () => {
       alertIcon.classList.toggle('ativo', proximas.length > 0);
     
       alertList.innerHTML = proximas.length
-        ? proximas.map(c => `<li>${c.description} - vence em ${c.date}</li>`).join('')
+        ? proximas.map(c => {
+              const dataFormatada = new Date(c.date).toLocaleDateString('pt-BR');
+              return `<li>${c.description} - vence em ${dataFormatada}</li>`;
+            }).join('')
         : "<li>Nenhuma conta próxima do vencimento</li>";
     }
     

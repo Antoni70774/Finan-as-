@@ -111,38 +111,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Calcula diferença em dias entre hoje e a data informada
-    function diasRestantes(data) {
-      const hoje = new Date();
-      const vencimento = new Date(data);
-      const diff = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
-      return diff;
-    }
-    
-    // Abre o modal de alertas
+    // Funções globais para abrir/fechar modal
     window.abrirAlerta = function () {
-      const modal = document.getElementById('alert-modal');
-      modal.classList.add('active');
-    }
+      document.getElementById('alert-modal').classList.add('active');
+    };
     
-    // Fecha o modal de alertas
     window.fecharAlerta = function () {
-      const modal = document.getElementById('alert-modal');
-      modal.classList.remove('active');
+      document.getElementById('alert-modal').classList.remove('active');
+    };
+    
+    // Função auxiliar
+    function diasRestantes(dataVencimento) {
+      const hoje = new Date();
+      const vencimento = new Date(dataVencimento);
+      const diff = vencimento - hoje;
+      return Math.ceil(diff / (1000 * 60 * 60 * 24));
     }
     
-    // Função para verificar contas próximas do vencimento
+    // Atualiza contador de contas a vencer
     function verificarContasAVencer() {
-      if (!state || !state.payables) return;
-    
-      const proximas = state.payables.filter(conta => {
-        const dias = diasRestantes(conta.date);
+      const proximas = state.payables.filter(c => {
+        const dias = diasRestantes(c.date);
         return dias >= 0 && dias <= 5;
       });
     
-      const alertIcon = document.getElementById('alert-icon');
       const alertCount = document.getElementById('alert-count');
       const alertList = document.getElementById('alert-list');
+      const alertIcon = document.getElementById('alert-icon');
     
       alertCount.textContent = proximas.length;
       alertIcon.classList.toggle('ativo', proximas.length > 0);
@@ -152,8 +147,34 @@ document.addEventListener('DOMContentLoaded', () => {
         : "<li>Nenhuma conta próxima do vencimento</li>";
     }
     
-    // ⚡ Chamar após carregar ou alterar contas
-    document.addEventListener("DOMContentLoaded", verificarContasAVencer);
+    // ⚡ Chamar sempre que carregar/adicionar contas
+    verificarContasAVencer();
+
+    // Sempre que salvar uma nova conta, atualiza alertas
+    payableForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('payable-id').value || Date.now().toString();
+      const payable = {
+        id,
+        description: document.getElementById('payable-description').value,
+        category: document.getElementById('payable-category').value,
+        amount: parseFloat(document.getElementById('payable-amount').value),
+        date: document.getElementById('payable-date').value
+      };
+    
+      // Salvar ou atualizar
+      const index = state.payables.findIndex(p => p.id === id);
+      if (index > -1) {
+        state.payables[index] = payable;
+      } else {
+        state.payables.push(payable);
+      }
+      localStorage.setItem('payables', JSON.stringify(state.payables));
+    
+      renderPayables();           // re-renderiza lista
+      verificarContasAVencer();   // ⚡ atualiza alerta
+      closeModal(payableModal);
+    });
 
     // Transaction Modal - abrir para novo lançamento
     function openTransactionModal(transaction = null) {

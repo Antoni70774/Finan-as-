@@ -119,14 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     perfilTrigger.addEventListener('click', () => {
-      const perfilPage = document.getElementById('profile-page');
-      const isPerfilVisible = perfilPage && perfilPage.style.display === 'block';
+      const activePage = document.querySelector('.page.active');
+      const isMenuPage = activePage && activePage.id === 'profile-page';
     
-      if (isPerfilVisible) {
+      if (isMenuPage) {
         const isVisible = menuPerfil.style.display === 'block';
         menuPerfil.style.display = isVisible ? 'none' : 'block';
       } else {
-        alert('O menu só pode ser aberto na aba Perfil.');
+        alert('O menu só pode ser aberto na aba "Menu".');
       }
     });
 

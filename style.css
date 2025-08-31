@@ -662,4 +662,28 @@ body, html {
       opacity: 1;
     }
 
+    .menu-lateral {
+      position: fixed;
+      bottom: 60px;
+      right: 10px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      padding: 10px;
+      display: none;
+      z-index: 1000;
+    }
+    .menu-lateral ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .menu-lateral li {
+      padding: 10px;
+      cursor: pointer;
+    }
+    .menu-lateral li:hover {
+      background: #f0f0f0;
+    }
+
 }

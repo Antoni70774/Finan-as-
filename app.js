@@ -111,6 +111,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Calcula diferença em dias entre hoje e a data informada
+    function diasRestantes(data) {
+      const hoje = new Date();
+      const vencimento = new Date(data);
+      const diff = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+      return diff;
+    }
+    
+    // Abre o modal de alertas
+    window.abrirAlerta = function () {
+      const modal = document.getElementById('alert-modal');
+      modal.classList.add('active');
+    }
+    
+    // Fecha o modal de alertas
+    window.fecharAlerta = function () {
+      const modal = document.getElementById('alert-modal');
+      modal.classList.remove('active');
+    }
+    
+    // Função para verificar contas próximas do vencimento
+    function verificarContasAVencer() {
+      if (!state || !state.payables) return;
+    
+      const proximas = state.payables.filter(conta => {
+        const dias = diasRestantes(conta.date);
+        return dias >= 0 && dias <= 5;
+      });
+    
+      const alertIcon = document.getElementById('alert-icon');
+      const alertCount = document.getElementById('alert-count');
+      const alertList = document.getElementById('alert-list');
+    
+      alertCount.textContent = proximas.length;
+      alertIcon.classList.toggle('ativo', proximas.length > 0);
+    
+      alertList.innerHTML = proximas.length
+        ? proximas.map(c => `<li>${c.description} - vence em ${c.date}</li>`).join('')
+        : "<li>Nenhuma conta próxima do vencimento</li>";
+    }
+    
+    // ⚡ Chamar após carregar ou alterar contas
+    document.addEventListener("DOMContentLoaded", verificarContasAVencer);
+
     // Transaction Modal - abrir para novo lançamento
     function openTransactionModal(transaction = null) {
         transactionForm.reset();

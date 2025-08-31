@@ -651,4 +651,15 @@ body, html {
       font-weight: 600;
     }
 
+    #menu-flutuante {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    #menu-flutuante.active {
+      display: block;
+      opacity: 1;
+    }
+
 }

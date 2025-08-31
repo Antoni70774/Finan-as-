@@ -123,10 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const isMenuPage = activePage && activePage.id === 'profile-page';
     
       if (isMenuPage) {
+        // Abre ou fecha o menu
         const isVisible = menuPerfil.style.display === 'block';
         menuPerfil.style.display = isVisible ? 'none' : 'block';
       } else {
-        alert('O menu só pode ser aberto na aba "Menu".');
+        // Garante que o menu fique fechado em outras abas
+        menuPerfil.style.display = 'none';
       }
     });
 

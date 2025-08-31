@@ -222,14 +222,35 @@
       <canvas id="annual-chart" width="100%" height="300"></canvas>
     </div>
 
+        <!-- Perfil -->
+        <div id="perfil-page" class="page">
+          <h2>👤 Perfil do Usuário</h2>
+          <p><b>Usuário atual:</b> <span id="perfil-usuario"></span></p>
+          <p><b>Email:</b> <span id="perfil-email"></span></p>
+          <p><b>Banco conectado:</b> <span id="perfil-banco"></span></p>
+        </div>
+        
         <!-- Configurações -->
-      <div id="settings-page" class="page">
-        <h2>Configurações</h2>
-        <label><input type="checkbox" checked> Notificações</label><br>
-        <label><input type="checkbox"> Tema escuro</label>
-      </div>
-
-    </main>
+        <div id="config-page" class="page">
+          <h2>⚙️ Configurações</h2>
+          <ul class="config-options">
+            <li><button onclick="exportarDados()">📤 Exportar Dados</button></li>
+            <li><button onclick="trocarTema()">🎨 Alterar Tema</button></li>
+            <li><button onclick="resetarApp()">♻️ Resetar Aplicativo</button></li>
+          </ul>
+        </div>
+        
+        <!-- Ajuda -->
+        <div id="ajuda-page" class="page">
+          <h2>❓ Ajuda</h2>
+          <p>Bem-vindo ao <b>Controle Financeiro</b>!</p>
+          <ul>
+            <li>📅 Resumo Mensal → Veja receitas, despesas e saldo do mês.</li>
+            <li>📊 Resumo Anual → Acompanhe seu desempenho no ano.</li>
+            <li>👤 Perfil → Gerencie suas informações pessoais.</li>
+            <li>⚙️ Configurações → Exporte dados, mude tema ou reset.</li>
+          </ul>
+        </div>
 
     <!-- Modal de alerta -->
                 <div id="alert-modal" class="modal">

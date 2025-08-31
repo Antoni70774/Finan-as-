@@ -227,6 +227,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    // Função genérica para abrir qualquer página
+    function abrirPagina(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const page = document.getElementById(pageId);
+      if (page) {
+        page.classList.add('active');
+      }
+      // Fecha o menu lateral ao trocar de aba
+      document.getElementById('menu-perfil').style.display = "none";
+    }
+    
+    // Abre a aba de Resumo Anual
+    function abrirResumoAnual() {
+      abrirPagina('annual-summary-page');
+      atualizarResumoAnual(); // chama atualização dos gráficos/valores
+    }
+    
+    // Atualiza os valores do resumo anual (exemplo simples, pode ser expandido)
+    function atualizarResumoAnual() {
+      document.getElementById('annual-revenue').textContent = "R$ 12.500,00";
+      document.getElementById('annual-expense').textContent = "R$ 8.300,00";
+      document.getElementById('annual-balance').textContent = "R$ 4.200,00";
+    
+      const ctx = document.getElementById('annual-chart');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+          datasets: [
+            { label: 'Receitas', data: [2000, 1800, 2200, 2100, 2500, 2400], backgroundColor: '#4caf50' },
+            { label: 'Despesas', data: [1200, 1500, 1300, 1400, 1600, 1300], backgroundColor: '#f44336' }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+    
+    // Exporta dados fictícios
+    function exportarDados() {
+      alert("📤 Exportando dados (simulação). Aqui você pode gerar CSV ou JSON.");
+      document.getElementById('menu-perfil').style.display = "none";
+    }
+    
+    // Abre configuração (simples)
+    function abrirConfig() {
+      alert("⚙️ Tela de Configurações em construção...");
+      document.getElementById('menu-perfil').style.display = "none";
+    }
+
     // Alerta de Conta a Vencer
     window.abrirAlerta = function () {
       document.getElementById('alert-modal').classList.add('active');

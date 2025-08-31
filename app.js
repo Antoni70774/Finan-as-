@@ -165,7 +165,67 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('config-page').classList.add('active');
       menuFlutuante.style.display = 'none';
     }
+
+    function abrirPagina(id) {
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
     
+      if (id === "resumo-anual-page") carregarResumoAnual();
+      if (id === "perfil-page") carregarPerfil();
+    }
+
+    // === Resumo Anual ===
+    function carregarResumoAnual() {
+      const ano = new Date().getFullYear();
+    
+      const receita = state.transactions
+        .filter(t => new Date(t.date).getFullYear() === ano && t.type === "income")
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+      const despesa = state.transactions
+        .filter(t => new Date(t.date).getFullYear() === ano && t.type === "expense")
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+      const saldo = receita - despesa;
+    
+      document.getElementById("annual-revenue").textContent = receita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      document.getElementById("annual-expense").textContent = despesa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      document.getElementById("annual-balance").textContent = saldo.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    
+      // gráfico
+      const ctx = document.getElementById("annual-chart").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Receita", "Despesa", "Saldo"],
+          datasets: [{
+            label: "R$",
+            data: [receita, despesa, saldo],
+            backgroundColor: ["#4CAF50", "#F44336", "#2196F3"]
+          }]
+        }
+      });
+    }
+    
+    // === Perfil ===
+    function carregarPerfil() {
+      document.getElementById("perfil-usuario").textContent = state.user?.name || "Usuário Padrão";
+      document.getElementById("perfil-email").textContent = state.user?.email || "sem@email.com";
+      document.getElementById("perfil-banco").textContent = state.user?.bank || "Nenhum conectado";
+    }
+    
+    // === Configurações ===
+    function trocarTema() {
+      document.body.classList.toggle("dark-theme");
+      alert("Tema alterado!");
+    }
+    function resetarApp() {
+      if (confirm("Deseja realmente resetar o aplicativo?")) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
 
     // Alerta de Conta a Vencer
     window.abrirAlerta = function () {

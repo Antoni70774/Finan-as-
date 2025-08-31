@@ -17,14 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionIdInput = document.getElementById('transaction-id');
     const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
     const perfilTrigger = document.querySelector('.profile-trigger');
-    const menuBotao = document.querySelector('.profile-trigger');
-    const menuFlutuante = document.getElementById('menu-flutuante');
+    const menuBotao = document.getElementById('menu-botao');
+    const menuFlutuante = document.getElementById('menu-perfil');
     
     if (menuBotao && menuFlutuante) {
       menuBotao.addEventListener('click', () => {
         menuFlutuante.classList.toggle('active');
       });
     }
+
     
     const transBtn = document.getElementById("transBtn");
     const transContainer = document.getElementById("transContainer");
@@ -166,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
 
-    // Funções globais para abrir/fechar modal
+    // Alerta de Conta a Vencer
     window.abrirAlerta = function () {
       document.getElementById('alert-modal').classList.add('active');
     };

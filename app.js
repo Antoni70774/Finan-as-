@@ -17,11 +17,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionIdInput = document.getElementById('transaction-id');
     const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
     const perfilTrigger = document.querySelector('.profile-trigger');
-    const menuPerfil = document.getElementById('menu-perfil');
+    const menuBotao = document.querySelector('.profile-trigger');
+    const menuFlutuante = document.getElementById('menu-flutuante');
     
+    menuBotao.addEventListener('click', () => {
+      menuFlutuante.classList.toggle('active');
+    });
+
     perfilTrigger.addEventListener('click', () => {
-      const isVisible = menuPerfil.style.display === 'block';
-      menuPerfil.style.display = isVisible ? 'none' : 'block';
+      const isVisible = menuFlutuante.style.display === 'block';
+      menuFlutuante.style.display = isVisible ? 'none' : 'block';
     });
 
     const addGoalBtn = document.getElementById('add-goal-btn');
@@ -75,21 +80,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // NAVIGATION
     function navigateToPage(pageId) {
-        pages.forEach(page => page.classList.remove('active'));
-        const selectedPage = document.getElementById(pageId);
-        if (selectedPage) selectedPage.classList.add('active');
-        navItems.forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('data-page') === pageId) item.classList.add('active');
-        });
-        const titles = {
-            'dashboard-page': 'Visão Geral',
-            'goals-page': 'Metas Pessoais',
-            'payables-page': 'Despesas a Pagar',
-            'menu-page': 'Menu'
-        };
-        document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
-        if (pageId === 'payables-page') renderPayables();
+      pages.forEach(page => page.classList.remove('active'));
+      const selectedPage = document.getElementById(pageId);
+      if (selectedPage) selectedPage.classList.add('active');
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-page') === pageId) item.classList.add('active');
+      });
+      const titles = {
+        'dashboard-page': 'Visão Geral',
+        'goals-page': 'Metas Pessoais',
+        'payables-page': 'Despesas a Pagar',
+        'menu-page': 'Menu',
+        'resumo-anual-page': 'Resumo Anual',
+        'config-page': 'Configurações'
+      };
+      document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
+      if (pageId === 'payables-page') renderPayables();
     }
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
@@ -118,41 +125,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-   perfilTrigger.addEventListener('click', () => {
-      navigateToPage('profile-page'); // Garante que a aba Menu seja ativada
-      menuPerfil.style.display = 'block'; // Abre o menu lateral
-    });
-
-
-    window.abrirPagina = function(pageId) {
-      navigateToPage(pageId);
-      menuPerfil.style.display = 'none';
-    };
-    
-    window.abrirResumoAnual = function() {
-      navigateToPage('annual-summary-page');
-      menuPerfil.style.display = 'none';
-    };
-    
-    window.abrirConfig = function() {
-      alert('Configurações ainda não implementadas.');
-      menuPerfil.style.display = 'none';
-    };
-    
-    window.exportarDados = function() {
-      exportData(); // já existe no seu app.js
-      menuPerfil.style.display = 'none';
-    };
-
-    function navigateToPage(pageId) {
-      const pages = document.querySelectorAll('.page');
-      pages.forEach(page => page.style.display = 'none');
-    
-      const targetPage = document.getElementById(pageId);
-      if (targetPage) {
-        targetPage.style.display = 'block';
-      }
+    function abrirPagina(paginaId) {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById(paginaId).classList.add('active');
+      menuFlutuante.style.display = 'none';
     }
+    
+    function abrirResumoAnual() {
+      // lógica para abrir a aba de resumo anual
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById('resumo-anual-page').classList.add('active');
+      menuFlutuante.style.display = 'none';
+    }
+    
+    function abrirConfig() {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById('config-page').classList.add('active');
+      menuFlutuante.style.display = 'none';
+    }
+    
 
     // Funções globais para abrir/fechar modal
     window.abrirAlerta = function () {

@@ -18,6 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
     const perfilTrigger = document.querySelector('.profile-trigger');
     const menuPerfil = document.getElementById('menu-perfil');
+    
+    perfilTrigger.addEventListener('click', () => {
+      const isVisible = menuPerfil.style.display === 'block';
+      menuPerfil.style.display = isVisible ? 'none' : 'block';
+    });
 
     const addGoalBtn = document.getElementById('add-goal-btn');
     const goalModal = document.getElementById('goal-modal');
@@ -142,7 +147,16 @@ document.addEventListener('DOMContentLoaded', () => {
       exportData(); // já existe no seu app.js
       menuPerfil.style.display = 'none';
     };
+
+    function navigateToPage(pageId) {
+      const pages = document.querySelectorAll('.page');
+      pages.forEach(page => page.style.display = 'none');
     
+      const targetPage = document.getElementById(pageId);
+      if (targetPage) {
+        targetPage.style.display = 'block';
+      }
+    }
 
     // Funções globais para abrir/fechar modal
     window.abrirAlerta = function () {

@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         transactions: JSON.parse(localStorage.getItem('transactions')) || [],
         goals: JSON.parse(localStorage.getItem('goals')) || [],
         payables: JSON.parse(localStorage.getItem('payables')) || [],
-        currentUser: localStorage.getItem('currentUser') || 'Esposo',
+        currentUser: localStorage.getItem('currentUser') || 'Bem Vindo',
         users: ['Esposo', 'Esposa'],
         currentDate: new Date(),
         expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Empréstimo', 'Cartão de Crédito', 'Energia', 'Água', 'Gás', 'Internet', 'Investimento', 'Outros'],

@@ -19,7 +19,6 @@
             <div class="profile-icon">
                 <div id="alert-icon" onclick="abrirAlerta()">
                     🔔 <span id="alert-count" class="badge">0</span>
-                <span class="material-icons-sharp">person_outline</span>
                 </div>
             </div>
         </header>
@@ -198,11 +197,20 @@
             <button class="nav-item" data-page="payables-page">
                 <span class="material-icons-sharp">notifications</span>
             </button>
-            <button class="nav-item" data-page="profile-page">
-                <span class="material-icons-sharp">person</span>
+            <button class="nav-item profile-trigger">
+              <span class="material-icons-sharp">person_outline</span>
             </button>
         </nav>
-    </div>
+        <!-- Menu lateral do perfil -->
+        <div id="menu-perfil" class="menu-lateral" style="display: none;">
+          <ul>
+            <li onclick="abrirPagina('dashboard-page')">📅 Resumo Mensal</li>
+            <li onclick="abrirResumoAnual()">📈 Resumo Anual</li>
+            <li onclick="abrirPagina('profile-page')">👤 Perfil</li>
+            <li onclick="exportarDados()">📤 Exportar Dados</li>
+            <li onclick="abrirConfig()">⚙️ Configurações</li>
+          </ul>
+        </div>
     
     <!-- Modal de alerta -->
                 <div id="alert-modal" class="modal">

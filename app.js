@@ -118,19 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    perfilTrigger.addEventListener('click', () => {
-      const activePage = document.querySelector('.page.active');
-      const isMenuPage = activePage && activePage.id === 'profile-page';
-    
-      if (isMenuPage) {
-        // Abre ou fecha o menu
-        const isVisible = menuPerfil.style.display === 'block';
-        menuPerfil.style.display = isVisible ? 'none' : 'block';
-      } else {
-        // Garante que o menu fique fechado em outras abas
-        menuPerfil.style.display = 'none';
-      }
+   perfilTrigger.addEventListener('click', () => {
+      navigateToPage('profile-page'); // Garante que a aba Menu seja ativada
+      menuPerfil.style.display = 'block'; // Abre o menu lateral
     });
+
 
     window.abrirPagina = function(pageId) {
       navigateToPage(pageId);

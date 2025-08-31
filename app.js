@@ -17,14 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const transactionIdInput = document.getElementById('transaction-id');
     const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
     const perfilTrigger = document.querySelector('.profile-trigger');
-    const menuBotao = document.getElementById('menu-botao');
-    const menuFlutuante = document.getElementById('menu-perfil');
+    const menuBotao = document.querySelector('.profile-trigger');
+    const menuFlutuante = document.getElementById('menu-flutuante');
     
-    if (menuBotao && menuFlutuante) {
       menuBotao.addEventListener('click', () => {
         menuFlutuante.classList.toggle('active');
       });
-    }
 
     
     const transBtn = document.getElementById("transBtn");

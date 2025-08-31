@@ -23,11 +23,24 @@ document.addEventListener('DOMContentLoaded', () => {
     menuBotao.addEventListener('click', () => {
       menuFlutuante.classList.toggle('active');
     });
+    
+    const transBtn = document.getElementById("transBtn");
+    const transContainer = document.getElementById("transContainer");
+    const perfBtn = document.getElementById("perfBtn");
+    const perfContainer = document.getElementById("perfContainer");
+    
+    if (transBtn && transContainer && perfBtn && perfContainer) {
+      transBtn.addEventListener("click", () => {
+        transContainer.style.display = "block";
+        perfContainer.style.display = "none";
+      });
+    
+      perfBtn.addEventListener("click", () => {
+        transContainer.style.display = "none";
+        perfContainer.style.display = "block";
+      });
+    }
 
-    perfilTrigger.addEventListener('click', () => {
-      const isVisible = menuFlutuante.style.display === 'block';
-      menuFlutuante.style.display = isVisible ? 'none' : 'block';
-    });
 
     const addGoalBtn = document.getElementById('add-goal-btn');
     const goalModal = document.getElementById('goal-modal');

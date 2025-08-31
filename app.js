@@ -918,6 +918,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('goal-modal').classList.remove('active');
     });
 
+    window.abrirResumoAnual = abrirResumoAnual;
+    window.abrirPagina = abrirPagina;
+    window.exportarDados = exportarDados;
+    window.abrirConfig = abrirConfig;
 
     // Correção da integração bancária
     window.connectBank = async function(bankName) {

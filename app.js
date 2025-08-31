@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'dashboard-page': 'Visão Geral',
             'goals-page': 'Metas Pessoais',
             'payables-page': 'Despesas a Pagar',
-            'profile-page': 'Menu'
+            'menu-page': 'Menu'
         };
         document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
         if (pageId === 'payables-page') renderPayables();

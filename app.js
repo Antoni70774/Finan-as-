@@ -119,12 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     perfilTrigger.addEventListener('click', () => {
-      menuPerfil.classList.toggle('ativo');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!menuPerfil.contains(e.target) && !perfilTrigger.contains(e.target)) {
-        menuPerfil.style.display = 'none';
+      const perfilPage = document.getElementById('profile-page');
+      const isPerfilVisible = perfilPage && perfilPage.style.display === 'block';
+    
+      if (isPerfilVisible) {
+        const isVisible = menuPerfil.style.display === 'block';
+        menuPerfil.style.display = isVisible ? 'none' : 'block';
+      } else {
+        alert('O menu só pode ser aberto na aba Perfil.');
       }
     });
 

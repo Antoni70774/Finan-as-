@@ -141,39 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function abrirPagina(paginaId) {
-      document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-      });
-      document.getElementById(paginaId).classList.add('active');
-      menuFlutuante.style.display = 'none';
-    }
     
-    function abrirResumoAnual() {
-      // lógica para abrir a aba de resumo anual
-      document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-      });
-      document.getElementById('resumo-anual-page').classList.add('active');
-      menuFlutuante.style.display = 'none';
-    }
-    
-    function abrirConfig() {
-      document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-      });
-      document.getElementById('config-page').classList.add('active');
-      menuFlutuante.style.display = 'none';
-    }
-
-    function abrirPagina(id) {
-      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-    
-      if (id === "resumo-anual-page") carregarResumoAnual();
-      if (id === "perfil-page") carregarPerfil();
-    }
-
     // === Resumo Anual ===
     function carregarResumoAnual() {
       const ano = new Date().getFullYear();
@@ -225,18 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
         location.reload();
       }
     }
-
-
-    // Função genérica para abrir qualquer página
-    function abrirPagina(pageId) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      const page = document.getElementById(pageId);
-      if (page) {
-        page.classList.add('active');
-      }
-      // Fecha o menu lateral ao trocar de aba
-      document.getElementById('menu-perfil').style.display = "none";
-    }
     
     // Abre a aba de Resumo Anual
     function abrirResumoAnual() {
@@ -244,25 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
       atualizarResumoAnual(); // chama atualização dos gráficos/valores
     }
     
-    // Atualiza os valores do resumo anual (exemplo simples, pode ser expandido)
-    function atualizarResumoAnual() {
-      document.getElementById('annual-revenue').textContent = "R$ 12.500,00";
-      document.getElementById('annual-expense').textContent = "R$ 8.300,00";
-      document.getElementById('annual-balance').textContent = "R$ 4.200,00";
-    
-      const ctx = document.getElementById('annual-chart');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-          datasets: [
-            { label: 'Receitas', data: [2000, 1800, 2200, 2100, 2500, 2400], backgroundColor: '#4caf50' },
-            { label: 'Despesas', data: [1200, 1500, 1300, 1400, 1600, 1300], backgroundColor: '#f44336' }
-          ]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
-    }
     
     // Exporta dados fictícios
     function exportarDados() {
@@ -276,7 +213,52 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('menu-perfil').style.display = "none";
     }
 
-    // Alerta de Conta a Vencer
+      // Fecha o menu lateral
+      document.getElementById('menu-perfil').style.display = "none";
+    
+      // Se for páginas específicas, chama atualização
+      if (pageId === 'annual-summary-page') atualizarResumoAnual();
+      if (pageId === 'profile-page') carregarPerfil();
+    }
+    
+    // === Resumo Anual ===
+    function atualizarResumoAnual() {
+      const ano = new Date().getFullYear();
+    
+      const receita = state.transactions
+        .filter(t => new Date(t.date).getFullYear() === ano && t.type === "income")
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+      const despesa = state.transactions
+        .filter(t => new Date(t.date).getFullYear() === ano && t.type === "expense")
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+      const saldo = receita - despesa;
+    
+      document.getElementById("annual-revenue").textContent =
+        receita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      document.getElementById("annual-expense").textContent =
+        despesa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      document.getElementById("annual-balance").textContent =
+        saldo.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    
+      const ctx = document.getElementById("annual-chart").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Receita", "Despesa", "Saldo"],
+          datasets: [{
+            label: "R$",
+            data: [receita, despesa, saldo],
+            backgroundColor: ["#4CAF50", "#F44336", "#2196F3"]
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+    
+    
+    //✅ Alerta de Conta a Vencer
     window.abrirAlerta = function () {
       document.getElementById('alert-modal').classList.add('active');
     };

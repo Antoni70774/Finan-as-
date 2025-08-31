@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Botão "Nova Conta"
-    document.getElementById('new-payable-btn').addEventListener('click', () => {
+    document.getElementById('add-payable-btn').addEventListener('click', () => {
       document.getElementById('payable-id').value = '';
       document.getElementById('payable-form').reset();
       openModal(payableModal);

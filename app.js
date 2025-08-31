@@ -113,6 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
       if (pageId === 'payables-page') renderPayables();
+      if (pageId === 'dashboard-page') {
+          carregarResumoMensal();
+          atualizarNomeDoMes();
+        }
     }
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
@@ -167,7 +171,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
 
-    // Alerta de Conta a Vencer
+    //✅ Comando das opçoes do menu da tela incial
+    function carregarResumoMensal() {
+      const mesAtual = state.currentDate.getMonth();
+      const anoAtual = state.currentDate.getFullYear();
+    
+      const transacoesDoMes = state.transactions.filter(t => {
+        const data = new Date(t.date);
+        return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+      });
+    
+      const receita = transacoesDoMes
+        .filter(t => t.type === "income")
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+      const despesa = transacoesDoMes
+        .filter(t => t.type === "expense")
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+      const saldo = receita - despesa;
+    
+      document.getElementById("monthly-revenue").textContent = receita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      document.getElementById("monthly-expense").textContent = despesa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      document.getElementById("monthly-balance").textContent = saldo.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
+    function atualizarNomeDoMes() {
+      const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+      const mes = meses[state.currentDate.getMonth()];
+      const ano = state.currentDate.getFullYear();
+      document.getElementById("mes-atual").textContent = `${mes} de ${ano}`;
+    }
+
+
+    //✅ Alerta de Conta a Vencer
     window.abrirAlerta = function () {
       document.getElementById('alert-modal').classList.add('active');
     };

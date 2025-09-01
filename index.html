@@ -216,9 +216,20 @@
     <div id="resumo-mensal-page" class="page">
       <h2>📅 Resumo Mensal</h2>
       <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
-      <p><strong>Receita:</strong> <span id="monthly-revenue">R$ 0,00</span></p>
-      <p><strong>Despesa:</strong> <span id="monthly-expense">R$ 0,00</span></p>
-      <p><strong>Saldo:</strong> <span id="monthly-balance">R$ 0,00</span></p>
+      <div class="dashboard-summary" id="resumo-mensal-summary">
+      <div class="summary-item">
+        <span>Receita</span>
+        <h4 id="monthly-revenue">R$ 0,00</h4>
+      </div>
+      <div class="summary-item">
+        <span>Despesa</span>
+        <h4 id="monthly-expense">R$ 0,00</h4>
+      </div>
+      <div class="summary-item">
+        <span>Saldo</span>
+        <h4 id="monthly-balance">R$ 0,00</h4>
+      </div>
+    </div>
     </div>
         <div class="month-nav">
       <button id="resumo-prev-month" class="btn-secondary">&lt;</button>

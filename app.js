@@ -113,8 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'menu-page': 'Menu',
         'resumo-anual-page': 'Resumo Anual',
         'config-page': 'Configurações'
-      };
       document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
+      };
       if (pageId === 'payables-page') renderPayables();
       if (pageId === 'dashboard-page') {
           carregarResumoMensal();
@@ -173,61 +173,63 @@ document.addEventListener('DOMContentLoaded', () => {
     
       atualizarGraficoAnual(); 
     }
+
+
+    let annualChart = null;
     
+        function atualizarGraficoAnual() {
+          const ctx = document.getElementById('annual-chart').getContext('2d');
+          const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+          const receitas = Array(12).fill(0);
+          const despesas = Array(12).fill(0);
+        
+          state.transactions.forEach(t => {
+            const data = new Date(t.date);
+            const mes = data.getMonth();
+            const ano = data.getFullYear();
+            if (ano === state.currentDate.getFullYear()) {
+              if (t.type === "income") receitas[mes] += t.amount;
+              if (t.type === "expense") despesas[mes] += t.amount;
+            }
+          });
+        
+          if (annualChart) {
+            annualChart.destroy();
+          }
+        
+          annualChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: meses,
+              datasets: [
+                {
+                  label: 'Receita',
+                  data: receitas,
+                  backgroundColor: '#2bc47d'
+                },
+                {
+                  label: 'Despesa',
+                  data: despesas,
+                  backgroundColor: '#ff3d3d'
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { position: 'top' }
+              }
+            }
+          });
+        }
+
+    //✅ Configuração
     function abrirConfig() {
       document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
       });
       document.getElementById('config-page').classList.add('active');
       menuFlutuante.style.display = 'none';
-    }
-    
-    let annualChart = null;
-
-    function atualizarGraficoAnual() {
-      const ctx = document.getElementById('annual-chart').getContext('2d');
-      const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-      const receitas = Array(12).fill(0);
-      const despesas = Array(12).fill(0);
-    
-      state.transactions.forEach(t => {
-        const data = new Date(t.date);
-        const mes = data.getMonth();
-        const ano = data.getFullYear();
-        if (ano === state.currentDate.getFullYear()) {
-          if (t.type === "income") receitas[mes] += t.amount;
-          if (t.type === "expense") despesas[mes] += t.amount;
-        }
-      });
-    
-      if (annualChart) {
-        annualChart.destroy();
-      }
-    
-      annualChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: meses,
-          datasets: [
-            {
-              label: 'Receita',
-              data: receitas,
-              backgroundColor: '#2bc47d'
-            },
-            {
-              label: 'Despesa',
-              data: despesas,
-              backgroundColor: '#ff3d3d'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'top' }
-          }
-        }
-      });
     }
     
 

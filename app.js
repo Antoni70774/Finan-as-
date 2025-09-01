@@ -347,6 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    
     //✅ Exporta e limpa dados
     function exportarDados() {
       const dados = localStorage.getItem('transacoes');

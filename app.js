@@ -272,42 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
       atualizarGraficoMensal();
     }
 
-    let monthlyChart = null; // variável global
-    
-    function atualizarGraficoMensal() {
-      const ctx = document.getElementById('monthly-bar-chart').getContext('2d');
-    
-      // Destroi gráfico anterior se existir
-      if (monthlyChart) {
-        monthlyChart.destroy();
-      }
-    
-      monthlyChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
-          datasets: [
-            {
-              label: 'Receita',
-              data: [...], // seus dados reais
-              backgroundColor: '#2bc47d'
-            },
-            {
-              label: 'Despesa',
-              data: [...], // seus dados reais
-              backgroundColor: '#ff3d3d'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'top' }
-          }
-        }
-      });
-    }
-
 
     //✅ Fecha as opçoes da aba menu quando clica fora
     document.addEventListener("click", function (event) {
@@ -322,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
         menuVisivel &&
         !menu.contains(event.target) &&
         !botaoMenu.contains(event.target)
-      ) {
+      ) {    
         menu.style.display = "none";
       }
     });

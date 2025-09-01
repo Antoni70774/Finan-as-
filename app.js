@@ -152,7 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById(paginaId).classList.add('active');
       menuFlutuante.style.display = 'none';
     }
-    
+
+    //✅ Resumo mensal
     function abrirResumoAnual() {
       document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
       document.getElementById('resumo-anual-page').classList.add('active');
@@ -166,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById("annual-revenue").textContent = receitaTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
       document.getElementById("annual-expense").textContent = despesaTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
       document.getElementById("annual-balance").textContent = saldoTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    
+      atualizarGraficoAnual(); // ← aqui!
     }
     
     function abrirConfig() {
@@ -175,9 +178,56 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('config-page').classList.add('active');
       menuFlutuante.style.display = 'none';
     }
+    let annualChart = null;
+
+    function atualizarGraficoAnual() {
+      const ctx = document.getElementById('annual-chart').getContext('2d');
+      const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+      const receitas = Array(12).fill(0);
+      const despesas = Array(12).fill(0);
+    
+      state.transactions.forEach(t => {
+        const data = new Date(t.date);
+        const mes = data.getMonth();
+        const ano = data.getFullYear();
+        if (ano === state.currentDate.getFullYear()) {
+          if (t.type === "income") receitas[mes] += t.amount;
+          if (t.type === "expense") despesas[mes] += t.amount;
+        }
+      });
+    
+      if (annualChart) {
+        annualChart.destroy();
+      }
+    
+      annualChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: meses,
+          datasets: [
+            {
+              label: 'Receita',
+              data: receitas,
+              backgroundColor: '#2bc47d'
+            },
+            {
+              label: 'Despesa',
+              data: despesas,
+              backgroundColor: '#ff3d3d'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' }
+          }
+        }
+      });
+    }
     
 
-    //✅ Comando das opçoes do menu da tela incial
+    //✅ Resumo mensal
     function carregarResumoMensal() {
       const mesAtual = state.currentDate.getMonth();
       const anoAtual = state.currentDate.getFullYear();

@@ -238,6 +238,59 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    document.getElementById('resumo-prev-month').addEventListener('click', () => {
+      state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+      carregarResumoMensal();
+      atualizarNomeDoMes();
+      atualizarGraficoMensal();
+    });
+    
+    document.getElementById('resumo-next-month').addEventListener('click', () => {
+      state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+      carregarResumoMensal();
+      atualizarNomeDoMes();
+      atualizarGraficoMensal();
+    });
+
+    function atualizarGraficoMensal() {
+      const ctx = document.getElementById('monthly-bar-chart').getContext('2d');
+      const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+      const receitas = Array(12).fill(0);
+      const despesas = Array(12).fill(0);
+    
+      state.transactions.forEach(t => {
+        const data = new Date(t.date);
+        const mes = data.getMonth();
+        if (data.getFullYear() === state.currentDate.getFullYear()) {
+          if (t.type === "income") receitas[mes] += t.amount;
+          if (t.type === "expense") despesas[mes] += t.amount;
+        }
+      });
+    
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: meses,
+          datasets: [
+            {
+              label: 'Receita',
+              data: receitas,
+              backgroundColor: '#2bc47d'
+            },
+            {
+              label: 'Despesa',
+              data: despesas,
+              backgroundColor: '#ff3d3d'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'top' } }
+        }
+      });
+    }
+
     //✅ Alerta de Conta a Vencer
     window.abrirAlerta = function () {
       document.getElementById('alert-modal').classList.add('active');

@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById("annual-expense").textContent = despesaTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
       document.getElementById("annual-balance").textContent = saldoTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     
-      atualizarGraficoAnual(); // ← aqui!
+      atualizarGraficoAnual(); 
     }
     
     function abrirConfig() {
@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('config-page').classList.add('active');
       menuFlutuante.style.display = 'none';
     }
+    
     let annualChart = null;
 
     function atualizarGraficoAnual() {

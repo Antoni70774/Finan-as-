@@ -211,42 +211,45 @@
             <li onclick="abrirConfig()">⚙️ Configurações</li>
           </ul>
         </div>
-        <canvas id="monthly-bar-chart" width="50" height="50"></canvas>
-        <!-- Resumo Mensal -->
-    <div id="resumo-mensal-page" class="page">
-      <h2>📅 Resumo Mensal</h2>
-      <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
-      <div class="dashboard-summary" id="resumo-mensal-summary">
-      <div class="summary-item">
-        <span>Receita</span>
-        <h4 id="monthly-revenue">R$ 0,00</h4>
-      </div>
-      <div class="summary-item">
-        <span>Despesa</span>
-        <h4 id="monthly-expense">R$ 0,00</h4>
-      </div>
-      <div class="summary-item">
-        <span>Saldo</span>
-        <h4 id="monthly-balance">R$ 0,00</h4>
-      </div>
-    </div>
-    </div>
-        <div class="month-nav">
-      <button id="resumo-prev-month" class="btn-secondary">&lt;</button>
-      <span id="resumo-current-month-year"></span>
-      <button id="resumo-next-month" class="btn-secondary">&gt;</button>
-    </div>
-    <!-- Resumo Anual -->
-<div id="resumo-anual-page" class="page">
-      <h2>Resumo Anual</h2>
-      <div class="summary-boxes">
-        <div class="box"><h4>Receita Total</h4><p id="annual-revenue">R$ 0,00</p></div>
-        <div class="box"><h4>Despesa Total</h4><p id="annual-expense">R$ 0,00</p></div>
-        <div class="box"><h4>Saldo Acumulado</h4><p id="annual-balance">R$ 0,00</p></div>
-      </div>
-      <canvas id="annual-chart" width="100%" height="300"></canvas>
-    </div>
-
+         <!-- Página: Resumo Mensal -->
+        <div id="resumo-mensal-page" class="page" style="display: none;">
+          <h2>📅 Resumo Mensal</h2>
+          <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
+          
+          <div class="dashboard-summary" id="resumo-mensal-summary">
+            <div class="summary-item">
+              <span>Receita</span>
+              <h4 id="monthly-revenue">R$ 0,00</h4>
+            </div>
+            <div class="summary-item">
+              <span>Despesa</span>
+              <h4 id="monthly-expense">R$ 0,00</h4>
+            </div>
+            <div class="summary-item">
+              <span>Saldo</span>
+              <h4 id="monthly-balance">R$ 0,00</h4>
+            </div>
+          </div>
+        
+          <canvas id="monthly-bar-chart" width="300" height="150"></canvas>
+        
+          <div class="month-nav">
+            <button id="resumo-prev-month" class="btn-secondary">&lt;</button>
+            <span id="resumo-current-month-year"></span>
+            <button id="resumo-next-month" class="btn-secondary">&gt;</button>
+          </div>
+        </div>
+        
+        <!-- Página: Resumo Anual -->
+        <div id="resumo-anual-page" class="page" style="display: none;">
+          <h2>📈 Resumo Anual</h2>
+          <div class="summary-boxes">
+            <div class="box"><h4>Receita Total</h4><p id="annual-revenue">R$ 0,00</p></div>
+            <div class="box"><h4>Despesa Total</h4><p id="annual-expense">R$ 0,00</p></div>
+            <div class="box"><h4>Saldo Acumulado</h4><p id="annual-balance">R$ 0,00</p></div>
+          </div>
+          <canvas id="annual-chart" width="100%" height="300"></canvas>
+        </div>
         <!-- Perfil -->
         <div id="perfil-page" class="page">
           <h2>👤 Perfil do Usuário</h2>

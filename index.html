@@ -211,6 +211,7 @@
             <li onclick="abrirConfig()">⚙️ Configurações</li>
           </ul>
         </div>
+        <canvas id="monthly-bar-chart" width="100%" height="300"></canvas>
         <!-- Resumo Mensal -->
     <div id="resumo-mensal-page" class="page">
       <h2>📅 Resumo Mensal</h2>
@@ -218,6 +219,11 @@
       <p><strong>Receita:</strong> <span id="monthly-revenue">R$ 0,00</span></p>
       <p><strong>Despesa:</strong> <span id="monthly-expense">R$ 0,00</span></p>
       <p><strong>Saldo:</strong> <span id="monthly-balance">R$ 0,00</span></p>
+    </div>
+        <div class="month-nav">
+      <button id="resumo-prev-month" class="btn-secondary">&lt;</button>
+      <span id="resumo-current-month-year"></span>
+      <button id="resumo-next-month" class="btn-secondary">&gt;</button>
     </div>
     <!-- Resumo Anual -->
 <div id="resumo-anual-page" class="page">

@@ -218,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
       menuFlutuante.style.display = 'none';
       carregarResumoMensal();
       atualizarNomeDoMes();
+      atualizarGraficoMensal();
     }
 
     //✅ Fecha as opçoes da aba menu quando clica fora

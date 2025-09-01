@@ -706,4 +706,18 @@ body, html {
       font-size: 18px;
     }
 
+    .dashboard-summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .summary-item {
+      flex: 1;
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
 }

@@ -2,6 +2,9 @@
 import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    const temaSalvo = localStorage.getItem('tema');
+    if (temaSalvo === 'dark') document.body.classList.add('dark-theme');
+    
     // Elementos da UI
     const navItems = document.querySelectorAll('.nav-item');
     const pages = document.querySelectorAll('.page');
@@ -342,6 +345,22 @@ document.addEventListener('DOMContentLoaded', () => {
           plugins: { legend: { position: 'top' } }
         }
       });
+    }
+
+    //✅ troca de tema Escuro ou Claro
+    function trocarTema() {
+      const body = document.body;
+      const isDark = body.classList.toggle('dark-theme');
+      localStorage.setItem('tema', isDark ? 'dark' : 'light');
+    }
+
+
+    //✅ Resetar o App
+    function resetarApp() {
+      if (confirm("Tem certeza que deseja resetar o aplicativo? Todos os dados serão apagados.")) {
+        localStorage.clear();
+        location.reload();
+      }
     }
 
     //✅ Alerta de Conta a Vencer

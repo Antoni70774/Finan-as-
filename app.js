@@ -347,6 +347,24 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    //✅ Exporta e limpa dados
+    function exportarDados() {
+      const dados = localStorage.getItem('transacoes');
+      const blob = new Blob([dados], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dados.json';
+      a.click();
+    }
+    
+    function limparDados() {
+      if (confirm("Tem certeza que deseja apagar todos os dados?")) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
     //✅ troca de tema Escuro ou Claro
     function trocarTema() {
       const body = document.body;

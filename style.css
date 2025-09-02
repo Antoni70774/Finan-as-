@@ -197,7 +197,7 @@ body, html {
 
 .summary-item h4 {
     margin: 0;
-    font-size: 0.63em; /* Valores dos cartões receita,despesa e saldo */
+    font-size: 0.6em; /* Valores dos cartões receita,despesa e saldo */
     font-weight: 700;
     word-break: break-all;
     max-width: 100%;

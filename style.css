@@ -466,11 +466,11 @@ body, html {
     }
     .dashboard-summary {
         flex-direction: row;
-        gap: 4px;
+        gap: 10px;
         padding: 14px 2px 8px 2px;
     }
     .summary-item {
-        min-width: 90px;
+        min-width: 100px;
         width: 100%;
         padding: 10px 8px;
     }

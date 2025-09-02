@@ -113,8 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'menu-page': 'Menu',
         'resumo-anual-page': 'Resumo Anual',
         'config-page': 'Configurações'
+       };      
       document.querySelector('.app-header h1').textContent = titles[pageId] || 'Visão Geral';
-      };
       if (pageId === 'payables-page') renderPayables();
       if (pageId === 'dashboard-page') {
           carregarResumoMensal();

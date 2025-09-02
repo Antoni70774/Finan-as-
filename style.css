@@ -471,7 +471,7 @@ body, html {
     }
     .summary-item {
         min-width: 90px;
-        width: 120%;
+        width: 100%;
         padding: 10px 8px;
     }
     .bottom-nav {

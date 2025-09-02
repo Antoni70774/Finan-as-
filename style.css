@@ -470,8 +470,8 @@ body, html {
         padding: 14px 2px 8px 2px;
     }
     .summary-item {
-        min-width: 100px;
-        width: 100%;
+        min-width: 90px;
+        width: 120%;
         padding: 10px 8px;
     }
     .bottom-nav {

@@ -350,23 +350,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     
-    //✅ Exporta e limpa dados
+    //✅ Exporta, limpa dados, configuração, reset e troca tema
+    function abrirConfig() {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+      });
+      document.getElementById('config-page').classList.add('active');
+      menuFlutuante.style.display = 'none';
+    }
+    
     function exportarDados() {
-      const dados = localStorage.getItem('transacoes');
-      const blob = new Blob([dados], { type: 'application/json' });
+      const dados = {
+        transacoes: state.transactions,
+        metas: state.goals,
+        contas: state.payables
+      };
+      const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'dados.json';
+      a.download = 'dados-financeiros.json';
       a.click();
+      URL.revokeObjectURL(url);
     }
     
-    function limparDados() {
-      if (confirm("Tem certeza que deseja apagar todos os dados?")) {
+    function trocarTema() {
+      const body = document.body;
+      const isDark = body.classList.toggle('dark-theme');
+      localStorage.setItem('tema', isDark ? 'dark' : 'light');
+    }
+    
+    function resetarApp() {
+      if (confirm("Tem certeza que deseja apagar todos os dados e reiniciar o aplicativo?")) {
         localStorage.clear();
         location.reload();
       }
     }
+
 
     //✅ troca de tema Escuro ou Claro
     function trocarTema() {
@@ -1091,8 +1111,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.abrirResumoMensal = abrirResumoMensal;
     window.abrirResumoAnual = abrirResumoAnual;
     window.abrirPagina = abrirPagina;
-    window.exportarDados = exportarDados;
     window.abrirConfig = abrirConfig;
+    window.exportarDados = exportarDados;
+    window.trocarTema = trocarTema;
+    window.resetarApp = resetarApp;
+
 
     // Correção da integração bancária
     window.connectBank = async function(bankName) {

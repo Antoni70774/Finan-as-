@@ -466,7 +466,7 @@ body, html {
     }
     .dashboard-summary {
         flex-direction: row;
-        gap: 9px;
+        gap: 4px;
         padding: 14px 2px 8px 2px;
     }
     .summary-item {

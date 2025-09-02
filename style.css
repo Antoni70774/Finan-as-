@@ -197,7 +197,7 @@ body, html {
 
 .summary-item h4 {
     margin: 0;
-    font-size: 0.78em; /* REDUZIDO para não ultrapassar */
+    font-size: 0.7em; /* REDUZIDO para não ultrapassar */
     font-weight: 700;
     word-break: break-all;
     max-width: 100%;
@@ -466,7 +466,7 @@ body, html {
     }
     .dashboard-summary {
         flex-direction: row;
-        gap: 9.3px;
+        gap: 9px;
         padding: 14px 2px 8px 2px;
     }
     .summary-item {

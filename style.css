@@ -720,4 +720,10 @@ body, html {
       text-align: center;
     }
 
+    .card-resumo {
+      height: 140px;
+      font-size: 1.2rem;
+      padding: 1rem;
+    }
+
 }

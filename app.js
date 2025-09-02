@@ -181,6 +181,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  function setCurrentDate() {
+    const today = new Date();
+    const dateInput = document.getElementById('date');
+    if (dateInput) {
+      dateInput.value = today.toISOString().split('T')[0];
+    }
+  }
+
   function navigateToPage(pageId) {
     pages.forEach(page => page.classList.remove('active'));
     const selectedPage = document.getElementById(pageId);

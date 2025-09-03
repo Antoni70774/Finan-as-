@@ -545,6 +545,70 @@ function showApp() {
   }
 
   // -------------------------
+  // Charts com Chart.js
+  // -------------------------
+  let expenseChart = null;
+  
+  function createExpenseChart(transactions, categories) {
+    const ctx = document.getElementById('main-chart').getContext('2d');
+    if (expenseChart) {
+      expenseChart.destroy();
+    }
+  
+    const grouped = {};
+    (transactions || []).forEach(t => {
+      if (t.type === 'expense') {
+        grouped[t.category] = (grouped[t.category] || 0) + t.amount;
+      }
+    });
+  
+    const labels = Object.keys(grouped);
+    const values = Object.values(grouped);
+  
+    expenseChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: [
+            '#FF6384','#36A2EB','#FFCE56','#4BC0C0',
+            '#9966FF','#FF9F40','#66BB6A','#EC407A'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  }
+  
+  function updateExpenseChart(transactions, categories) {
+    if (!expenseChart) {
+      createExpenseChart(transactions, categories);
+      return;
+    }
+  
+    const grouped = {};
+    (transactions || []).forEach(t => {
+      if (t.type === 'expense') {
+        grouped[t.category] = (grouped[t.category] || 0) + t.amount;
+      }
+    });
+  
+    expenseChart.data.labels = Object.keys(grouped);
+    expenseChart.data.datasets[0].data = Object.values(grouped);
+    expenseChart.update();
+  }
+  
+  // expõe no window
+  window.createExpenseChart = createExpenseChart;
+  window.updateExpenseChart = updateExpenseChart;
+
+  // -------------------------
   // Filters and updateAll
   // -------------------------
   function filterTransactionsByMonth(transactions, date) {

@@ -1,26 +1,26 @@
-// app.js - VERSÃO REVISADA E COMPLETA
-// - Requisitos: index.html já expõe window.firebase com Auth & Firestore funções
-// - Funções principais: Autenticação obrigatória, backup local+cloud, realtime sync, CRUD, PWA support
+
+// app.js - VERSÃO FINAL REVISADA
 
 document.addEventListener('DOMContentLoaded', () => {
-  /**************************************************************************
-   * 1) Dependências (injetadas pelo index.html em window.firebase)
-   **************************************************************************/
+  // -------------------------
+  // Firebase helpers (injetados no index.html)
+  // -------------------------
+  const winFb = window.firebase || {};
   const {
     auth, db, onAuthStateChanged, GoogleAuthProvider,
     signInWithPopup, signInWithRedirect, signOut,
     signInWithEmailAndPassword, createUserWithEmailAndPassword,
     sendPasswordResetEmail, collection, doc, setDoc, getDocs,
     onSnapshot, writeBatch
-  } = window.firebase || {};
+  } = winFb;
 
-  if (!window.firebase) {
-    console.error('window.firebase não encontrado. Verifique index.html.');
+  if (!winFb || !auth || !db) {
+    console.warn('Aviso: window.firebase ou auth/db não encontrados. O app continuará em modo offline (sem Cloud sync).');
   }
 
-  /**************************************************************************
-   * 2) DOM references (IDs e elementos assumidos do index.html)
-   **************************************************************************/
+  // -------------------------
+  // DOM references (IDs encontrados no index.html enviado)
+  // -------------------------
   const appContainer = document.querySelector('.app-container');
   const authModal = document.getElementById('auth-modal');
   const loginEmailBtn = document.getElementById('btn-login-email');
@@ -63,9 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // safe getter
   const $ = id => document.getElementById(id) || null;
 
-  /**************************************************************************
-   * 3) App state (persistido em localStorage)
-   **************************************************************************/
+  // -------------------------
+  // App state persisted in localStorage
+  // -------------------------
   const state = {
     transactions: JSON.parse(localStorage.getItem('transactions') || '[]'),
     goals: JSON.parse(localStorage.getItem('goals') || '[]'),
@@ -78,13 +78,13 @@ document.addEventListener('DOMContentLoaded', () => {
     chartType: 'all'
   };
 
-  // firebase runtime
+  // runtime
   let currentUid = null;
   let unsubscribers = [];
 
-  /**************************************************************************
-   * 4) Utilitários
-   **************************************************************************/
+  // -------------------------
+  // Utility helpers
+  // -------------------------
   function formatCurrency(v) {
     if (v == null || isNaN(v)) return 'R$ 0,00';
     return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -101,17 +101,17 @@ document.addEventListener('DOMContentLoaded', () => {
   function closeModal(el){ if(!el) return; el.classList.remove('active'); el.style.display='none'; }
 
   function hideApp() {
-    if (appContainer) appContainer.style.visibility = 'hidden';
-    if (authModal) authModal.style.display = 'block';
-  }
-  function showApp() {
-    if (appContainer) appContainer.style.visibility = 'visible';
-    if (authModal) authModal.style.display = 'none';
-  }
+  document.querySelector('.app-container').style.display = 'none';
+  document.getElementById('auth-modal').style.display = 'flex';
+}
+function showApp() {
+  document.querySelector('.app-container').style.display = 'block';
+  document.getElementById('auth-modal').style.display = 'none';
+}
 
-  /**************************************************************************
-   * 5) FIRESTORE SYNC: saveAllToCloud(), firstCloudSync(), realtime listeners
-   **************************************************************************/
+  // -------------------------
+  // Firestore sync functions
+  // -------------------------
   async function saveAllToCloud() {
     if (!currentUid || !db || !writeBatch) return;
     try {
@@ -127,11 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
       putAll('transactions', state.transactions);
       putAll('goals', state.goals);
       putAll('payables', state.payables);
+
       await batch.commit();
       console.log('Backup para Firestore concluído.');
     } catch (err) {
       console.error('Erro em saveAllToCloud:', err);
-      // Não propaga — continua com localStorage
     }
   }
 
@@ -146,8 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
         pull('transactions'), pull('goals'), pull('payables')
       ]);
 
-      // Se a nuvem tem dados, adotamos (nuvem vence). Se preferir merge, substituir por merge logic.
       if ((remoteTx && remoteTx.length) || (remoteGoals && remoteGoals.length) || (remotePay && remotePay.length)) {
+        // adopt cloud as source of truth
         state.transactions = remoteTx.length ? remoteTx : state.transactions;
         state.goals = remoteGoals.length ? remoteGoals : state.goals;
         state.payables = remotePay.length ? remotePay : state.payables;
@@ -156,8 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('payables', JSON.stringify(state.payables));
         console.info('Dados da nuvem sincronizados para local.');
       } else {
-        // Se nuvem vazia e local tem dados, subimos local para nuvem
-        if ((state.transactions.length + state.goals.length + state.payables.length) > 0) {
+        // if cloud empty and local has data, push local to cloud
+        if ((state.transactions.length + state.goals.length + state.payables.length) > 0 && currentUid) {
           await saveAllToCloud();
         }
       }
@@ -175,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
       snap => {
         const arr = snap.docs.map(d => d.data());
         apply(arr);
-        // manter localStorage para offline
         localStorage.setItem(name, JSON.stringify(arr));
         updateAll();
       },
@@ -196,9 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Realtime listeners removidos.');
   }
 
-  /**************************************************************************
-   * 6) saveAndRerender() centralizado - salva local e na nuvem (se logado)
-   **************************************************************************/
+  // -------------------------
+  // Central save function (local + cloud)
+  // -------------------------
   async function saveAndRerender() {
     try {
       localStorage.setItem('transactions', JSON.stringify(state.transactions));
@@ -215,9 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /**************************************************************************
-   * 7) AUTH FLOW: observer + UI handlers (login / signup / google / reset / logout)
-   **************************************************************************/
+  // -------------------------
+  // Auth flow - observer and UI handlers
+  // -------------------------
   // hide app until auth resolved
   if (auth && onAuthStateChanged) hideApp();
 
@@ -231,20 +230,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (perfilUsuarioEl) perfilUsuarioEl.textContent = state.currentUser;
         if (perfilEmailEl) perfilEmailEl.textContent = user.email || '';
         showApp();
-        // After login: sync
-        try { await firstCloudSync(); } catch(e) { console.warn('firstCloudSync error', e); }
+        try { await firstCloudSync(); } catch (e) { console.warn('firstCloudSync error', e); }
         startRealtimeSync();
         ensureLogoutButton();
       } else {
-        // no user -> show auth modal and hide app
         currentUid = null;
         stopRealtimeSync();
         hideApp();
       }
     });
   } else {
-    // if no firebase present, show app (dev mode)
-    console.warn('Firebase auth not present, running in offline mode.');
+    console.warn('Firebase auth não disponível — rodando em modo offline.');
     showApp();
   }
 
@@ -289,7 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle hiding modal
     } catch (err) {
       console.error('Erro login Google:', err);
       alert(err.message || 'Erro ao entrar com Google.');
@@ -310,10 +305,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /**************************************************************************
-   * 8) CRUD UI bindings (Transactions, Goals, Payables)
-   **************************************************************************/
-  // Transactions: open modal
+  // -------------------------
+  // CRUD: Transactions / Goals / Payables
+  // -------------------------
   function setTransactionType(type) {
     if (transactionTypeInput) transactionTypeInput.value = type;
     if (typeExpenseBtn) typeExpenseBtn.classList.toggle('active', type === 'expense');
@@ -326,8 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cats = type === 'expense' ? state.expenseCategories : state.incomeCategories;
     cats.forEach(c => {
       const option = document.createElement('option');
-      option.value = c;
-      option.textContent = c;
+      option.value = c; option.textContent = c;
       categorySelect.appendChild(option);
     });
   }
@@ -347,7 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       transactionIdInput.value = '';
       deleteTransactionBtn && (deleteTransactionBtn.style.display = 'none');
-      // set date to today
       const today = new Date().toISOString().slice(0,10);
       $('date') && ($('date').value = today);
     }
@@ -375,14 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       state.transactions.push({ id: generateId(), type, amount, description, category, date, user });
     }
-
     await saveAndRerender();
     closeModal(transactionModal);
   });
 
   if (deleteTransactionBtn) deleteTransactionBtn.addEventListener('click', async () => {
-    const id = transactionIdInput && transactionIdInput.value;
-    if (!id) return;
+    const id = transactionIdInput && transactionIdInput.value; if(!id) return;
     if (!confirm('Deseja excluir esta transação?')) return;
     state.transactions = state.transactions.filter(t => t.id !== id);
     await saveAndRerender();
@@ -390,20 +380,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Goals
-  if (addGoalBtn) addGoalBtn.addEventListener('click', () => {
-    goalForm && goalForm.reset();
-    openModal(goalModal);
-  });
+  if (addGoalBtn) addGoalBtn.addEventListener('click', () => { goalForm && goalForm.reset(); openModal(goalModal); });
   if (goalForm) goalForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const gid = $('goal-id') && $('goal-id').value;
-    const gd = {
-      id: gid || generateId(),
-      name: $('goal-name') && $('goal-name').value,
-      target: parseFloat($('goal-target') && $('goal-target').value) || 0,
-      current: parseFloat($('goal-current') && $('goal-current').value) || 0,
-      date: $('goal-date') && $('goal-date').value
-    };
+    const gd = { id: gid || generateId(), name: $('goal-name') && $('goal-name').value, target: parseFloat($('goal-target') && $('goal-target').value) || 0, current: parseFloat($('goal-current') && $('goal-current').value) || 0, date: $('goal-date') && $('goal-date').value };
     if (!gd.name || !gd.target) return alert('Preencha os campos da meta.');
     const idx = state.goals.findIndex(g => g.id === gd.id);
     if (idx > -1) state.goals[idx] = gd; else state.goals.push(gd);
@@ -412,8 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   window.editGoal = function(gid) {
-    const goal = state.goals.find(g => g.id === gid);
-    if (!goal) return;
+    const goal = state.goals.find(g => g.id === gid); if(!goal) return;
     $('goal-id') && ($('goal-id').value = goal.id);
     $('goal-name') && ($('goal-name').value = goal.name);
     $('goal-target') && ($('goal-target').value = goal.target);
@@ -421,70 +401,29 @@ document.addEventListener('DOMContentLoaded', () => {
     $('goal-date') && ($('goal-date').value = goal.date);
     openModal(goalModal);
   };
-
-  window.deleteGoal = async function(gid) {
-    if (!confirm('Excluir meta?')) return;
-    state.goals = state.goals.filter(g => g.id !== gid);
-    await saveAndRerender();
-  };
+  window.deleteGoal = async function(gid) { if(!confirm('Excluir meta?')) return; state.goals = state.goals.filter(g => g.id !== gid); await saveAndRerender(); };
 
   // Payables
-  if (addPayableBtn) addPayableBtn.addEventListener('click', () => {
-    payableForm && payableForm.reset();
-    openModal(payableModal);
-  });
+  if (addPayableBtn) addPayableBtn.addEventListener('click', () => { payableForm && payableForm.reset(); openModal(payableModal); });
   if (payableForm) payableForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = $('payable-id') && $('payable-id').value || generateId();
-    const p = {
-      id,
-      description: $('payable-description') && $('payable-description').value,
-      category: $('payable-category') && $('payable-category').value,
-      amount: parseFloat($('payable-amount') && $('payable-amount').value) || 0,
-      date: $('payable-date') && $('payable-date').value,
-      paid: false
-    };
-    const idx = state.payables.findIndex(x => x.id === id);
-    if (idx > -1) state.payables[idx] = p; else state.payables.push(p);
-    await saveAndRerender();
-    closeModal(payableModal);
+    const p = { id, description: $('payable-description') && $('payable-description').value, category: $('payable-category') && $('payable-category').value, amount: parseFloat($('payable-amount') && $('payable-amount').value) || 0, date: $('payable-date') && $('payable-date').value, paid: false };
+    const idx = state.payables.findIndex(x => x.id === id); if (idx > -1) state.payables[idx] = p; else state.payables.push(p);
+    await saveAndRerender(); closeModal(payableModal);
   });
 
-  window.editPayable = function(id) {
-    const p = state.payables.find(pp => pp.id === id);
-    if (!p) return;
-    $('payable-id') && ($('payable-id').value = p.id);
-    $('payable-description') && ($('payable-description').value = p.description);
-    $('payable-category') && ($('payable-category').value = p.category);
-    $('payable-amount') && ($('payable-amount').value = p.amount);
-    $('payable-date') && ($('payable-date').value = p.date);
-    openModal(payableModal);
-  };
+  window.editPayable = function(id) { const p = state.payables.find(pp => pp.id === id); if(!p) return; $('payable-id') && ($('payable-id').value = p.id); $('payable-description') && ($('payable-description').value = p.description); $('payable-category') && ($('payable-category').value = p.category); $('payable-amount') && ($('payable-amount').value = p.amount); $('payable-date') && ($('payable-date').value = p.date); openModal(payableModal); };
+  window.deletePayable = async function(id) { if(!confirm('Excluir conta?')) return; state.payables = state.payables.filter(p => p.id !== id); await saveAndRerender(); };
+  window.markPayablePaid = async function(id) { const idx = state.payables.findIndex(p => p.id === id); if (idx > -1) { state.payables[idx].paid = !state.payables[idx].paid; await saveAndRerender(); } };
 
-  window.deletePayable = async function(id) {
-    if (!confirm('Excluir conta?')) return;
-    state.payables = state.payables.filter(p => p.id !== id);
-    await saveAndRerender();
-  };
-
-  window.markPayablePaid = async function(id) {
-    const idx = state.payables.findIndex(p => p.id === id);
-    if (idx > -1) {
-      state.payables[idx].paid = !state.payables[idx].paid;
-      await saveAndRerender();
-    }
-  };
-
-  /**************************************************************************
-   * 9) Rendering (transactions, goals, payables, charts, summaries)
-   **************************************************************************/
+  // -------------------------
+  // Rendering functions
+  // -------------------------
   function renderTransactionList(transactions) {
     if (!transactionListEl) return;
     transactionListEl.innerHTML = '';
-    if (!transactions || transactions.length === 0) {
-      transactionListEl.innerHTML = '<li>Nenhuma transação neste filtro.</li>';
-      return;
-    }
+    if (!transactions || transactions.length === 0) { transactionListEl.innerHTML = '<li>Nenhuma transação neste filtro.</li>'; return; }
     const sorted = [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date));
     sorted.forEach(t => {
       const li = document.createElement('li');
@@ -552,7 +491,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Chart update - calls to your existing chart module if present
   function atualizarGraficoMensal() {
     try {
       const updateExpenseChart = window.updateExpenseChart || null;
@@ -605,9 +543,9 @@ document.addEventListener('DOMContentLoaded', () => {
     $('month-balance') && ($('month-balance').style.color = bal >= 0 ? 'var(--text-light)' : '#ff8a80');
   }
 
-  /**************************************************************************
-   * 10) Filters, updateAll and UI wiring
-   **************************************************************************/
+  // -------------------------
+  // Filters and updateAll
+  // -------------------------
   function filterTransactionsByMonth(transactions, date) {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -618,10 +556,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateAll() {
-    // refresh data-driven UI
     const monthFiltered = filterTransactionsByMonth(state.transactions, state.currentDate);
     renderSummary(monthFiltered);
-    // chart filtering
     let display = monthFiltered;
     if (state.chartType === 'expense') display = monthFiltered.filter(t => t.type === 'expense');
     if (state.chartType === 'income') display = monthFiltered.filter(t => t.type === 'income');
@@ -636,8 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateMonthDisplay() {
-    const el = $('current-month-year');
-    if (!el) return;
+    const el = $('current-month-year'); if (!el) return;
     el.textContent = state.currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
   }
   function updateUserUI() {
@@ -645,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (perfilUsuarioEl) perfilUsuarioEl.textContent = state.currentUser;
   }
 
-  // nav buttons
+  // nav buttons wiring
   navItems.forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
@@ -656,14 +591,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sel) sel.classList.add('active');
         navItems.forEach(n => n.classList.remove('active'));
         item.classList.add('active');
-        // small actions
         if (page === 'goals-page') renderGoals();
         if (page === 'payables-page') renderPayables();
       }
     });
   });
 
-  // prev/next month
   const prevMonth = $('prev-month'), nextMonth = $('next-month'), resumoPrev = $('resumo-prev-month'), resumoNext = $('resumo-next-month');
   prevMonth && prevMonth.addEventListener('click', () => { state.currentDate.setMonth(state.currentDate.getMonth()-1); updateAll(); });
   nextMonth && nextMonth.addEventListener('click', () => { state.currentDate.setMonth(state.currentDate.getMonth()+1); updateAll(); });
@@ -677,9 +610,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAll();
   }));
 
-  /**************************************************************************
-   * 11) Alerts for payables due, export, theme, reset
-   **************************************************************************/
+  // -------------------------
+  // Alerts / export / theme / reset
+  // -------------------------
   function diasRestantes(dateStr) {
     const hoje = new Date();
     const v = new Date(dateStr + 'T03:00:00');
@@ -690,31 +623,22 @@ document.addEventListener('DOMContentLoaded', () => {
   function verificarContasAVencer() {
     const proximas = state.payables.filter(p => !p.paid && diasRestantes(p.date) >= 0 && diasRestantes(p.date) <= 5);
     $('alert-count') && ($('alert-count').textContent = String(proximas.length));
-    const list = $('alert-list');
-    if (!list) return;
+    const list = $('alert-list'); if (!list) return;
     list.innerHTML = proximas.length ? proximas.map(p => `<li>${p.description} vence em ${formatDateBR(p.date)}</li>`).join('') : '<li>Nenhuma conta próxima do vencimento</li>';
   }
 
   if (exportDataBtn) exportDataBtn.addEventListener('click', () => {
     const payload = { transactions: state.transactions, goals: state.goals, payables: state.payables };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'dados_financeiros.json'; a.click(); URL.revokeObjectURL(url);
+    const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'dados_financeiros.json'; a.click(); URL.revokeObjectURL(url);
   });
 
-  window.trocarTema = function() {
-    const isDark = document.body.classList.toggle('dark-theme');
-    localStorage.setItem('tema', isDark ? 'dark' : 'light');
-  };
+  window.trocarTema = function() { const isDark = document.body.classList.toggle('dark-theme'); localStorage.setItem('tema', isDark ? 'dark' : 'light'); };
 
   window.resetarApp = function() {
     if (!confirm('Deseja apagar todos os dados locais?')) return;
-    localStorage.removeItem('transactions');
-    localStorage.removeItem('goals');
-    localStorage.removeItem('payables');
-    state.transactions = []; state.goals = []; state.payables = [];
-    saveAndRerender();
-    updateAll();
+    localStorage.removeItem('transactions'); localStorage.removeItem('goals'); localStorage.removeItem('payables');
+    state.transactions = []; state.goals = []; state.payables = []; saveAndRerender(); updateAll();
   };
 
   window.abrirAlerta = function(){ const m = $('alert-modal'); if (m) openModal(m); };
@@ -722,38 +646,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.abrirResumoMensal = function(){ pages.forEach(p=>p.classList.remove('active')); $('resumo-mensal-page') && $('resumo-mensal-page').classList.add('active'); updateAll(); };
   window.abrirResumoAnual = function(){ pages.forEach(p=>p.classList.remove('active')); $('resumo-anual-page') && $('resumo-anual-page').classList.add('active'); updateAll(); };
-  window.abrirPagina = function(id){ pages.forEach(p=>p.classList.remove('active')); $(id) && $(id).classList.add('active'); };
+  window.abrirPagina = function(id){ pages.forEach(p=>p.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); };
   window.abrirConfig = function(){ pages.forEach(p=>p.classList.remove('active')); $('config-page') && $('config-page').classList.add('active'); };
 
   window.connectBank = function(bankName) { alert(`Integração com ${bankName} não implementada.`); };
 
-  /**************************************************************************
-   * 12) Service Worker
-   **************************************************************************/
+  // -------------------------
+  // Service Worker registration
+  // -------------------------
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('ServiceWorker registrado com scope:', reg.scope))
-        .catch(err => console.warn('Erro ao registrar SW:', err));
+      navigator.serviceWorker.register('/sw.js').then(reg => console.log('SW registrado:', reg.scope)).catch(err => console.warn('SW erro', err));
     });
   }
 
-  /**************************************************************************
-   * 13) Final initialization
-   **************************************************************************/
-  // ensure initial UI state
-  try {
-    // set today's date in transaction modal date field if present
-    const dateInput = $('date');
-    if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0,10);
-  } catch (e) {}
-
-  // initial render from local state (if auth not configured, app will still show)
+  // Final init
+  try { const dateInput = $('date'); if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().slice(0,10); } catch(e) {}
   updateAll();
-
-  // expose useful functions (in case HTML uses onclick)
   window.saveAndRerender = saveAndRerender;
   window.updateAll = updateAll;
 
-  console.log('app.js inicializado (revisado).');
+  console.log('app.js final (revisado) inicializado.');
 }); // DOMContentLoaded end

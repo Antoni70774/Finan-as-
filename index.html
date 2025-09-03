@@ -1,39 +1,39 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Financeiro</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4A90E2">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle Financeiro</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4A90E2">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-    <!-- 🔗 Firebase SDK + inicialização -->
-    <script type="module">
+  <!-- 🔗 Firebase SDK + inicialização -->
+  <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import {
-        getAuth, onAuthStateChanged, GoogleAuthProvider,
-        signInWithPopup, signInWithRedirect, signOut,
-        signInWithEmailAndPassword, createUserWithEmailAndPassword,
-        sendPasswordResetEmail
+      getAuth, onAuthStateChanged, GoogleAuthProvider,
+      signInWithPopup, signInWithRedirect, signOut,
+      signInWithEmailAndPassword, createUserWithEmailAndPassword,
+      sendPasswordResetEmail
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
     import {
-        getFirestore, enableIndexedDbPersistence, collection, doc,
-        setDoc, getDocs, onSnapshot, writeBatch
+      getFirestore, enableIndexedDbPersistence, collection, doc,
+      setDoc, getDocs, onSnapshot, writeBatch
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-    // 🔧 COLE suas credenciais do Firebase aqui:
+    // 🔧 Cole suas credenciais do Firebase
     const firebaseConfig = {
-    apiKey: "AIzaSyCw...", // sua chave da Web API
-    authDomain: "zantos-preacture.firebaseapp.com",
-    projectId: "zantos-preacture",
-    storageBucket: "zantos-preacture.appspot.com",
-    messagingSenderId: "1010518826111",
-    appId: "1:1010518826111:web:..." // seu ID do aplicativo
+      apiKey: "AIzaSyCw...", 
+      authDomain: "zantos-preacture.firebaseapp.com",
+      projectId: "zantos-preacture",
+      storageBucket: "zantos-preacture.appspot.com",
+      messagingSenderId: "1010518826111",
+      appId: "1:1010518826111:web:..."
     };
 
     const app = initializeApp(firebaseConfig);
@@ -42,12 +42,12 @@
     try { await enableIndexedDbPersistence(db); } catch(e) {}
 
     window.firebase = { auth, db, onAuthStateChanged, GoogleAuthProvider,
-        signInWithPopup, signInWithRedirect, signOut,
-        signInWithEmailAndPassword, createUserWithEmailAndPassword,
-        sendPasswordResetEmail, collection, doc, setDoc, getDocs,
-        onSnapshot, writeBatch
+      signInWithPopup, signInWithRedirect, signOut,
+      signInWithEmailAndPassword, createUserWithEmailAndPassword,
+      sendPasswordResetEmail, collection, doc, setDoc, getDocs,
+      onSnapshot, writeBatch
     };
-    </script>
+  </script>
 
     <div class="app-container">
         <!-- Header -->
@@ -59,7 +59,6 @@
                 </div>
             </div>
         </header>
-
         
         <!-- Main Content -->
         <main id="app-main">
@@ -328,34 +327,35 @@
                 </div>
             </div>
     
-    <!-- Modal de Autenticação -->
-<div id="auth-modal" class="modal active" style="display:none">
-  <div class="modal-content" style="max-width:420px">
-    <h2>Entrar ou cadastrar</h2>
-    <p>Use seu e-mail e senha ou entre com o Google.</p>
+   <!-- Modal de Autenticação -->
+    <div id="auth-modal" class="modal active">
+      <div class="modal-content" style="max-width:420px">
+        <h2>Entrar ou cadastrar</h2>
+        <p>Use seu e-mail e senha ou entre com o Google.</p>
 
-    <label>E-mail</label>
-    <input id="auth-email" type="email" placeholder="voce@email.com" />
+        <label>E-mail</label>
+        <input id="auth-email" type="email" placeholder="voce@email.com" />
 
-    <label>Senha</label>
-    <input id="auth-password" type="password" placeholder="••••••••" />
+        <label>Senha</label>
+        <input id="auth-password" type="password" placeholder="••••••••" />
 
-    <div style="display:flex; gap:8px; margin-top:10px;">
-      <button id="btn-login-email" class="btn-primary">Entrar</button>
-      <button id="btn-signup-email" class="btn-secondary">Criar conta</button>
-    </div>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button id="btn-login-email" class="btn-primary">Entrar</button>
+          <button id="btn-signup-email" class="btn-secondary">Criar conta</button>
+        </div>
 
-    <div style="margin:12px 0; text-align:center;">ou</div>
+        <div style="margin:12px 0; text-align:center;">ou</div>
 
-    <button id="btn-login-google" class="btn-primary">Continuar com Google</button>
+        <button id="btn-login-google" class="btn-primary">Continuar com Google</button>
 
-    <div style="margin-top:12px; text-align:right;">
-      <button id="btn-reset" class="btn-link">Esqueci minha senha</button>
+        <div style="margin-top:12px; text-align:right;">
+          <button id="btn-reset" class="btn-link">Esqueci minha senha</button>
+        </div>
+      </div>
     </div>
   </div>
-</div>
-</div>
-        
-    <script type="module" src="app.js"></script>
+
+  <!-- Seu app.js -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>

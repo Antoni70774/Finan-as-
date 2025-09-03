@@ -1,14 +1,6 @@
 
 // app.js - VERSÃO FINAL REVISADA
-// Funcionalidades:
-// - Autenticação obrigatória com Firebase (Email/Password + Google)
-// - Bloqueio do app até o usuário autenticar (modal de login)
-// - Salvamento local (localStorage) + backup automático no Firestore (users/{uid}/transactions, goals, payables)
-// - Sincronização inicial da nuvem ao logar (nuvem vence por padrão) e listeners em tempo real
-// - CRUD para transações, metas, contas a pagar; gráficos e export; PWA service worker
-// Requisitos:
-// - index.html deve expor window.firebase com as funções necessárias (auth, db, onAuthStateChanged, collection, doc, getDocs, onSnapshot, writeBatch, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider, signOut)
-// - chart update functions (updateExpenseChart/createExpenseChart) podem ser expostos em window se existirem
+te functions (updateExpenseChart/createExpenseChart) podem ser expostos em window se existirem
 
 document.addEventListener('DOMContentLoaded', () => {
   // -------------------------
@@ -683,4 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
     authModal.style.display = 'flex';
     authModal.classList.add('active');
   }
+  
+  document.body.style.visibility = 'visible';
+
 }); // DOMContentLoaded end

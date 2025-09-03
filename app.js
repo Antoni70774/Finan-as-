@@ -1,5 +1,5 @@
 
-// app.js - VERSÃO FINAL REVISADA
+// ------ app.js -------
 te functions (updateExpenseChart/createExpenseChart) podem ser expostos em window se existirem
 
 document.addEventListener('DOMContentLoaded', () => {

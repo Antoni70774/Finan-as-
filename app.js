@@ -1068,6 +1068,58 @@ document.addEventListener('DOMContentLoaded', () => {
       if (target) target.classList.add('active');
     }
 
+     // Botões de navegação de mês na página inicial (Dashboard)
+  if (monthPrevBtn) {
+    monthPrevBtn.addEventListener('click', () => {
+      state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+      updateAll();
+    });
+  }
+  if (monthNextBtn) {
+    monthNextBtn.addEventListener('click', () => {
+      state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+      updateAll();
+    });
+  }
+
+     // --- Funções de Lógica da Aplicação ---
+
+  function updateMonthlySummary() {
+    const mesAtual = state.currentDate.getMonth();
+    const anoAtual = state.currentDate.getFullYear();
+    const transacoesDoMes = state.transactions.filter(t => {
+      const data = new Date(t.date);
+      return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+    });
+
+    const receita = transacoesDoMes.filter(t => t.type === "income").reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const despesa = transacoesDoMes.filter(t => t.type === "expense").reduce((sum, t) => sum + parseFloat(t.amount), 0);
+    const saldo = receita - despesa;
+
+    const currentMonthYearEl = document.getElementById('current-month-year');
+    if (currentMonthYearEl) {
+      currentMonthYearEl.textContent = state.currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    }
+
+    const monthIncomeEl = document.getElementById('month-income');
+    const monthExpenseEl = document.getElementById('month-expense');
+    const monthBalanceEl = document.getElementById('month-balance');
+
+    if (monthIncomeEl) monthIncomeEl.textContent = formatCurrency(receita);
+    if (monthExpenseEl) monthExpenseEl.textContent = formatCurrency(despesa);
+    if (monthBalanceEl) {
+      monthBalanceEl.textContent = formatCurrency(saldo);
+      monthBalanceEl.style.color = saldo >= 0 ? 'var(--text-light)' : 'var(--danger-color)';
+    }
+
+       function filterTransactionsByMonth(transactions, date) {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    return transactions.filter(t => {
+      const tDate = new Date(t.date);
+      return tDate.getFullYear() === year && tDate.getMonth() === month;
+    });
+  }
     document.getElementById('btn-logout') && document.getElementById('btn-logout').addEventListener('click', async () => {
         try {
             await signOut(auth);

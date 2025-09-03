@@ -15,20 +15,14 @@
   <!-- 🔗 Firebase SDK + inicialização -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import {
-      getAuth, onAuthStateChanged, GoogleAuthProvider,
-      signInWithPopup, signInWithRedirect, signOut,
-      signInWithEmailAndPassword, createUserWithEmailAndPassword,
-      sendPasswordResetEmail
-    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-    import {
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { 
       getFirestore, enableIndexedDbPersistence, collection, doc,
       setDoc, getDocs, onSnapshot, writeBatch
     } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-    // 🔧 Cole suas credenciais do Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyCw...", 
+      apiKey: "AIzaSyCw...",
       authDomain: "zantos-preacture.firebaseapp.com",
       projectId: "zantos-preacture",
       storageBucket: "zantos-preacture.appspot.com",
@@ -41,18 +35,22 @@
     const db = getFirestore(app);
     try { await enableIndexedDbPersistence(db); } catch(e) {}
 
-    firebase.auth().onAuthStateChanged(user => {
-    if (!user) {
-        window.location.href = 'login.html';
-    }
+    window.firebase = { auth, db, collection, doc, setDoc, getDocs, onSnapshot, writeBatch };
+
+    // 🔒 Redireciona para login se não houver usuário
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
     });
 
-    window.firebase = { auth, db, onAuthStateChanged, GoogleAuthProvider,
-      signInWithPopup, signInWithRedirect, signOut,
-      signInWithEmailAndPassword, createUserWithEmailAndPassword,
-      sendPasswordResetEmail, collection, doc, setDoc, getDocs,
-      onSnapshot, writeBatch
-    };
+    // 🚪 Logout
+    document.addEventListener("click", async (e) => {
+      if (e.target.id === "btn-logout") {
+        await signOut(auth);
+        window.location.href = "login.html";
+      }
+    });
   </script>
 
     <div class="app-container">
@@ -333,34 +331,10 @@
                 </div>
             </div>
     
-   <!-- Modal de Autenticação -->
-    <div id="auth-modal" class="modal active">
-      <div class="modal-content" style="max-width:420px">
-        <h2>Entrar ou cadastrar</h2>
-        <p>Use seu e-mail e senha ou entre com o Google.</p>
-
-        <label>E-mail</label>
-        <input id="auth-email" type="email" placeholder="voce@email.com" />
-
-        <label>Senha</label>
-        <input id="auth-password" type="password" placeholder="••••••••" />
-
-        <div style="display:flex; gap:8px; margin-top:10px;">
-          <button id="btn-login-email" class="btn-primary">Entrar</button>
-          <button id="btn-signup-email" class="btn-secondary">Criar conta</button>
-        </div>
-
-        <div style="margin:12px 0; text-align:center;">ou</div>
-
-        <button id="btn-login-google" class="btn-primary">Continuar com Google</button>
-
-        <div style="margin-top:12px; text-align:right;">
-          <button id="btn-reset" class="btn-link">Esqueci minha senha</button>
-        </div>
-      </div>
-    </div>
+   <!-- botão de logout -->
+    <button id="btn-logout" class="btn-secondary">Sair</button>
   </div>
-
+  
   <!-- Seu app.js -->
   <script type="module" src="app.js"></script>
 </body>

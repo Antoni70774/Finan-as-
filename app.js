@@ -87,18 +87,22 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAll();
     registerServiceWorker();
 
-    onAuthStateChanged(auth, async (user) => {
-        const authModal = document.getElementById('auth-modal');
-        if (user) {
-            currentUid = user.uid;
-            if (authModal) authModal.style.display = 'none';
-            await firstCloudSync();
-            startRealtimeSync();
-        } else {
-            currentUid = null;
-            stopRealtimeSync();
-            if (authModal) authModal.style.display = 'block';
-        }
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        const docRef = doc(db, 'usuarios', user.uid);
+        onSnapshot(docRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const dados = docSnap.data();
+            state.transactions = dados.transactions || [];
+            state.goals = dados.goals || [];
+            state.payables = dados.payables || [];
+            state.currentUser = dados.currentUser || user.displayName || user.email;
+            updateAll();
+          }
+        });
+      }
     });
 
     const loginEmailBtn = document.getElementById('btn-login-email');
@@ -1023,17 +1027,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 🧭 Navegação entre abas do menu
+    document.getElementById('btn-transactions')?.addEventListener('click', () => showSection('transactions'));
+    document.getElementById('btn-goals')?.addEventListener('click', () => showSection('goals'));
+    document.getElementById('btn-payables')?.addEventListener('click', () => showSection('payables'));
+    document.getElementById('btn-profile')?.addEventListener('click', () => showSection('profile'));
+    
+    
+    // ✅ Envio do formulário de nova meta
+    document.getElementById('goal-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nome = document.getElementById('goal-name')?.value;
+      const valor = parseFloat(document.getElementById('goal-target')?.value);
+    
+      if (nome && !isNaN(valor)) {
+        state.goals.push({ nome, valor });
+        saveAndRerender();
+        document.getElementById('goal-modal')?.classList.remove('open');
+        document.getElementById('goal-form').reset();
+      }
+    });
+    
+    // 🔄 Atualiza a interface com os dados do usuário
     function updateUserUI() {
-        const logoutBtn = document.getElementById('btn-logout');
-        const loginNameEl = document.getElementById('login-name');
-        
-        if (auth.currentUser) {
-          if (loginNameEl) loginNameEl.textContent = auth.currentUser.email;
-          if (logoutBtn) logoutBtn.style.display = 'inline';
-        } else {
-          if (loginNameEl) loginNameEl.textContent = 'Não Autenticado';
-          if (logoutBtn) logoutBtn.style.display = 'none';
-        }
+      const nameEl = document.getElementById('current-user-name') || document.getElementById('login-name');
+      if (nameEl && state.currentUser) {
+        nameEl.textContent = state.currentUser;
+      }
     }
 
     document.getElementById('btn-logout') && document.getElementById('btn-logout').addEventListener('click', async () => {

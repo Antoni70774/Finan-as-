@@ -41,6 +41,12 @@
     const db = getFirestore(app);
     try { await enableIndexedDbPersistence(db); } catch(e) {}
 
+    firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+        window.location.href = 'login.html';
+    }
+    });
+
     window.firebase = { auth, db, onAuthStateChanged, GoogleAuthProvider,
       signInWithPopup, signInWithRedirect, signOut,
       signInWithEmailAndPassword, createUserWithEmailAndPassword,

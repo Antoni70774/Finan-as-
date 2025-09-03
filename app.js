@@ -1006,27 +1006,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderGoals() {
-        if (!goalList) return;
-        goalList.innerHTML = '';
-        state.goals.forEach(goal => {
-            const progress = (goal.current / goal.target) * 100;
-            const item = document.createElement('li');
-            item.className = 'goal-item';
-            item.innerHTML = `
-            <h3>${goal.name}</h3>
-            <p>Meta: ${formatCurrency(goal.target)} | Atual: ${formatCurrency(goal.current)}</p>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${Math.min(100, progress)}%;"></div>
-            </div>
-            <span>${progress.toFixed(0)}%</span>
-            <button class="icon-btn" onclick="editGoal('${goal.id}')">
-                <span class="material-icons-sharp">edit</span>
-            </button>
+      const container = document.getElementById('goals-list');
+      if (!container) return;
+      container.innerHTML = '';
+    
+      state.goals.forEach(goal => {
+        const div = document.createElement('div');
+        div.className = 'goal-item';
+        div.innerHTML = `
+          <h4>${goal.name}</h4>
+          <p>Meta: R$ ${goal.target.toFixed(2)}</p>
+          <p>Atual: R$ ${goal.current.toFixed(2)}</p>
+          <progress value="${goal.current}" max="${goal.target}"></progress>
         `;
-            goalList.appendChild(item);
-        });
+        container.appendChild(div);
+      });
     }
-
+    
     // 🧭 Navegação entre abas do menu
     document.getElementById('btn-transactions')?.addEventListener('click', () => showSection('transactions'));
     document.getElementById('btn-goals')?.addEventListener('click', () => showSection('goals'));
@@ -1037,11 +1033,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ✅ Envio do formulário de nova meta
     document.getElementById('goal-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
-      const nome = document.getElementById('goal-name')?.value;
-      const valor = parseFloat(document.getElementById('goal-target')?.value);
+      const name = document.getElementById('goal-name')?.value;
+      const target = parseFloat(document.getElementById('goal-target')?.value);
+      const current = parseFloat(document.getElementById('goal-current')?.value);
+      const date = document.getElementById('goal-date')?.value;
     
-      if (nome && !isNaN(valor)) {
-        state.goals.push({ nome, valor });
+      if (name && !isNaN(target)) {
+        state.goals.push({ name, target, current, date });
         saveAndRerender();
         document.getElementById('goal-modal')?.classList.remove('open');
         document.getElementById('goal-form').reset();
@@ -1054,6 +1052,20 @@ document.addEventListener('DOMContentLoaded', () => {
       if (nameEl && state.currentUser) {
         nameEl.textContent = state.currentUser;
       }
+    }
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const pageId = item.getAttribute('data-page');
+        if (pageId) navigateToPage(pageId);
+      });
+    });
+    
+    function navigateToPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      const target = document.getElementById(pageId);
+      if (target) target.classList.add('active');
     }
 
     document.getElementById('btn-logout') && document.getElementById('btn-logout').addEventListener('click', async () => {

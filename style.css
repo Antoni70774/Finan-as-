@@ -185,7 +185,7 @@ body {
 
 /* Estilo geral para cartões e seções */
 .dashboard-summary, .category-grid, .recent-transactions,
-.goal-item, .payable-item, .summary-boxes, .dashboard-summary .summary-item {
+.goal-item, .payable-item, .summary-boxes {
     background-color: var(--card-bg);
     border-radius: 12px;
     padding: 20px;
@@ -206,16 +206,6 @@ body {
     display: flex;
     justify-content: space-around;
     text-align: center;
-    gap: 15px;
-    padding: 0;
-    box-shadow: none;
-    border: none;
-    background: none;
-}
-
-.dashboard-summary .summary-item {
-    flex: 1;
-    padding: 20px;
 }
 
 .summary-item h4 {
@@ -260,7 +250,6 @@ body {
     padding: 8px 16px;
     border-radius: 20px;
     cursor: pointer;
-    font-weight: 500;
     transition: background-color 0.2s, color 0.2s;
 }
 
@@ -268,26 +257,6 @@ body {
     background-color: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
-}
-
-/* Resumo por Categoria */
-.category-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 15px;
-    padding: 20px;
-    background-color: var(--card-bg);
-    border-radius: 12px;
-}
-
-.category-grid .summary-item {
-    text-align: center;
-    background-color: var(--bg-color);
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: none;
-    border: 1px solid var(--border-color);
-    margin-bottom: 0;
 }
 
 /* Listas de Transações */
@@ -434,41 +403,9 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     margin-left: 10px;
-    padding: 8px 12px;
-    border-radius: 5px;
-    font-weight: 500;
-    transition: background-color 0.2s, color 0.2s;
 }
-
-.payable-actions .btn-edit-payable {
-    background-color: var(--secondary-color);
-    color: var(--text-color);
-}
-
-.payable-actions .btn-edit-payable:hover {
-    background-color: #8C99A9;
-}
-
-.payable-actions .btn-paid-payable {
-    background-color: var(--success-color);
-    color: white;
-}
-
-.payable-actions .btn-paid-payable:hover {
-    background-color: #43A047;
-}
-
-.payable-actions .btn-cancel-payable {
-    background-color: var(--danger-color);
-    color: white;
-}
-
-.payable-actions .btn-cancel-payable:hover {
-    background-color: #D32F2F;
-}
-
 
 /* Resumo Mensal/Anual */
 .summary-boxes {
@@ -673,6 +610,16 @@ body {
     background-color: #C53030;
 }
 
+#btn-logout {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: auto;
+    padding: 10px 15px;
+    border-radius: 5px;
+    z-index: 11;
+}
+
 /*
  * ========================================
  * Menu Lateral
@@ -703,23 +650,10 @@ body {
     cursor: pointer;
     transition: background-color 0.2s;
     border-radius: 8px;
-    font-weight: 500;
 }
 
 .menu-lateral li:hover {
     background-color: var(--bg-color);
-}
-
-#btn-logout {
-    color: var(--danger-color);
-    font-weight: 700;
-    border-top: 1px solid var(--border-color);
-    margin-top: 10px;
-    padding-top: 15px;
-}
-
-#btn-logout:hover {
-    background-color: rgba(229, 62, 62, 0.1);
 }
 
 /*

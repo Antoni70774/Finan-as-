@@ -1049,6 +1049,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    document.getElementById('resumo-prev-month') && document.getElementById('resumo-prev-month').addEventListener('click', () => {
+        state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+        updateAll();
+    });
+    
+    document.getElementById('resumo-next-month') && document.getElementById('resumo-next-month').addEventListener('click', () => {
+        state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+        updateAll();
+    });
+
     document.getElementById('menu-resumo-mensal-btn') && document.getElementById('menu-resumo-mensal-btn').addEventListener('click', () => {
         abrirResumoMensal();
     });

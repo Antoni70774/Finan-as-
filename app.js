@@ -416,15 +416,29 @@ document.addEventListener('DOMContentLoaded', () => {
         atualizarGraficoMensal();
     }
 
-    document.addEventListener("click", function(event) {
-        const menu = document.getElementById("menu-perfil");
-        const botaoMenu = document.getElementById("menu-botao");
-        if (!menu || !botaoMenu) return;
-        const menuVisivel = menu.style.display === "block";
-        if (menuVisivel && !menu.contains(event.target) && !botaoMenu.contains(event.target)) {
-            menu.style.display = "none";
+    // ------------------------ MENU PERFIL ------------------------
+    const menuBotao = document.getElementById("menu-botao");
+    const menuFlutuante = document.getElementById("menu-perfil");
+    
+    if (menuBotao && menuFlutuante) {
+      // Alterna abrir/fechar no clique do botão
+      menuBotao.addEventListener("click", function (event) {
+        event.stopPropagation();
+        menuFlutuante.style.display =
+          (menuFlutuante.style.display === "block") ? "none" : "block";
+      });
+    
+      // Fecha se clicar fora
+      document.addEventListener("click", function (event) {
+        const menuVisivel = menuFlutuante.style.display === "block";
+        if (menuVisivel &&
+            !menuFlutuante.contains(event.target) &&
+            !menuBotao.contains(event.target)) {
+          menuFlutuante.style.display = "none";
         }
-    });
+      });
+    }
+
     document.getElementById('resumo-prev-month') && document.getElementById('resumo-prev-month').addEventListener('click', () => {
         state.currentDate.setMonth(state.currentDate.getMonth() - 1);
         carregarResumoMensal();

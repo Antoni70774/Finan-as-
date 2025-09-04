@@ -303,12 +303,18 @@ const renderPayables = () => {
         <p><strong>Vencimento:</strong> ${formatDate(payable.dueDate)}</p>
       </div>
       <div class="payable-actions">
-        <button class="btn-check" data-id="${payable.id}">${payable.paid ? '✅' : 'Pagar'}</button>
+        <button class="btn-check" data-id="${payable.id}">${payable.paid ? '✅ Pago' : 'Pagar'}</button>
         <button class="btn-edit-payable" data-id="${payable.id}">✏️</button>
         <button class="btn-delete-payable" data-id="${payable.id}">🗑️</button>
       </div>
     `;
     list.appendChild(item);
+
+    // Alternar status de pagamento ao clicar
+    item.querySelector('.btn-check').addEventListener('click', () => {
+      payable.paid = !payable.paid;
+      renderPayables(); // Re-renderiza para atualizar visual
+    });
   });
 };
 

@@ -318,32 +318,6 @@ const renderPayables = () => {
   });
 };
 
-document.getElementById('btn-salvar-edicao').addEventListener('click', () => {
-  const id = document.getElementById('modal-edicao').getAttribute('data-id');
-  const descricao = document.getElementById('descricao').value.trim();
-  const categoria = document.getElementById('categoria').value;
-  const valor = parseFloat(document.getElementById('valor').value.replace(',', '.'));
-  const vencimento = document.getElementById('vencimento').value;
-
-  if (!descricao || !categoria || isNaN(valor) || !vencimento) {
-    alert('Preencha todos os campos corretamente.');
-    return;
-  }
-
-  const index = payablesData.findIndex(p => p.id === id);
-  if (index !== -1) {
-    payablesData[index] = {
-      ...payablesData[index],
-      description: descricao,
-      category: categoria,
-      amount: valor,
-      dueDate: vencimento
-    };
-    renderPayables();
-    fecharModalEdicao();
-  }
-});
-
 const updateAlertBadge = () => {
     const today = new Date();
     const futurePayables = payablesData.filter(p => !p.paid && new Date(p.dueDate + 'T00:00:00') >= today);

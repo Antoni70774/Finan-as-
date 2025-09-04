@@ -11,7 +11,26 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
-<body>
+
+<body class="dark-theme">
+  <!-- 🔧 Script para alternância de tema -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const temaSalvo = localStorage.getItem('tema');
+      if (temaSalvo === 'claro') {
+        document.body.classList.remove('dark-theme');
+      } else {
+        document.body.classList.add('dark-theme'); // modo escuro por padrão
+      }
+    });
+
+    window.trocarTema = () => {
+      document.body.classList.toggle('dark-theme');
+      const temaAtual = document.body.classList.contains('dark-theme') ? 'escuro' : 'claro';
+      localStorage.setItem('tema', temaAtual);
+    };
+  </script>
+
   <!-- 🔗 Firebase SDK + inicialização -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';

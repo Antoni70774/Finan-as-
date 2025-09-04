@@ -711,13 +711,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateAll() {
-        carregarResumoMensal();
+        const monthFiltered = filterTransactionsByMonth(state.transactions, state.currentDate);
+        let transactionsForDisplay = monthFiltered;
+        if (state.chartType === 'expense') transactionsForDisplay = monthFiltered.filter(t => t.type === 'expense');
+        else if (state.chartType === 'income') transactionsForDisplay = monthFiltered.filter(t => t.type === 'income');
+
+        renderSummary(monthFiltered);
+        renderTransactionList(transactionsForDisplay);
+        updateMainChart(monthFiltered);
+        renderGoals();
+        renderPayables();
+        updateMonthDisplay();
+        updateUserUI();
+        updateAll();
         atualizarNomeDoMes();
         atualizarGraficoMensal();
         renderTransactionList(state.transactions);
         verificarContasAVencer();
-        renderGoals();
-        renderPayables();
     }
 
     function filterTransactionsByMonth(transactions, date) {

@@ -547,6 +547,43 @@ section {
     font-weight: 700;
 }
 
+/* 🔷 Bloco superior do Resumo Mensal */
+.resumo-mensal-top {
+  background-color: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+
+/* 🔹 Cartões de Receita, Despesa e Saldo */
+#resumo-mensal-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+#resumo-mensal-summary .summary-item {
+  flex: 1;
+  background-color: var(--card-bg);
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+/* 📊 Gráfico Mensal */
+#monthly-bar-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  max-height: 200px;
+}
+
+
 /*
  * ========================================
  * Modais (Pop-ups)

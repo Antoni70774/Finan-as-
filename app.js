@@ -723,6 +723,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPayables();
         updateMonthDisplay();
         updateUserUI();
+        updateAll();
+        atualizarNomeDoMes();
+        atualizarGraficoMensal();
+        renderTransactionList(state.transactions);
+        verificarContasAVencer();
     }
 
     function filterTransactionsByMonth(transactions, date) {

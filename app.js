@@ -318,6 +318,30 @@ const renderPayables = () => {
   });
 };
 
+document.getElementById('btn-salvar').addEventListener('click', () => {
+  const descricao = document.getElementById('descricao').value.trim();
+  const categoria = document.getElementById('categoria').value;
+  const valor = parseFloat(document.getElementById('valor').value.replace(',', '.'));
+  const vencimento = document.getElementById('vencimento').value;
+
+  if (!descricao || !categoria || isNaN(valor) || !vencimento) {
+    alert('Preencha todos os campos corretamente.');
+    return;
+  }
+
+  // Aqui você atualiza a despesa no array ou banco
+  atualizarDespesa({ descricao, categoria, valor, vencimento });
+
+  fecharModal(); // Fecha o modal após salvar
+});
+
+document.getElementById('btn-cancelar').addEventListener('click', () => {
+  const confirmar = confirm('Deseja cancelar a edição? As alterações serão perdidas.');
+  if (confirmar) {
+    fecharModal(); // Fecha o modal apenas se confirmado
+  }
+});
+
 const updateAlertBadge = () => {
     const today = new Date();
     const futurePayables = payablesData.filter(p => !p.paid && new Date(p.dueDate + 'T00:00:00') >= today);

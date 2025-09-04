@@ -19,8 +19,7 @@
     --font-family: 'Roboto', sans-serif;
     --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
-
-/* Modo Escuro */
+/* 🌙 Modo Escuro (padrão) */
 body.dark-theme {
     --text-color: #E2E8F0;
     --text-light: #A0B3C8;
@@ -30,6 +29,17 @@ body.dark-theme {
     --shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
+/* ☀️ Modo Claro */
+body:not(.dark-theme) {
+    --text-color: #1A202C;
+    --text-light: #4A5568;
+    --bg-color: #F7FAFC;
+    --card-bg: #FFFFFF;
+    --border-color: #CBD5E0;
+    --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Reset e base */
 * {
     margin: 0;
     padding: 0;
@@ -37,7 +47,7 @@ body.dark-theme {
 }
 
 body {
-    font-family: var(--font-family);
+    font-family: var(--font-family, 'Segoe UI', sans-serif);
     background-color: var(--bg-color);
     color: var(--text-color);
     line-height: 1.6;
@@ -49,14 +59,15 @@ body {
     position: relative;
 }
 
+/* Container principal */
 .app-container {
     width: 100%;
     max-width: 450px;
     height: 100%;
     max-height: 800px;
-    background-color: var(--bg-color);
+    background-color: var(--card-bg);
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
     overflow: hidden;

@@ -318,7 +318,8 @@ const renderPayables = () => {
   });
 };
 
-document.getElementById('btn-salvar').addEventListener('click', () => {
+document.getElementById('btn-salvar-edicao').addEventListener('click', () => {
+  const id = document.getElementById('modal-edicao').getAttribute('data-id');
   const descricao = document.getElementById('descricao').value.trim();
   const categoria = document.getElementById('categoria').value;
   const valor = parseFloat(document.getElementById('valor').value.replace(',', '.'));
@@ -329,16 +330,17 @@ document.getElementById('btn-salvar').addEventListener('click', () => {
     return;
   }
 
-  // Aqui você atualiza a despesa no array ou banco
-  atualizarDespesa({ descricao, categoria, valor, vencimento });
-
-  fecharModal(); // Fecha o modal após salvar
-});
-
-document.getElementById('btn-cancelar').addEventListener('click', () => {
-  const confirmar = confirm('Deseja cancelar a edição? As alterações serão perdidas.');
-  if (confirmar) {
-    fecharModal(); // Fecha o modal apenas se confirmado
+  const index = payablesData.findIndex(p => p.id === id);
+  if (index !== -1) {
+    payablesData[index] = {
+      ...payablesData[index],
+      description: descricao,
+      category: categoria,
+      amount: valor,
+      dueDate: vencimento
+    };
+    renderPayables();
+    fecharModalEdicao();
   }
 });
 

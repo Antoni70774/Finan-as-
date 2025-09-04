@@ -742,25 +742,41 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
 
 // Envio do formulário de transação
 document.getElementById('transaction-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('transaction-id').value;
-    const data = {
-        amount: parseFloat(document.getElementById('amount').value),
-        description: document.getElementById('description').value,
-        category: document.getElementById('category').value,
-        date: document.getElementById('date').value,
-        type: document.getElementById('transaction-type').value,
-        createdAt: new Date().toISOString()
-    };
+  e.preventDefault();
 
+  const id = document.getElementById('transaction-id').value;
+  const data = {
+    amount: parseFloat(document.getElementById('amount').value),
+    description: document.getElementById('description').value,
+    category: document.getElementById('category').value,
+    date: document.getElementById('date').value,
+    type: document.getElementById('transaction-type').value,
+    createdAt: new Date().toISOString()
+  };
+
+  try {
     if (id) {
-        await updateTransaction(id, data);
+      await updateTransaction(id, data);
     } else {
-        await addTransaction(data);
+      await addTransaction(data);
     }
-    closeTransactionModal();                               // fecha o modal
-    document.getElementById('transaction-form').reset();   // limpa o formulário
+
+    // Atualiza a interface se necessário
+    updateTransactionList(); // opcional, se você tiver essa função
+
+    // Fecha o modal
+    closeTransactionModal();
+
+    // Limpa o formulário
+    document.getElementById('transaction-form').reset();
+    document.getElementById('transaction-id').value = ''; // limpa o campo hidden de ID
+
+  } catch (error) {
+    console.error('Erro ao salvar transação:', error);
+    alert('Ocorreu um erro ao salvar. Tente novamente.');
+  }
 });
+
 
 
 // Botão de deletar transação

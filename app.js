@@ -249,8 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
         await batch.commit();
     }
 
-    menuBotao && menuBotao.addEventListener('click', () => {
-        menuFlutuante.style.display = menuFlutuante.style.display === 'none' ? 'block' : 'none';
     });
     if (transBtn && transContainer && perfBtn && perfContainer) {
         transBtn.addEventListener('click', () => {

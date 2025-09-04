@@ -740,6 +740,7 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
     window.location.href = "login.html";
 });
 
+
 // Envio do formulário de transação
 document.getElementById('transaction-form').addEventListener('submit', async (e) => {
   e.preventDefault();

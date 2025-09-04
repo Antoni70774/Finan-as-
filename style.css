@@ -59,6 +59,18 @@ body {
     position: relative;
 }
 
+/* Resumo Mensal e Resumo Anual fixos no topo */
+#resumo-mensal-page,
+#resumo-anual-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* garante topo */
+  align-items: stretch;
+  padding-top: 15px;           /* espaço abaixo do header */
+  box-sizing: border-box;
+}
+
+
 /* Container principal */
 .app-container {
     width: 100%;

@@ -59,18 +59,6 @@ body {
     position: relative;
 }
 
-/* Resumo Mensal e Resumo Anual fixos no topo */
-#resumo-mensal-page,
-#resumo-anual-page {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* garante topo */
-  align-items: stretch;
-  padding-top: 15px;           /* espaço abaixo do header */
-  box-sizing: border-box;
-}
-
-
 /* Container principal */
 .app-container {
     width: 100%;
@@ -600,14 +588,59 @@ section {
   padding-top: 0;
 }
 
-/* Resumo Mensal da aba Menu alinhado ao topo */
-#resumo-mensal-page .resumo-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;   /* 🔹 Garante que começa do topo */
-    align-items: stretch;
-    margin-top: 0;
-    padding-top: 10px;             /* 🔹 Pequeno espaçamento do topo */
+/* ===== Corrigido: Resumo Mensal / Resumo Anual =====
+   NÃO definir `display` nesses ids — a visibilidade é controlada por .page / .page.active
+*/
+#resumo-mensal-page,
+#resumo-anual-page {
+  box-sizing: border-box;
+  padding-top: 8px;     /* espaço abaixo do header */
+  min-height: 0;        /* permite scroll do container principal funcionar corretamente */
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Alinha apenas o conteúdo INTERNO para o topo (sem forçar a visibilidade) */
+#resumo-mensal-page .resumo-mensal-top,
+#resumo-anual-page .resumo-anual-top,
+#resumo-anual-page > .summary-boxes,
+#resumo-mensal-page > .dashboard-summary {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 12px;
+}
+
+/* Força layout horizontal dos cartões (Receita/Despesa/Saldo) */
+#resumo-mensal-summary {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 8px 0 12px 0;
+}
+
+/* Ajuste do container do gráfico dentro da página de resumo */
+#resumo-mensal-page .chart-container {
+  margin-top: 0;
+}
+
+/* Garantir que a visibilidade continue sendo controlada por .page/.page.active */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Espaço para bottom-nav — garante que conteúdo não fique colado na barra inferior */
+#app-main {
+  padding-bottom: 90px; /* garante folga para a bottom-nav fixa */
+  box-sizing: border-box;
+}
+
+/* Garante que cada .page ocupe o fluxo normal e comece pelo topo */
+.page {
+  position: relative;
+  min-height: 0;
 }
 
 

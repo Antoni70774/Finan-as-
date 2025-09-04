@@ -282,27 +282,29 @@
           </ul>
         </div>
          <!-- Página: Resumo Mensal -->
-        <div id="resumo-mensal-page" class="page" style="max-height: 100vh; overflow-y: auto; padding: 20px;">
-          <h2>📅 Resumo Mensal</h2>
-          <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
-          
-          <div class="dashboard-summary" id="resumo-mensal-summary">
-            <div class="summary-item">
-              <span>Receita</span>
-              <h4 id="monthly-revenue">R$ 0,00</h4>
-            </div>
-            <div class="summary-item">
-              <span>Despesa</span>
-              <h4 id="monthly-expense">R$ 0,00</h4>
-            </div>
-            <div class="summary-item">
-              <span>Saldo</span>
-              <h4 id="monthly-balance">R$ 0,00</h4>
-            </div>
-          </div>
+        <div id="resumo-mensal-page" class="page">
+          <div class="resumo-mensal-top">
+            <h2>📅 Resumo Mensal</h2>
+            <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
         
-          <div style="max-height: 200px; overflow: hidden;">
-            <canvas id="monthly-bar-chart" width="300" height="130" style="display: block; margin: 0 auto;"></canvas>
+            <div class="dashboard-summary" id="resumo-mensal-summary">
+              <div class="summary-item">
+                <span>Receita</span>
+                <h4 id="monthly-revenue">R$ 0,00</h4>
+              </div>
+              <div class="summary-item">
+                <span>Despesa</span>
+                <h4 id="monthly-expense">R$ 0,00</h4>
+              </div>
+              <div class="summary-item">
+                <span>Saldo</span>
+                <h4 id="monthly-balance">R$ 0,00</h4>
+              </div>
+            </div>
+        
+            <div class="chart-container">
+              <canvas id="monthly-bar-chart" width="300" height="130"></canvas>
+            </div>
           </div>
         
           <div class="month-nav">

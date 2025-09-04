@@ -711,23 +711,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateAll() {
-        const monthFiltered = filterTransactionsByMonth(state.transactions, state.currentDate);
-        let transactionsForDisplay = monthFiltered;
-        if (state.chartType === 'expense') transactionsForDisplay = monthFiltered.filter(t => t.type === 'expense');
-        else if (state.chartType === 'income') transactionsForDisplay = monthFiltered.filter(t => t.type === 'income');
-
-        renderSummary(monthFiltered);
-        renderTransactionList(transactionsForDisplay);
-        updateMainChart(monthFiltered);
-        renderGoals();
-        renderPayables();
-        updateMonthDisplay();
-        updateUserUI();
-        updateAll();
+        carregarResumoMensal();
         atualizarNomeDoMes();
         atualizarGraficoMensal();
         renderTransactionList(state.transactions);
         verificarContasAVencer();
+        renderGoals();
+        renderPayables();
     }
 
     function filterTransactionsByMonth(transactions, date) {
@@ -1054,15 +1044,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    document.getElementById('resumo-prev-month') && document.getElementById('resumo-prev-month').addEventListener('click', () => {
-        state.currentDate.setMonth(state.currentDate.getMonth() - 1);
-        updateAll();
-    });
-    
-    document.getElementById('resumo-next-month') && document.getElementById('resumo-next-month').addEventListener('click', () => {
-        state.currentDate.setMonth(state.currentDate.getMonth() + 1);
-        updateAll();
-    });
 
     document.getElementById('menu-resumo-mensal-btn') && document.getElementById('menu-resumo-mensal-btn').addEventListener('click', () => {
         abrirResumoMensal();

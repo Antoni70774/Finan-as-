@@ -477,6 +477,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    addGoalBtn && addGoalBtn.addEventListener('click', () => openGoalModal());
+    
     function abrirConfig() {
         document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
         document.getElementById('config-page').classList.add('active');
@@ -1036,6 +1038,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function openGoalModal() {
+        const goalModal = document.getElementById('goal-modal');
+        if (goalModal) {
+            goalForm.reset();
+            document.getElementById('goal-id').value = '';
+            document.getElementById('goal-modal-title').textContent = 'Nova Meta Financeira';
+            document.getElementById('delete-goal-btn').style.display = 'none';
+            openModal(goalModal);
+        }
+    }
+
+    document.getElementById('menu-resumo-mensal-btn') && document.getElementById('menu-resumo-mensal-btn').addEventListener('click', () => {
+        abrirResumoMensal();
+    });
+    
+    document.getElementById('menu-resumo-anual-btn') && document.getElementById('menu-resumo-anual-btn').addEventListener('click', () => {
+        abrirResumoAnual();
+    });
+    
+    document.getElementById('menu-perfil-btn') && document.getElementById('menu-perfil-btn').addEventListener('click', () => {
+        abrirPagina('profile-page');
+    });
+    
+    document.getElementById('menu-config-btn') && document.getElementById('menu-config-btn').addEventListener('click', () => {
+        abrirConfig();
+    });
+    
     document.getElementById('btn-logout') && document.getElementById('btn-logout').addEventListener('click', async () => {
         try {
             await signOut(auth);

@@ -25,14 +25,14 @@ import { updateMonthlyChart, createMonthlyChart } from './monthly-chart-setup.js
 
 // Sua configuração do Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
-    authDomain: "controle-financeiro-65744.firebaseapp.com",
-    projectId: "controle-financeiro-65744",
-    storageBucket: "controle-financeiro-65744.appspot.com",
-    messagingSenderId: "587527394934",
-    appId: "1:587527394934:web:c142740ef0139a5cf63157",
-    measurementId: "G-RT2T1HNV4G"
-  };
+  apiKey: "sua-apiKey-aqui",
+  authDomain: "seu-authDomain-aqui",
+  projectId: "seu-projectId-aqui",
+  storageBucket: "seu-storageBucket-aqui",
+  messagingSenderId: "seu-messagingSenderId-aqui",
+  appId: "seu-appId-aqui",
+  measurementId: "seu-measurementId-aqui"
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

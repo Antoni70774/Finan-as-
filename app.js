@@ -837,69 +837,36 @@ document.getElementById('delete-goal-btn').addEventListener('click', async () =>
 });
 
 // Contas a Pagar
-// === Handler unificado para CONTAS A PAGAR ===
-(function(){
-  const payableForm = document.getElementById('payable-form');
-  const payableModal = document.getElementById('payable-modal');
-
-  if (!payableForm) return;
-
-  payableForm.addEventListener('submit', async function (e) {
+document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
+document.getElementById('payable-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    const id = (document.getElementById('payable-id') || {}).value || '';
-    const payable = {
-      description: (document.getElementById('payable-description') || {}).value || '',
-      category: (document.getElementById('payable-category') || {}).value || '',
-      amount: parseFloat((document.getElementById('payable-amount') || {}).value || 0),
-      dueDate: (document.getElementById('payable-date') || {}).value || '',
-      paid: false
+    const id = document.getElementById('payable-id').value;
+    const data = {
+        description: document.getElementById('payable-description').value,
+        category: document.getElementById('payable-category').value,
+        amount: parseFloat(document.getElementById('payable-amount').value),
+        dueDate: document.getElementById('payable-date').value,
+        paid: false
     };
-
-    if (!payable.description || !payable.amount || !payable.dueDate) {
-      alert('Preencha todos os campos da conta a pagar.');
-      return;
+    if (id) {
+        await updatePayable(id, data);
+    } else {
+        await addPayable(data);
     }
-
-    try {
-      if (id) {
-        if (typeof updatePayable === 'function') await updatePayable(id, payable);
-        else {
-          const idx = state.payables.findIndex(p => p.id === id);
-          if (idx > -1) state.payables[idx] = { id, ...payable };
-        }
-      } else {
-        if (typeof addPayable === 'function') await addPayable(payable);
-        else {
-          const newId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString();
-          state.payables.push({ id: newId, ...payable });
-        }
-      }
-
-      if (typeof saveAndRerender === 'function') await saveAndRerender();
-      else updateAll && updateAll();
-
-      payableForm.reset();
-      if (typeof closeModal === 'function' && payableModal) {
-        try { closeModal(payableModal); } catch (err) { payableModal.style.display = 'none'; }
-      } else if (typeof closePayableModal === 'function') {
-        try { closePayableModal(); } catch (err) { payableModal.style.display = 'none'; }
-      } else if (payableModal) {
-        payableModal.style.display = 'none';
-      }
-
-    } catch (err) {
-      console.error('Erro ao salvar conta a pagar:', err);
-      alert('Erro ao salvar conta a pagar. Veja console.');
+    closePayableModal();
+    document.getElementById('payable-form').reset();
+});
+document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
+document.getElementById('payable-list').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    if (btn.classList.contains('btn-check')) {
+        await markPayableAsPaid(id);
+    } else if (btn.classList.contains('btn-edit-payable')) {
+        editPayable(id);
     }
-  });
-
-  const cancelPayBtn = document.getElementById('cancel-payable-btn');
-  if (cancelPayBtn) cancelPayBtn.addEventListener('click', () => {
-    payableForm.reset();
-    if (payableModal) payableModal.style.display = 'none';
-  });
-})();
+});
 
 
 // Funções do menu lateral

@@ -282,7 +282,7 @@
           </ul>
         </div>
          <!-- Página: Resumo Mensal -->
-        <div id="resumo-mensal-page" class="page">
+        <div id="resumo-mensal-page" class="page" style="max-height: 100vh; overflow-y: auto; padding: 20px;">
           <h2>📅 Resumo Mensal</h2>
           <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
           
@@ -301,7 +301,9 @@
             </div>
           </div>
         
-          <canvas id="monthly-bar-chart" width="300" height="130"></canvas>
+          <div style="max-height: 200px; overflow: hidden;">
+            <canvas id="monthly-bar-chart" width="300" height="130" style="display: block; margin: 0 auto;"></canvas>
+          </div>
         
           <div class="month-nav">
             <button id="resumo-prev-month" class="btn-secondary">&lt;</button>
@@ -309,7 +311,7 @@
             <button id="resumo-next-month" class="btn-secondary">&gt;</button>
           </div>
         </div>
-        
+
         <!-- Página: Resumo Anual -->
         <div id="resumo-anual-page" class="page">
           <h2>📈 Resumo Anual</h2>

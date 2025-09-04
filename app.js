@@ -5,7 +5,7 @@ import {
     setDoc, getDocs, onSnapshot, writeBatch, deleteDoc, updateDoc, query, where, orderBy
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-// 🔗 Configuração do Firebase
+// 🔗 Configuração do Firebase (pode ser movida para um arquivo de configuração separado)
 const firebaseConfig = {
     apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
     authDomain: "controle-financeiro-65744.firebaseapp.com",
@@ -48,18 +48,6 @@ const showPage = (pageId) => {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     document.querySelector(`.nav-item[data-page="${pageId}"]`)?.classList.add('active');
     closeSidebar();
-    
-    // Atualiza o header com o nome da página
-    const pageTitles = {
-        'dashboard-page': 'Visão Geral',
-        'goals-page': 'Metas Pessoais',
-        'payables-page': 'Contas a Pagar',
-        'resumo-mensal-page': 'Resumo Mensal',
-        'resumo-anual-page': 'Resumo Anual',
-        'profile-page': 'Perfil',
-        'config-page': 'Configurações'
-    };
-    document.querySelector('.app-header h1').textContent = pageTitles[pageId] || 'Controle Financeiro';
 };
 
 const formatCurrency = (value) => formatter.format(value);
@@ -69,14 +57,6 @@ const formatDate = (date) => new Date(date + 'T00:00:00').toLocaleDateString('pt
 const getMonthYearString = (date) => {
     const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     return `${monthNames[date.getMonth()]} de ${date.getFullYear()}`;
-};
-
-const getChartColors = (numColors) => {
-    const palette = [
-        '#6C5B7B', '#C06C84', '#F67280', '#F8B195', '#A3D2CA', 
-        '#5EAAA8', '#FFD8BE', '#B9B8D3', '#D0A3C9', '#6D597A'
-    ];
-    return Array.from({ length: numColors }, (_, i) => palette[i % palette.length]);
 };
 
 const setupChart = () => {
@@ -149,7 +129,7 @@ const updateChart = (type = 'all') => {
 
     const labels = Object.keys(categories);
     const data = Object.values(categories);
-    const backgroundColors = getChartColors(labels.length);
+    const backgroundColors = labels.map(() => `hsl(${Math.random() * 360}, 70%, 50%)`);
 
     myChart.data.labels = labels;
     myChart.data.datasets[0].data = data;
@@ -271,12 +251,10 @@ const renderPayables = () => {
                 <h4>${payable.description}</h4>
                 <p>Valor: ${formatCurrency(parseFloat(payable.amount))}</p>
                 <p>Vencimento: ${formatDate(payable.dueDate)}</p>
-                <p>Status: ${payable.paid ? 'Pago' : 'A Pagar'}</p>
             </div>
             <div class="payable-actions">
-                <button class="btn-edit-payable" data-id="${payable.id}">Alterar</button>
-                <button class="btn-paid-payable" data-id="${payable.id}">${payable.paid ? 'Pago' : 'Pagar'}</button>
-                <button class="btn-cancel-payable" data-id="${payable.id}">Cancelar</button>
+                <button class="btn-check" data-id="${payable.id}">${payable.paid ? '✅' : 'Pagar'}</button>
+                <button class="btn-edit-payable" data-id="${payable.id}">✏️</button>
             </div>
         `;
         list.appendChild(item);
@@ -378,13 +356,6 @@ const markPayableAsPaid = async (id) => {
     if (!user) return;
     const docRef = doc(db, `users/${user.uid}/payables`, id);
     await updateDoc(docRef, { paid: true });
-};
-
-const cancelPayable = async (id) => {
-    const user = currentUser;
-    if (!user) return;
-    const docRef = doc(db, `users/${user.uid}/payables`, id);
-    await deleteDoc(docRef);
 };
 
 // ----------------------
@@ -706,6 +677,12 @@ document.getElementById('add-transaction-btn').addEventListener('click', () => {
     openTransactionModal();
 });
 
+// Botão de logout
+document.getElementById('btn-logout').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = "login.html";
+});
+
 // Envio do formulário de transação
 document.getElementById('transaction-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -823,16 +800,10 @@ document.getElementById('payable-list').addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
     const id = btn.dataset.id;
-    if (btn.classList.contains('btn-paid-payable')) {
-        if (confirm('Deseja marcar esta conta como paga?')) {
-            await markPayableAsPaid(id);
-        }
+    if (btn.classList.contains('btn-check')) {
+        await markPayableAsPaid(id);
     } else if (btn.classList.contains('btn-edit-payable')) {
         editPayable(id);
-    } else if (btn.classList.contains('btn-cancel-payable')) {
-        if (confirm('Deseja cancelar (excluir) esta conta?')) {
-            await cancelPayable(id);
-        }
     }
 });
 
@@ -883,12 +854,6 @@ document.addEventListener('click', (e) => {
     if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
         closeSidebar();
     }
-});
-
-// Botão de logout no menu
-document.getElementById('btn-logout').addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.href = "login.html";
 });
 
 // ----------------------

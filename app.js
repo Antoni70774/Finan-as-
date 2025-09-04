@@ -108,10 +108,11 @@ const getChartTitle = (type) => {
 const updateChart = (type = 'all') => {
     const chartTitle = getChartTitle(type);
     document.getElementById('chart-title').textContent = chartTitle;
-    
+
     let filteredTransactions = transactionsData.filter(t => {
         const transactionDate = new Date(t.date);
-        return transactionDate.getFullYear() === currentMonth.getFullYear() && transactionDate.getMonth() === currentMonth.getMonth();
+        return transactionDate.getFullYear() === currentMonth.getFullYear() &&
+               transactionDate.getMonth() === currentMonth.getMonth();
     });
 
     if (type !== 'all') {
@@ -120,16 +121,17 @@ const updateChart = (type = 'all') => {
 
     const categories = {};
     filteredTransactions.forEach(t => {
-        if (categories[t.category]) {
-            categories[t.category] += parseFloat(t.amount);
-        } else {
-            categories[t.category] = parseFloat(t.amount);
-        }
+        categories[t.category] = (categories[t.category] || 0) + parseFloat(t.amount);
     });
 
     const labels = Object.keys(categories);
     const data = Object.values(categories);
-    const backgroundColors = labels.map(() => `hsl(${Math.random() * 360}, 70%, 50%)`);
+
+    const pastelColors = [
+        '#A3D5FF', '#FFC1CC', '#C1FFD7', '#FFF5BA',
+        '#D5C1FF', '#FFDAC1', '#C1E1FF', '#E2F0CB'
+    ];
+    const backgroundColors = labels.map((_, i) => pastelColors[i % pastelColors.length]);
 
     myChart.data.labels = labels;
     myChart.data.datasets[0].data = data;
@@ -139,14 +141,42 @@ const updateChart = (type = 'all') => {
     renderCategorySummary(categories);
 };
 
+const iconMap = {
+    // Despesas
+    'Alimentação': '🍽️',
+    'Transporte': '🚌',
+    'Moradia': '🏠',
+    'Lazer': '🎉',
+    'Saúde': '🩺',
+    'Empréstimo': '💳',
+    'Cartão de Crédito': '💸',
+    'Energia': '🔌',
+    'Água': '🚿',
+    'Gás': '🔥',
+    'Internet': '🌐',
+    'Investimento': '📉',
+    'Outros': '📦',
+
+    // Receitas
+    'Salário': '💼',
+    'Combustível': '⛽',
+    'Aluguel': '🏢',
+    'Outras Entradas': '📦'
+};
+
 const renderCategorySummary = (categories) => {
     const summaryDiv = document.getElementById('category-summary');
     summaryDiv.innerHTML = '';
-    
+    summaryDiv.style.display = 'grid';
+    summaryDiv.style.gridTemplateColumns = 'repeat(auto-fit, minmax(120px, 1fr))';
+    summaryDiv.style.gap = '15px';
+
     for (const category in categories) {
         const item = document.createElement('div');
         item.className = 'summary-item';
+        item.style.textAlign = 'center';
         item.innerHTML = `
+            <div style="font-size: 1.5rem;">${iconMap[category] || '📦'}</div>
             <span>${category}</span>
             <h4>${formatCurrency(categories[category])}</h4>
         `;

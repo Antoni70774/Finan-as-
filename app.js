@@ -751,7 +751,8 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     category: document.getElementById('category').value,
     date: document.getElementById('date').value,
     type: document.getElementById('transaction-type').value,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    user: currentUser?.email || 'Desconhecido'
   };
 
   try {
@@ -761,22 +762,24 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
       await addTransaction(data);
     }
 
-    // Atualiza a interface se necessário
-    updateTransactionList(); // opcional, se você tiver essa função
+    // Atualiza a interface
+    refreshDashboard();
 
     // Fecha o modal
     closeTransactionModal();
 
     // Limpa o formulário
     document.getElementById('transaction-form').reset();
-    document.getElementById('transaction-id').value = ''; // limpa o campo hidden de ID
+    document.getElementById('transaction-id').value = '';
+    document.getElementById('transaction-type').value = 'expense';
+    document.getElementById('type-expense-btn').classList.add('active');
+    document.getElementById('type-income-btn').classList.remove('active');
 
   } catch (error) {
     console.error('Erro ao salvar transação:', error);
-    alert('Ocorreu um erro ao salvar. Tente novamente.');
+    alert('Erro ao salvar. Verifique os dados e tente novamente.');
   }
 });
-
 
 
 // Botão de deletar transação

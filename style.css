@@ -253,21 +253,33 @@ body {
 
 /* Gráficos */
 .chart-container {
-    position: relative;
+    position: sticky;
+    top: 60px; /* ajusta conforme altura do header */
+    z-index: 10;
     width: 100%;
-    height: 300px;
+    background-color: var(--card-bg);
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 20px;
 }
-#main-chart, #monthly-bar-chart, #annual-chart {
-    height: 100% !important;
+
+#main-chart,
+#monthly-bar-chart,
+#annual-chart {
     width: 100% !important;
+    height: auto !important;
+    max-height: 300px;
+    display: block;
+    margin: 0 auto;
 }
 
+/* Botões de seleção de gráfico */
 .chart-selector {
     display: flex;
     justify-content: center;
     gap: 10px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .chart-btn {

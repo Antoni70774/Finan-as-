@@ -301,7 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal) modal.classList.remove('active');
     }
 
-    addButton && addButton.addEventListener('click', () => openTransactionModal());
     cancelBtn && cancelBtn.addEventListener('click', () => closeModal(transactionModal));
 
     deleteTransactionBtn && deleteTransactionBtn.addEventListener('click', () => {

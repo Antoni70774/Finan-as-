@@ -549,11 +549,15 @@ section {
 
 /* 🔷 Bloco superior do Resumo Mensal */
 .resumo-mensal-top {
-  background-color: var(--card-bg);
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  margin-bottom: 20px;
+  position: relative;
+  top: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+#resumo-mensal-page {
+  padding-top: 0;
+  margin-top: 0;
 }
 
 /* 🔹 Cartões de Receita, Despesa e Saldo */

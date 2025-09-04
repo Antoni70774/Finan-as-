@@ -255,8 +255,8 @@ body {
 .chart-container {
     position: relative;
     width: 100%;
-    height: 300px;
-    margin-bottom: 20px;
+    height: 220px;
+    margin-bottom: 30px;
 }
 #main-chart, #monthly-bar-chart, #annual-chart {
     height: 100% !important;

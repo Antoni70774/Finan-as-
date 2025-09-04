@@ -758,8 +758,10 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     } else {
         await addTransaction(data);
     }
-    closeTransactionModal();
+    closeTransactionModal();                               // fecha o modal
+    document.getElementById('transaction-form').reset();   // limpa o formulário
 });
+
 
 // Botão de deletar transação
 document.getElementById('delete-transaction-btn').addEventListener('click', async () => {
@@ -823,6 +825,7 @@ document.getElementById('goal-form').addEventListener('submit', async (e) => {
         await addGoal(data);
     }
     closeGoalModal();
+    document.getElementById('transaction-form').reset();
 });
 document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
 document.getElementById('delete-goal-btn').addEventListener('click', async () => {
@@ -851,6 +854,7 @@ document.getElementById('payable-form').addEventListener('submit', async (e) => 
         await addPayable(data);
     }
     closePayableModal();
+    document.getElementById('payable-form').reset();
 });
 document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
 document.getElementById('payable-list').addEventListener('click', async (e) => {

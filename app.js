@@ -260,35 +260,56 @@ const renderGoals = () => {
 };
 
 const renderPayables = () => {
-    const list = document.getElementById('payable-list');
-    list.innerHTML = '';
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  const list = document.getElementById('payable-list');
+  list.innerHTML = '';
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-    payablesData.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+  payablesData.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
 
-    payablesData.forEach(payable => {
-        const dueDate = new Date(payable.dueDate + 'T00:00:00');
-        const isOverdue = dueDate < today && !payable.paid;
-        const isToday = dueDate.getTime() === today.getTime();
-        const item = document.createElement('div');
-        item.className = 'payable-item';
-        if (isOverdue) item.classList.add('overdue');
-        if (isToday) item.classList.add('due-today');
-        item.setAttribute('data-id', payable.id);
-        item.innerHTML = `
-            <div class="payable-details">
-                <h4>${payable.description}</h4>
-                <p>Valor: ${formatCurrency(parseFloat(payable.amount))}</p>
-                <p>Vencimento: ${formatDate(payable.dueDate)}</p>
-            </div>
-            <div class="payable-actions">
-                <button class="btn-check" data-id="${payable.id}">${payable.paid ? '✅' : 'Pagar'}</button>
-                <button class="btn-edit-payable" data-id="${payable.id}">✏️</button>
-            </div>
-        `;
-        list.appendChild(item);
-    });
+  const categoryIcons = {
+    'Alimentação': '🍽️',
+    'Transporte': '🚌',
+    'Moradia': '🏠',
+    'Lazer': '🎉',
+    'Saúde': '🩺',
+    'Empréstimo': '💳',
+    'Cartão de Crédito': '💸',
+    'Energia': '🔌',
+    'Água': '🚿',
+    'Gás': '🔥',
+    'Internet': '🌐',
+    'Investimento': '📉',
+    'Outros': '📦'
+  };
+
+  payablesData.forEach(payable => {
+    const dueDate = new Date(payable.dueDate + 'T00:00:00');
+    const isOverdue = dueDate < today && !payable.paid;
+    const isToday = dueDate.getTime() === today.getTime();
+    const item = document.createElement('div');
+    item.className = 'payable-item';
+    if (isOverdue) item.classList.add('overdue');
+    if (isToday) item.classList.add('due-today');
+    item.setAttribute('data-id', payable.id);
+
+    const icon = categoryIcons[payable.category] || '📌';
+
+    item.innerHTML = `
+      <div class="payable-details">
+        <h4>${icon} ${payable.description}</h4>
+        <p><strong>Categoria:</strong> ${payable.category}</p>
+        <p><strong>Valor:</strong> ${formatCurrency(parseFloat(payable.amount))}</p>
+        <p><strong>Vencimento:</strong> ${formatDate(payable.dueDate)}</p>
+      </div>
+      <div class="payable-actions">
+        <button class="btn-check" data-id="${payable.id}">${payable.paid ? '✅' : 'Pagar'}</button>
+        <button class="btn-edit-payable" data-id="${payable.id}">✏️</button>
+        <button class="btn-delete-payable" data-id="${payable.id}">🗑️</button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
 };
 
 const updateAlertBadge = () => {

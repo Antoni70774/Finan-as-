@@ -110,7 +110,7 @@ const updateChart = (type = 'all') => {
     document.getElementById('chart-title').textContent = chartTitle;
 
     let filteredTransactions = transactionsData.filter(t => {
-        const transactionDate = new Date(t.date);
+        const transactionDate = new Date(t.date + 'T12:00:00-03:00');
         return transactionDate.getFullYear() === currentMonth.getFullYear() &&
                transactionDate.getMonth() === currentMonth.getMonth();
     });
@@ -188,7 +188,7 @@ const calculateDashboardData = () => {
     let income = 0;
     let expense = 0;
     const filteredTransactions = transactionsData.filter(t => {
-        const transactionDate = new Date(t.date);
+        const transactionDate = new Date(t.date + 'T12:00:00-03:00');
         return transactionDate.getFullYear() === currentMonth.getFullYear() && transactionDate.getMonth() === currentMonth.getMonth();
     });
 
@@ -211,7 +211,7 @@ const renderTransactions = () => {
     list.innerHTML = '';
 
     const filteredTransactions = transactionsData.filter(t => {
-        const transactionDate = new Date(t.date);
+        const transactionDate = new Date(t.date + 'T12:00:00-03:00');
         return transactionDate.getFullYear() === currentMonth.getFullYear() && transactionDate.getMonth() === currentMonth.getMonth();
     }).sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -550,7 +550,7 @@ const updateMonthlySummary = (date) => {
     document.getElementById('resumo-current-month-year').textContent = monthYear;
 
     const filtered = transactionsData.filter(t => {
-        const transactionDate = new Date(t.date);
+        const transactionDate = new Date(t.date + 'T12:00:00-03:00');
         return transactionDate.getFullYear() === date.getFullYear() && transactionDate.getMonth() === date.getMonth();
     });
 
@@ -641,7 +641,7 @@ const calculateMonthlyTotals = () => {
     const currentYear = new Date().getFullYear();
 
     transactionsData.forEach(t => {
-        const transactionDate = new Date(t.date);
+        const transactionDate = new Date(t.date + 'T12:00:00-03:00');
         if (transactionDate.getFullYear() === currentYear) {
             const month = transactionDate.getMonth();
             const amount = parseFloat(t.amount);

@@ -404,18 +404,50 @@ section {
     font-weight: 700;
 }
 
-/* Metas */
-#goals-page h2, #payables-page h2, #profile-page h2, #resumo-mensal-page h2, #resumo-anual-page h2, #config-page h2, #ajuda-page h2 {
+/*
+ * ========================================
+ * Seções de Páginas (Metas, Perfil, etc.)
+ * ========================================
+ */
+
+/* Estilos para títulos de todas as páginas principais para consistência */
+#goals-page h2, 
+#payables-page h2, 
+#profile-page h2, 
+#resumo-mensal-page h2, 
+#resumo-anual-page h2, 
+#config-page h2, 
+#ajuda-page h2 {
     margin-bottom: 20px;
     font-weight: 500;
 }
 
-#add-goal-btn, #add-payable-btn {
+/* Estilos para botões de adicionar nas seções de Metas e Contas a Pagar */
+#add-goal-btn, 
+#add-payable-btn {
     margin-bottom: 20px;
 }
 
+/*
+ * ========================================
+ * Estilos da Seção "Metas"
+ * ========================================
+ */
+
 .goal-item {
     cursor: pointer;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.goal-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .goal-item h4 {
@@ -437,6 +469,7 @@ section {
     height: 12px;
     margin-top: 8px;
 }
+
 .progress-bar-container:hover {
     transform: none;
     box-shadow: none;

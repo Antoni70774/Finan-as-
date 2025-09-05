@@ -468,9 +468,9 @@ const openTransactionModal = (transaction = null) => {
 };
 
 const closeTransactionModal = () => {
-  const modal = document.getElementById('transaction-modal');
-  modal.classList.remove('active'); // ✅ fecha corretamente
+  document.getElementById('transaction-modal').style.display = 'none';
 };
+
 
 
 const editTransaction = (id) => {

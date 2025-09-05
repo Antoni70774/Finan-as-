@@ -189,6 +189,37 @@ function carregarResumoMensal() {
   renderTransacoesRecentes(transacoesDoMes);
 }
 
+transactionForm.addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const id = transactionIdInput.value;
+  const type = transactionTypeInput.value;
+  const category = categorySelect.value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  const description = document.getElementById('description').value;
+  const date = document.getElementById('date').value;
+
+  if (!type || !category || isNaN(amount) || !description || !date) {
+    alert("Preencha todos os campos corretamente.");
+    return;
+  }
+
+  const transacao = { type, category, amount, description, date };
+
+  try {
+    await addDoc(collection(db, 'transacoes'), {
+      ...transacao,
+      uid: state.currentUser.uid
+    });
+
+    transactionModal.style.display = 'none';
+    carregarDadosDoUsuario(state.currentUser.uid);
+  } catch (error) {
+    console.error("Erro ao salvar transação:", error);
+    alert("Não foi possível salvar a transação.");
+  }
+});
+
 function atualizarGraficoPorCategoria(transacoes) {
   const categorias = {};
   transacoes.forEach(t => {
@@ -442,6 +473,12 @@ function updateUserUI() {
   if (state.currentUser && nomeEl) {
     nomeEl.textContent = state.currentUser.email || 'Usuário';
   }
+}
+
+async function carregarDadosDoUsuario(uid) {
+  const transSnap = await getDocs(query(collection(db, 'transacoes'), where('uid', '==', uid)));
+  state.transactions = transSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  updateAll();
 }
 
 // Inicialização final

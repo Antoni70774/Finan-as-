@@ -621,6 +621,20 @@ section {
 .summary-item:last-child {
   border-right: none;
 }
+@media (max-width: 767px) {
+  #dashboard-summary {
+    flex-direction: column;
+  }
+
+  .summary-item {
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .summary-item:last-child {
+    border-bottom: none;
+  }
+}
 
 
 /* 🔷 Bloco superior do Resumo Mensal */

@@ -464,7 +464,7 @@ const openTransactionModal = (transaction = null) => {
         deleteBtn.style.display = 'none';
         document.getElementById('date').valueAsDate = new Date(); // Define data atual para nova transação
     }
-    modal.classList.add('active'); // ✅ abre corretamente
+    modal.style.display = 'flex';
 };
 
 const closeTransactionModal = () => {

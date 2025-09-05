@@ -1,3 +1,48 @@
+import { initializeApp } from 'firebase/app';
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+  query,
+  where
+} from 'firebase/firestore';
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut
+} from 'firebase/auth';
+
+const firebaseConfig = {
+      apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
+      authDomain: "controle-financeiro-65744.firebaseapp.com",
+      projectId: "controle-financeiro-65744",
+      storageBucket: "controle-financeiro-65744.appspot.com",
+      messagingSenderId: "587527394934",
+      appId: "1:587527394934:web:c142740ef0139a5cf63157",
+      measurementId: "G-RT2T1HNV4G"
+    };
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const state = {
+  transactions: [],
+  goals: [],
+  payables: [],
+  currentUser: null,
+  currentDate: new Date(),
+  expenseCategories: [...],
+  incomeCategories: [...],
+  chartType: 'all'
+};
+
+
 import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -87,6 +132,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+async function login(email, senha) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+    state.currentUser = userCredential.user;
+    carregarDadosDoUsuario(state.currentUser.uid);
+  } catch (error) {
+    console.error("Erro ao logar:", error);
+  }
+}
+
+async function cadastrar(email, senha) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+    state.currentUser = userCredential.user;
+    carregarDadosDoUsuario(state.currentUser.uid);
+  } catch (error) {
+    console.error("Erro ao cadastrar:", error);
+  }
+}
+
+  onAuthStateChanged(auth, user => {
+  if (user) {
+    state.currentUser = user;
+    carregarDadosDoUsuario(user.uid);
+  } else {
+    state.currentUser = null;
+    // Redirecionar para tela de login
+  }
+});
+  
+  async function salvarTransacao(transacao) {
+  if (!state.currentUser) return;
+  await addDoc(collection(db, 'transacoes'), {
+    ...transacao,
+    uid: state.currentUser.uid
+  });
+  carregarDadosDoUsuario(state.currentUser.uid);
+}
+
+
+  async function carregarDadosDoUsuario(uid) {
+  const transQuery = query(collection(db, 'transacoes'), where('uid', '==', uid));
+  const transSnap = await getDocs(transQuery);
+  state.transactions = transSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  const goalsQuery = query(collection(db, 'metas'), where('uid', '==', uid));
+  const goalsSnap = await getDocs(goalsQuery);
+  state.goals = goalsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  const payablesQuery = query(collection(db, 'contas'), where('uid', '==', uid));
+  const payablesSnap = await getDocs(payablesQuery);
+  state.payables = payablesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  updateAll();
+}
 
   // Navegação entre páginas
   navItems.forEach(item => {

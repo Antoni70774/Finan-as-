@@ -765,14 +765,9 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
       await addTransaction(data);
     }
 
-    // Atualiza a interface
-    refreshDashboard();
-
-    // Fecha o modal
-    closeTransactionModal();
-
-    // Limpa o formulário
-    document.getElementById('transaction-form').reset();
+    refreshDashboard(); // Atualiza a interface
+    closeTransactionModal(); // Fecha o modal
+    document.getElementById('transaction-form').reset(); // Limpa o formulário
     document.getElementById('transaction-id').value = '';
     document.getElementById('transaction-type').value = 'expense';
     document.getElementById('type-expense-btn').classList.add('active');

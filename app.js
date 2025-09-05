@@ -21,7 +21,7 @@ import { getAuth, onAuthStateChanged, signInWithCustomToken, signOut } from 'htt
 import {
     getFirestore, enableIndexedDbPersistence, collection, doc,
     setDoc, getDocs, onSnapshot, writeBatch, deleteDoc, updateDoc,
-    query, where, orderBy
+    query, where, orderBy, addDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // ===========================================
@@ -185,6 +185,7 @@ const saveTransaction = async (data) => {
                 });
                 console.log("Transação salva com sucesso!");
             }
+            document.getElementById('transaction-modal-overlay').style.display = 'none';
         }
     } catch (e) {
         console.error("Erro ao salvar a transação:", e);
@@ -197,6 +198,7 @@ const deleteTransaction = async (id) => {
         if (transactionsRef) {
             await deleteDoc(doc(transactionsRef, id));
             console.log("Transação deletada com sucesso!");
+            document.getElementById('transaction-modal-overlay').style.display = 'none';
         }
     } catch (e) {
         console.error("Erro ao deletar a transação:", e);
@@ -218,6 +220,7 @@ const saveGoal = async (data) => {
                 });
                 console.log("Meta salva com sucesso!");
             }
+            document.getElementById('goal-modal-overlay').style.display = 'none';
         }
     } catch (e) {
         console.error("Erro ao salvar a meta:", e);
@@ -230,6 +233,7 @@ const deleteGoal = async (id) => {
         if (goalsRef) {
             await deleteDoc(doc(goalsRef, id));
             console.log("Meta deletada com sucesso!");
+            document.getElementById('goal-modal-overlay').style.display = 'none';
         }
     } catch (e) {
         console.error("Erro ao deletar a meta:", e);
@@ -251,6 +255,7 @@ const savePayable = async (data) => {
                 });
                 console.log("Conta a pagar salva com sucesso!");
             }
+            document.getElementById('payable-modal-overlay').style.display = 'none';
         }
     } catch (e) {
         console.error("Erro ao salvar a conta a pagar:", e);
@@ -263,6 +268,7 @@ const deletePayable = async (id) => {
         if (payablesRef) {
             await deleteDoc(doc(payablesRef, id));
             console.log("Conta a pagar deletada com sucesso!");
+            document.getElementById('payable-modal-overlay').style.display = 'none';
         }
     } catch (e) {
         console.error("Erro ao deletar a conta a pagar:", e);
@@ -672,7 +678,6 @@ document.addEventListener('DOMContentLoaded', () => {
             date: document.getElementById('transaction-date').value
         };
         await saveTransaction(data);
-        transactionModalOverlay.style.display = 'none'; // CORREÇÃO: Fecha o modal após a ação
     });
 
     goalForm.addEventListener('submit', async (e) => {
@@ -684,7 +689,6 @@ document.addEventListener('DOMContentLoaded', () => {
             currentAmount: parseFloat(document.getElementById('goal-current-amount').value)
         };
         await saveGoal(data);
-        goalModalOverlay.style.display = 'none'; // CORREÇÃO: Fecha o modal após a ação
     });
 
     payableForm.addEventListener('submit', async (e) => {
@@ -697,7 +701,6 @@ document.addEventListener('DOMContentLoaded', () => {
             isPaid: document.getElementById('payable-is-paid').checked
         };
         await savePayable(data);
-        payableModalOverlay.style.display = 'none'; // CORREÇÃO: Fecha o modal após a ação
     });
 
     // --- Edição e Deleção de Itens ---

@@ -8,13 +8,14 @@ import {
 } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_DOMINIO.firebaseapp.com",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_BUCKET.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId: "SEU_APP_ID"
-};
+  apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
+      authDomain: "controle-financeiro-65744.firebaseapp.com",
+      projectId: "controle-financeiro-65744",
+      storageBucket: "controle-financeiro-65744.appspot.com",
+      messagingSenderId: "587527394934",
+      appId: "1:587527394934:web:c142740ef0139a5cf63157",
+      measurementId: "G-RT2T1HNV4G"
+    };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);

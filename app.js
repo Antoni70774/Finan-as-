@@ -435,42 +435,42 @@ const populateCategories = () => {
 };
 
 const openTransactionModal = (transaction = null) => {
-    const modal = document.getElementById('transaction-modal');
-    const form = document.getElementById('transaction-form');
-    const title = document.getElementById('transaction-modal-title');
-    const deleteBtn = document.getElementById('delete-transaction-btn');
-    form.reset();
-    populateCategories();
+  const modal = document.getElementById('transaction-modal');
+  const form = document.getElementById('transaction-form');
+  const title = document.getElementById('transaction-modal-title');
+  const deleteBtn = document.getElementById('delete-transaction-btn');
+  form.reset();
+  populateCategories();
 
-    if (transaction) {
-        title.textContent = 'Editar Transação';
-        document.getElementById('transaction-id').value = transaction.id;
-        document.getElementById('amount').value = transaction.amount;
-        document.getElementById('description').value = transaction.description;
-        document.getElementById('category').value = transaction.category;
-        document.getElementById('date').value = transaction.date;
-        document.getElementById('transaction-type').value = transaction.type;
-        
-        document.getElementById('type-expense-btn').classList.toggle('active', transaction.type === 'expense');
-        document.getElementById('type-income-btn').classList.toggle('active', transaction.type === 'income');
-        
-        deleteBtn.style.display = 'inline-block';
-    } else {
-        title.textContent = 'Nova Transação';
-        document.getElementById('transaction-id').value = '';
-        document.getElementById('transaction-type').value = 'expense';
-        document.getElementById('type-expense-btn').classList.add('active');
-        document.getElementById('type-income-btn').classList.remove('active');
-        deleteBtn.style.display = 'none';
-        document.getElementById('date').valueAsDate = new Date(); // Define data atual para nova transação
-    }
-    modal.style.display = 'flex';
+  if (transaction) {
+    title.textContent = 'Editar Transação';
+    document.getElementById('transaction-id').value = transaction.id;
+    document.getElementById('amount').value = transaction.amount;
+    document.getElementById('description').value = transaction.description;
+    document.getElementById('category').value = transaction.category;
+    document.getElementById('date').value = transaction.date;
+    document.getElementById('transaction-type').value = transaction.type;
+
+    document.getElementById('type-expense-btn').classList.toggle('active', transaction.type === 'expense');
+    document.getElementById('type-income-btn').classList.toggle('active', transaction.type === 'income');
+
+    deleteBtn.style.display = 'inline-block';
+  } else {
+    title.textContent = 'Nova Transação';
+    document.getElementById('transaction-id').value = '';
+    document.getElementById('transaction-type').value = 'expense';
+    document.getElementById('type-expense-btn').classList.add('active');
+    document.getElementById('type-income-btn').classList.remove('active');
+    deleteBtn.style.display = 'none';
+    document.getElementById('date').valueAsDate = new Date();
+  }
+
+  modal.classList.add('active'); // ✅ novo controle
 };
 
 const closeTransactionModal = () => {
-  document.getElementById('transaction-modal').style.display = 'none';
+  document.getElementById('transaction-modal').classList.remove('active'); // ✅ novo controle
 };
-
 
 
 const editTransaction = (id) => {

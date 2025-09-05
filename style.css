@@ -417,6 +417,10 @@ section {
   z-index: 999;
 }
 
+#transaction-modal.active {
+  display: flex;
+}
+
 /*
  * ========================================
  * Seções de Páginas (Metas, Perfil, etc.)

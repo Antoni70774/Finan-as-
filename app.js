@@ -192,7 +192,6 @@ function carregarResumoMensal() {
 transactionForm.addEventListener('submit', async e => {
   e.preventDefault();
 
-  const id = transactionIdInput.value;
   const type = transactionTypeInput.value;
   const category = categorySelect.value;
   const amount = parseFloat(document.getElementById('amount').value);
@@ -207,7 +206,7 @@ transactionForm.addEventListener('submit', async e => {
   const transacao = { type, category, amount, description, date };
 
   try {
-    await addDoc(collection(db, 'transacoes'), {
+    await db.collection('transacoes').add({
       ...transacao,
       uid: state.currentUser.uid
     });
@@ -476,10 +475,11 @@ function updateUserUI() {
 }
 
 async function carregarDadosDoUsuario(uid) {
-  const transSnap = await getDocs(query(collection(db, 'transacoes'), where('uid', '==', uid)));
-  state.transactions = transSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const snapshot = await db.collection('transacoes').where('uid', '==', uid).get();
+  state.transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   updateAll();
 }
+
 
 // Inicialização final
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,375 +1,891 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle Financeiro</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#4A90E2">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Finanças Pessoal</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        :root {
+            --bg-color: #f4f7f9;
+            --surface-color: #ffffff;
+            --text-color: #333333;
+            --primary-color: #4a90e2;
+            --secondary-color: #a0b3c8;
+            --success-color: #4caf50;
+            --danger-color: #e53e3e;
+            --warning-color: #f1c40f;
+            --border-color: #e0e6ed;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --radius-default: 12px;
+            --fab-size: 56px;
+        }
+
+        body.dark-theme {
+            --bg-color: #1a202c;
+            --surface-color: #2d3748;
+            --text-color: #e2e8f0;
+            --border-color: #4a5568;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--surface-color);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-left h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .profile-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: var(--surface-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .alert-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translate(25%, -25%);
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            background-color: var(--surface-color);
+            border-radius: var(--radius-default);
+            box-shadow: var(--card-shadow);
+            width: 250px;
+            z-index: 100;
+            padding: 1rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .profile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .profile-menu-item:hover {
+            background-color: var(--bg-color);
+        }
+
+        .profile-menu-item span {
+            font-size: 1.2rem;
+        }
+
+        .profile-menu-item p {
+            font-size: 0.9rem;
+        }
+
+        .profile-menu-item p.uid-text {
+            word-wrap: break-word;
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+        
+        .profile-menu .btn-logout {
+            color: var(--danger-color);
+            font-weight: 600;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+        }
+
+        .app-main {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+        
+        /* Dashboard Page */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--surface-color);
+            padding: 1.25rem;
+            border-radius: var(--radius-default);
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+
+        .card.income {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .card.expense {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .card.balance {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .card h4 {
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            opacity: 0.9;
+        }
+
+        .card p {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .section-header a {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .transaction-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .transaction-item, .goal-item, .payable-item {
+            background-color: var(--surface-color);
+            padding: 1rem;
+            border-radius: var(--radius-default);
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .transaction-item:hover, .goal-item:hover, .payable-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .transaction-icon {
+            font-size: 1.75rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+        }
+        
+        .transaction-icon.income { color: var(--success-color); }
+        .transaction-icon.expense { color: var(--danger-color); }
+
+        .transaction-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-grow: 1;
+        }
+        
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .description {
+            font-weight: 600;
+        }
+
+        .date {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+        }
+
+        /* Monthly and Annual Summary Pages */
+        .summary-page .summary-header {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-page .summary-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .summary-page .summary-info .card {
+            box-shadow: none;
+            border: 1px solid var(--border-color);
+        }
+        
+        .summary-page .summary-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .summary-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        /* Goals Page */
+        .goal-item {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+        
+        .goal-item h4 {
+            font-size: 1rem;
+        }
+        
+        .goal-amounts {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .progress-bar-container {
+            background-color: var(--bg-color);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success-color);
+            transition: width 0.4s ease-in-out;
+        }
+
+        .goal-progress-text {
+            font-size: 0.8rem;
+            text-align: right;
+            opacity: 0.7;
+        }
+
+        /* Payables Page */
+        .payable-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .payable-item.overdue {
+            border: 2px solid var(--danger-color);
+        }
+
+        .payable-item.due-today {
+            border: 2px solid var(--warning-color);
+        }
+
+        .payable-item h4 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .payable-item p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: var(--radius-default);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input, .form-group select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-default);
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-cancel {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: var(--surface-color);
+            border-top: 1px solid var(--border-color);
+            padding: 0.5rem 0;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: var(--secondary-color);
+            text-decoration: none;
+            width: 25%;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item.active .nav-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 700;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-color);
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .fab-container {
+            position: fixed;
+            bottom: calc(4rem + 1rem); /* Altura da nav + espaçamento */
+            right: 1.5rem;
+            z-index: 20;
+        }
+
+        .fab {
+            width: var(--fab-size);
+            height: var(--fab-size);
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .fab:hover {
+            transform: scale(1.05);
+        }
+
+        .fab .material-symbols-sharp {
+            font-size: 2rem;
+        }
+    </style>
 </head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-left">
+                <span class="material-symbols-sharp" id="toggle-theme-btn" style="cursor:pointer;">dark_mode</span>
+                <h1 id="header-title">Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="profile-btn" id="profile-btn">
+                    <span class="material-symbols-sharp">person</span>
+                    <span class="alert-badge" id="alert-badge">0</span>
+                </div>
+            </div>
+        </header>
 
-<body class="dark-theme">
-  <!-- 🔧 Script para alternância de tema -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const temaSalvo = localStorage.getItem('tema');
-      if (temaSalvo === 'claro') {
-        document.body.classList.remove('dark-theme');
-      } else {
-        document.body.classList.add('dark-theme'); // modo escuro por padrão
-      }
-    });
-
-    window.trocarTema = () => {
-      document.body.classList.toggle('dark-theme');
-      const temaAtual = document.body.classList.contains('dark-theme') ? 'escuro' : 'claro';
-      localStorage.setItem('tema', temaAtual);
-    };
-  </script>
-
-  <!-- 🔗 Firebase SDK + inicialização -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-    import { 
-      getFirestore, enableIndexedDbPersistence, collection, doc,
-      setDoc, getDocs, onSnapshot, writeBatch
-    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-    // 🔧 Configuração correta
-    const firebaseConfig = {
-      apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
-      authDomain: "controle-financeiro-65744.firebaseapp.com",
-      projectId: "controle-financeiro-65744",
-      storageBucket: "controle-financeiro-65744.appspot.com",
-      messagingSenderId: "587527394934",
-      appId: "1:587527394934:web:c142740ef0139a5cf63157",
-      measurementId: "G-RT2T1HNV4G"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // Ativa cache offline
-    (async () => {
-      try { await enableIndexedDbPersistence(db); }
-      catch (e) { console.warn("IndexedDB não disponível:", e); }
-    })();
-
-    window.firebase = { auth, db, collection, doc, setDoc, getDocs, onSnapshot, writeBatch };
-
-    // 🔒 Redireciona para login se não houver usuário
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        console.log("Usuário logado:", user.email);
-      }
-    });
-
-    // 🚪 Logout
-    document.addEventListener("click", async (e) => {
-      if (e.target.id === "btn-logout") {
-        await signOut(auth);
-        window.location.href = "login.html";
-      }
-    });
-  </script>
-
-  <div class="app-container">
-    <!-- Header -->
-    <header class="app-header">
-      <h1>Visão Geral</h1>
-      <div class="profile-icon">
-        <div id="alert-icon" onclick="abrirAlerta()">
-          🔔 <span id="alert-count" class="badge">0</span>
-        </div>
-      </div>
-    </header>
-    
-    <!-- Main Content -->
-    <main id="app-main">
-      <!-- Dashboard Page -->
-      <div id="dashboard-page" class="page active">
-        <div class="month-nav">
-          <button id="prev-month" class="btn-secondary">&lt;</button>
-          <span id="current-month-year"></span>
-          <button id="next-month" class="btn-secondary">&gt;</button>
-        </div>
-        <div class="dashboard-summary" id="dashboard-summary">
-          <div class="summary-item">
-            <span>Receita</span>
-            <h4 id="month-income">R$ 0,00</h4>
-          </div>
-          <div class="summary-item">
-            <span>Despesa</span>
-            <h4 id="month-expense">R$ 0,00</h4>
-          </div>
-          <div class="summary-item">
-            <span>Saldo</span>
-            <h4 id="month-balance">R$ 0,00</h4>
-          </div>
-        </div>
-        <div class="chart-selector">
-          <button class="chart-btn active" data-type="all">Geral</button>
-          <button class="chart-btn" data-type="expense">Despesas</button>
-          <button class="chart-btn" data-type="income">Receitas</button>
-        </div>
-        <div class="chart-container">
-          <h3 id="chart-title">Movimentação por Categoria</h3>
-          <canvas id="main-chart"></canvas>
-        </div>
-        <div id="chart-details" class="chart-details"></div>
-
-        <div class="category-summary-section">
-          <h3>Resumo por Categoria</h3>
-          <div id="category-summary" class="category-grid"></div>
+        <!-- Profile Menu -->
+        <div class="profile-menu" id="profile-menu">
+            <div class="profile-menu-item">
+                <span class="material-symbols-sharp">account_circle</span>
+                <div>
+                    <p>Meu Perfil</p>
+                    <p class="uid-text" id="profile-uid">uid: ...</p>
+                </div>
+            </div>
+            <div class="profile-menu-item" data-page="goals">
+                <span class="material-symbols-sharp">emoji_events</span>
+                <p>Metas</p>
+            </div>
+            <div class="profile-menu-item" data-page="payables">
+                <span class="material-symbols-sharp">calendar_month</span>
+                <p>Contas a Pagar</p>
+            </div>
+            <div class="btn-logout" id="btn-logout">
+                <span class="material-symbols-sharp">logout</span>
+                Sair
+            </div>
         </div>
         
-        <div class="recent-transactions">
-          <h3>Transações Recentes</h3>
-          <ul id="transaction-list"></ul>
-        </div>
-      </div>
+        <!-- Main Content (Pages) -->
+        <main class="app-main" id="app-main">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page active">
+                <section class="summary-cards">
+                    <div class="card income">
+                        <h4>Receita Total</h4>
+                        <p id="total-revenue">R$ 0,00</p>
+                    </div>
+                    <div class="card expense">
+                        <h4>Despesa Total</h4>
+                        <p id="total-expense">R$ 0,00</p>
+                    </div>
+                    <div class="card balance">
+                        <h4>Saldo Atual</h4>
+                        <p id="total-balance">R$ 0,00</p>
+                    </div>
+                </section>
+                
+                <section>
+                    <div class="section-header">
+                        <h3>Visão Geral das Despesas</h3>
+                        <a href="#" class="btn-link">Ver Relatório</a>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="main-chart"></canvas>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-header">
+                        <h3>Transações Recentes</h3>
+                        <a href="#" class="btn-link" data-page="monthly-summary">Ver Todas</a>
+                    </div>
+                    <ul class="transaction-list" id="transaction-list">
+                        <!-- Transações recentes serão inseridas aqui -->
+                    </ul>
+                </section>
+            </div>
+
+            <!-- Monthly Summary Page -->
+            <div id="monthly-summary-page" class="page">
+                <h2 id="monthly-page-title" style="text-align: center; margin-bottom: 2rem;">Resumo Mensal</h2>
+                <div class="summary-info">
+                    <div class="card income">
+                        <h4>Receita</h4>
+                        <p id="monthly-revenue-summary">R$ 0,00</p>
+                    </div>
+                    <div class="card expense">
+                        <h4>Despesa</h4>
+                        <p id="monthly-expense-summary">R$ 0,00</p>
+                    </div>
+                    <div class="card balance">
+                        <h4>Saldo</h4>
+                        <p id="monthly-balance-summary">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <div class="summary-content">
+                    <section>
+                        <h3>Distribuição das Despesas</h3>
+                        <div class="chart-container">
+                            <canvas id="monthly-pie-chart"></canvas>
+                        </div>
+                    </section>
+                    
+                    <section>
+                        <h3>Transações</h3>
+                        <ul class="summary-list" id="monthly-transactions-list">
+                            <!-- Transações do mês serão inseridas aqui -->
+                        </ul>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Annual Summary Page -->
+            <div id="annual-summary-page" class="page">
+                <h2 id="annual-page-title" style="text-align: center; margin-bottom: 2rem;">Resumo Anual</h2>
+                <div class="summary-info">
+                    <div class="card income">
+                        <h4>Receita Anual</h4>
+                        <p id="annual-revenue-summary">R$ 0,00</p>
+                    </div>
+                    <div class="card expense">
+                        <h4>Despesa Anual</h4>
+                        <p id="annual-expense-summary">R$ 0,00</p>
+                    </div>
+                    <div class="card balance">
+                        <h4>Saldo Anual</h4>
+                        <p id="annual-balance-summary">R$ 0,00</p>
+                    </div>
+                </div>
+                <div class="summary-content">
+                    <section>
+                        <h3>Desempenho Mensal</h3>
+                        <div class="chart-container">
+                            <canvas id="annual-chart"></canvas>
+                        </div>
+                    </section>
+                </div>
+            </div>
 
             <!-- Goals Page -->
             <div id="goals-page" class="page">
-              <h2>Metas Pessoais</h2>
-              <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
-              <div id="goal-list"></div>
+                <div class="section-header">
+                    <h3>Minhas Metas de Poupança</h3>
+                    <button class="btn btn-primary" id="add-goal-btn">
+                        <span class="material-symbols-sharp">add</span> Nova Meta
+                    </button>
+                </div>
+                <div class="goals-list" id="goals-list">
+                    <!-- Metas de poupança serão inseridas aqui -->
+                </div>
             </div>
-            
+
+            <!-- Payables Page -->
             <div id="payables-page" class="page">
-                <h2>Despesas a Pagar</h2>
-                <button id="add-payable-btn" class="btn-primary">Nova Conta</button>
-                <div id="payable-list"></div>
+                <div class="section-header">
+                    <h3>Contas a Pagar</h3>
+                    <button class="btn btn-primary" id="add-payable-btn">
+                        <span class="material-symbols-sharp">add</span> Nova Conta
+                    </button>
+                </div>
+                <div class="payables-list" id="payables-list">
+                    <!-- Contas a pagar serão inseridas aqui -->
+                </div>
             </div>
 
-            <!-- Profile Page -->
-            <div id="profile-page" class="page">
-                <h2>Perfil</h2>
-                <div>
-                    <span>Usuário atual: <span id="current-user-name"></span></span>
-                </div>
-                <div class="bank-connect">
-                    <h4>Conexão Bancária</h4>
-                    <p>Selecione seu banco para conectar:</p>
-                    <div class="bank-integration">
-                        <button class="bank-button" onclick="connectBank('nubank')">
-                            <img src="assets/nubank-icon.png" alt="Nubank">
-                            Nubank
-                        </button>
-                        <button class="bank-button" onclick="connectBank('itau')">
-                            <img src="assets/itau-icon.png" alt="Itaú">
-                            Itaú
-                        </button>
-                        <button class="bank-button" onclick="connectBank('caixa')">
-                            <img src="assets/caixa-icon.png" alt="Caixa">
-                            Caixa
-                        </button>
-                    </div>
-                </div>
-                <button id="export-data-btn" class="btn-secondary">Exportar Dados</button>
-            </div>
         </main>
-
-        <!-- Transaction Modal -->
-        <div id="transaction-modal" class="modal-overlay">
-            <div class="modal-content">
-                <form id="transaction-form">
-                    <h3 id="transaction-modal-title">Nova Transação</h3>
-                    <div class="toggle-type">
-                        <button type="button" id="type-expense-btn" class="toggle-btn active">Despesa</button>
-                        <button type="button" id="type-income-btn" class="toggle-btn">Receita</button>
-                    </div>
-                    <input type="hidden" id="transaction-type" value="expense">
-                    <label for="amount">Valor</label>
-                    <input type="number" id="amount" placeholder="R$ 0,00" step="0.01" required>
-                    <label for="description">Descrição</label>
-                    <input type="text" id="description" placeholder="Ex: Almoço" required>
-                    <label for="category">Categoria</label>
-                    <select id="category" required></select>
-                    <label for="date">Data</label>
-                    <input type="date" id="date" required>
-                    <input type="hidden" id="transaction-id">
-                    <div class="modal-actions" id="transaction-modal-actions">
-                        <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn-primary">Salvar</button>
-                        <button type="button" id="delete-transaction-btn" class="btn-danger" style="display:none;">Excluir</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <!-- Goal Modal -->
-        <div id="goal-modal" class="modal-overlay">
-            <div class="modal-content">
-                <form id="goal-form">
-                    <h3 id="goal-modal-title">Nova Meta Financeira</h3>
-                    <input type="hidden" id="goal-id">
-                    <label for="goal-name">Nome</label>
-                    <input type="text" id="goal-name" required>
-                    <label for="goal-target">Valor alvo</label>
-                    <input type="number" id="goal-target" step="0.01" required>
-                    <label for="goal-current">Valor atual</label>
-                    <input type="number" id="goal-current" step="0.01" required>
-                    <label for="goal-date">Data limite</label>
-                    <input type="date" id="goal-date" required>
-                    <div class="modal-actions">
-                        <button type="button" id="cancel-goal-btn" class="btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn-primary">Salvar</button>
-                        <button type="button" id="delete-goal-btn" class="btn-danger" style="display:none;">Excluir</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <!-- Payable Modal -->
-        <div id="payable-modal" class="modal-overlay">
-            <div class="modal-content">
-                <!-- CORRIGIDO: todos campos e ids alinhados com JS -->
-                <form id="payable-form">
-                    <h3 id="payable-modal-title">Nova Conta a Pagar</h3>
-                    <input type="hidden" id="payable-id">
-                    <label for="payable-description">Descrição</label>
-                    <input type="text" id="payable-description" required>
-                    <label for="payable-category">Categoria</label>
-                    <input type="text" id="payable-category" required>
-                    <label for="payable-amount">Valor</label>
-                    <input type="number" id="payable-amount" step="0.01" required>
-                    <label for="payable-date">Data de Vencimento</label>
-                    <input type="date" id="payable-date" required>
-                    <div class="modal-actions">
-                        <button type="button" id="cancel-payable-btn" class="btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn-primary">Salvar</button>
-                    </div>
-                </form>
-            </div>
+        
+        <!-- Floating Action Button -->
+        <div class="fab-container">
+            <button class="fab" id="add-transaction-fab">
+                <span class="material-symbols-sharp">add</span>
+            </button>
         </div>
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
-            <button class="nav-item active" data-page="dashboard-page">
-                <span class="material-icons-sharp">home</span>
-            </button>
-            <button class="nav-item" data-page="goals-page">
-                <span class="material-icons-sharp">flag</span>
-            </button>
-            <button id="add-transaction-btn" class="fab">
-                <span class="material-icons-sharp">add</span>
-            </button>
-            <button class="nav-item" data-page="payables-page">
-                <span class="material-icons-sharp">notifications</span>
-            </button>
-            <button id="menu-botao" class="nav-item profile-trigger">
-              <span class="material-icons-sharp">menu</span>
-            </button>
+            <a href="#" class="nav-item active" data-page="dashboard">
+                <span class="material-symbols-sharp nav-icon">dashboard</span>
+                <span class="nav-label">Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-page="monthly-summary">
+                <span class="material-symbols-sharp nav-icon">calendar_month</span>
+                <span class="nav-label">Mensal</span>
+            </a>
+            <a href="#" class="nav-item" data-page="annual-summary">
+                <span class="material-symbols-sharp nav-icon">trending_up</span>
+                <span class="nav-label">Anual</span>
+            </a>
         </nav>
-        <!-- Menu lateral -->
-        <div id="menu-perfil" class="menu-lateral" style="display: none;">
-          <ul>
-            <li onclick="abrirResumoMensal()">📅 Resumo Mensal</li>
-            <li onclick="abrirResumoAnual()">📈 Resumo Anual</li>
-            <li onclick="abrirPagina('profile-page')">👤 Perfil</li>
-            <li onclick="exportarDados()">📤 Exportar Dados</li>
-            <li onclick="abrirConfig()">⚙️ Configurações</li>
-            <li>
-              <button id="btn-logout" class="btn-secondary">🚪 Sair</button>
-            </li>
-          </ul>
-        </div>
-         <!-- Página: Resumo Mensal -->
-        <div id="resumo-mensal-page" class="page">
-          <div class="resumo-mensal-top">
-            <h2>📅 Resumo Mensal</h2>
-            <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
-        
-            <div class="dashboard-summary" id="resumo-mensal-summary">
-              <div class="summary-item">
-                <span>Receita</span>
-                <h4 id="monthly-revenue">R$ 0,00</h4>
-              </div>
-              <div class="summary-item">
-                <span>Despesa</span>
-                <h4 id="monthly-expense">R$ 0,00</h4>
-              </div>
-              <div class="summary-item">
-                <span>Saldo</span>
-                <h4 id="monthly-balance">R$ 0,00</h4>
-              </div>
-            </div>
-        
-            <div class="chart-container">
-              <canvas id="monthly-bar-chart" width="300" height="130"></canvas>
-            </div>
-          </div>
-        
-          <div class="month-nav">
-            <button id="resumo-prev-month" class="btn-secondary">&lt;</button>
-            <span id="resumo-current-month-year"></span>
-            <button id="resumo-next-month" class="btn-secondary">&gt;</button>
-          </div>
-        </div>
+    </div>
 
-        <!-- Página: Resumo Anual -->
-        <div id="resumo-anual-page" class="page">
-          <h2>📈 Resumo Anual</h2>
-          <div class="summary-boxes">
-            <div class="box"><h4>Receita Total</h4><p id="annual-revenue">R$ 0,00</p></div>
-            <div class="box"><h4>Despesa Total</h4><p id="annual-expense">R$ 0,00</p></div>
-            <div class="box"><h4>Saldo Acumulado</h4><p id="annual-balance">R$ 0,00</p></div>
-          </div>
-          <canvas id="annual-chart" width="100%" height="70"></canvas>
-        </div>
-      </div>
-        <!-- Perfil -->
-        <div id="perfil-page" class="page">
-          <h2>👤 Perfil do Usuário</h2>
-          <p><b>Usuário atual:</b> <span id="perfil-usuario"></span></p>
-          <p><b>Email:</b> <span id="perfil-email"></span></p>
-          <p><b>Banco conectado:</b> <span id="perfil-banco"></span></p>
-        </div>
-        
-        <!-- Página: Configurações -->
-        <div id="config-page" class="page">
-          <h2>⚙️ Configurações</h2>
-          <ul class="config-options">
-            <li><button onclick="exportarDados()">📤 Exportar Dados</button></li>
-            <li><button onclick="trocarTema()">🎨 Alterar Tema</button></li>
-            <li><button onclick="resetarApp()">♻️ Resetar Aplicativo</button></li>
-          </ul>
-        </div>
-        
-        <!-- Ajuda -->
-        <div id="ajuda-page" class="page">
-          <h2>❓ Ajuda</h2>
-          <p>Bem-vindo ao <b>Controle Financeiro</b>!</p>
-          <ul>
-            <li>📅 Resumo Mensal → Veja receitas, despesas e saldo do mês.</li>
-            <li>📊 Resumo Anual → Acompanhe seu desempenho no ano.</li>
-            <li>👤 Perfil → Gerencie suas informações pessoais.</li>
-            <li>⚙️ Configurações → Exporte dados, mude tema ou reset.</li>
-          </ul>
-        </div>
-
-    <!-- Modal de alerta -->
-                <div id="alert-modal" class="modal">
-                  <div class="modal-content">
-                    <h3>Contas a vencer</h3>
-                    <ul id="alert-list"></ul>
-                    <button onclick="fecharAlerta()">Fechar</button>
-                  </div>
+    <!-- Modal para Transações -->
+    <div class="modal-overlay" id="transaction-modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="transaction-modal-title">Adicionar Transação</h3>
+                <button class="modal-close-btn btn-cancel">&times;</button>
+            </div>
+            <form id="transaction-form" class="modal-form">
+                <input type="hidden" id="transaction-id">
+                <div class="form-group">
+                    <label for="transaction-type">Tipo</label>
+                    <select id="transaction-type" required>
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
                 </div>
-            </div>
+                <div class="form-group">
+                    <label for="transaction-description">Descrição</label>
+                    <input type="text" id="transaction-description" placeholder="Ex: Salário, Aluguel" required>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-amount">Valor</label>
+                    <input type="number" id="transaction-amount" step="0.01" placeholder="Ex: 1500.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-category">Categoria</label>
+                    <input type="text" id="transaction-category" placeholder="Ex: Alimentação, Transporte" required>
+                </div>
+                <div class="form-group">
+                    <label for="transaction-date">Data</label>
+                    <input type="date" id="transaction-date" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" id="btn-delete-transaction">Excluir</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
     
-   </main>
-  
-  </div>
+    <!-- Modal para Metas -->
+    <div class="modal-overlay" id="goal-modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="goal-modal-title">Adicionar Nova Meta</h3>
+                <button class="modal-close-btn btn-cancel">&times;</button>
+            </div>
+            <form id="goal-form" class="modal-form">
+                <input type="hidden" id="goal-id">
+                <div class="form-group">
+                    <label for="goal-name">Nome da Meta</label>
+                    <input type="text" id="goal-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="goal-target-amount">Valor Alvo</label>
+                    <input type="number" id="goal-target-amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="goal-current-amount">Valor Atual</label>
+                    <input type="number" id="goal-current-amount" step="0.01" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" id="btn-delete-goal">Excluir</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para Contas a Pagar -->
+    <div class="modal-overlay" id="payable-modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="payable-modal-title">Adicionar Conta a Pagar</h3>
+                <button class="modal-close-btn btn-cancel">&times;</button>
+            </div>
+            <form id="payable-form" class="modal-form">
+                <input type="hidden" id="payable-id">
+                <div class="form-group">
+                    <label for="payable-name">Descrição</label>
+                    <input type="text" id="payable-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="payable-amount">Valor</label>
+                    <input type="number" id="payable-amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="payable-due-date">Data de Vencimento</label>
+                    <input type="date" id="payable-due-date" required>
+                </div>
+                <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="payable-is-paid">
+                    <label for="payable-is-paid">Já Paguei</label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" id="btn-delete-payable">Excluir</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-  <!-- Seu app.js -->
- <script type="module" src="./app.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>

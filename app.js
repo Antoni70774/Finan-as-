@@ -454,6 +454,24 @@ function registerServiceWorker() {
   }
 }
 
+export function updateExpenseChart(transactions) {
+  if (!chartInstance) return;
+
+  const categorias = {};
+  transactions.forEach(t => {
+    if (t.type === 'expense') {
+      categorias[t.category] = (categorias[t.category] || 0) + t.amount;
+    }
+  });
+
+  const labels = Object.keys(categorias);
+  const valores = Object.values(categorias);
+
+  chartInstance.data.labels = labels;
+  chartInstance.data.datasets[0].data = valores;
+  chartInstance.update();
+}
+
 // ✅ Funções globais
 window.exportarDados = exportarDados;
 window.verificarContasAVencer = verificarContasAVencer;
@@ -466,6 +484,10 @@ function updateAll() {
   renderGoals();
   renderPayables();
 }
+
+const transacoesDoMes = state.transactions.filter(...);
+updateExpenseChart(transacoesDoMes);
+
 
 function updateUserUI() {
   const nomeEl = document.getElementById('current-user-name');

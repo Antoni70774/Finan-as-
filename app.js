@@ -1,11 +1,11 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { 
+import {
     getFirestore, enableIndexedDbPersistence, collection, doc,
     setDoc, getDocs, onSnapshot, writeBatch, deleteDoc, updateDoc, query, where, orderBy
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-// 🔗 Configuração do Firebase (pode ser movida para um arquivo de configuração separado)
+// 🔗 Configuração do Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
     authDomain: "controle-financeiro-65744.firebaseapp.com",
@@ -407,7 +407,7 @@ const populateCategories = () => {
     const select = document.getElementById('category');
     select.innerHTML = '';
     const categories = [
-        "Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", 
+        "Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação",
         "Salário", "Freelance", "Rendimentos", "Presentes", "Outros"
     ];
     categories.forEach(cat => {
@@ -446,11 +446,11 @@ const openTransactionModal = (transaction = null) => {
     deleteBtn.style.display = 'none';
     document.getElementById('date').valueAsDate = new Date();
   }
-  modal.classList.add('active'); // ✅ novo controle
+  modal.classList.add('active');
 };
 
 const closeTransactionModal = () => {
-  document.getElementById('transaction-modal').classList.remove('active'); // ✅ novo controle
+    document.getElementById('transaction-modal').classList.remove('active');
 };
 
 const editTransaction = (id) => {
@@ -505,7 +505,7 @@ const openPayableModal = (payable = null) => {
         document.getElementById('payable-id').value = payable.id;
         document.getElementById('payable-description').value = payable.description;
         document.getElementById('payable-category').value = payable.category;
-        document.getElementById('payable-amount').value = payable.amount;
+        document.getElementById('payable-amount').value = parseFloat(payable.amount);
         document.getElementById('payable-date').value = payable.dueDate;
     } else {
         title.textContent = 'Nova Conta a Pagar';
@@ -731,9 +731,9 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
       await addTransaction(data);
     }
 
-    refreshDashboard(); 
-    closeTransactionModal(); // Fecha o modal
-    document.getElementById('transaction-form').reset(); // Limpa o formulário
+    refreshDashboard();
+    closeTransactionModal();
+    document.getElementById('transaction-form').reset();
     document.getElementById('transaction-id').value = '';
     document.getElementById('transaction-type').value = 'expense';
     document.getElementById('type-expense-btn').classList.add('active');
@@ -750,7 +750,7 @@ document.getElementById('delete-transaction-btn').addEventListener('click', asyn
     const id = document.getElementById('transaction-id').value;
     if (confirm('Tem certeza que deseja excluir esta transação?')) {
         await deleteTransaction(id);
-        closeTransactionModal();
+        closeTransactionModal(); // Fecha o modal após a exclusão
     }
 });
 
@@ -803,7 +803,7 @@ document.getElementById('goal-form').addEventListener('submit', async (e) => {
     };
     if (id) {
         await updateGoal(id, data);
-    } else 
+    } else
  {
         await addGoal(data);
     }
@@ -834,7 +834,7 @@ document.getElementById('payable-form').addEventListener('submit', async (e) => 
     };
     if (id) {
         await updatePayable(id, data);
-    } else 
+    } else
  {
         await addPayable(data);
     }

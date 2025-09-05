@@ -51,7 +51,6 @@ const showPage = (pageId) => {
 };
 
 const formatCurrency = (value) => formatter.format(value);
-
 const formatDate = (date) => new Date(date + 'T00:00:00').toLocaleDateString('pt-BR');
 
 const getMonthYearString = (date) => {
@@ -63,9 +62,7 @@ const setupChart = () => {
     const ctx = document.getElementById('main-chart').getContext('2d');
     const chartType = 'all';
     const chartTitle = getChartTitle(chartType);
-
     document.getElementById('chart-title').textContent = chartTitle;
-
     myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -108,22 +105,18 @@ const getChartTitle = (type) => {
 const updateChart = (type = 'all') => {
     const chartTitle = getChartTitle(type);
     document.getElementById('chart-title').textContent = chartTitle;
-
     let filteredTransactions = transactionsData.filter(t => {
         const transactionDate = new Date(t.date + 'T12:00:00-03:00');
         return transactionDate.getFullYear() === currentMonth.getFullYear() &&
                transactionDate.getMonth() === currentMonth.getMonth();
     });
-
     if (type !== 'all') {
         filteredTransactions = filteredTransactions.filter(t => t.type === type);
     }
-
     const categories = {};
     filteredTransactions.forEach(t => {
         categories[t.category] = (categories[t.category] || 0) + parseFloat(t.amount);
     });
-
     const labels = Object.keys(categories);
     const data = Object.values(categories);
 
@@ -137,7 +130,6 @@ const updateChart = (type = 'all') => {
     myChart.data.datasets[0].data = data;
     myChart.data.datasets[0].backgroundColor = backgroundColors;
     myChart.update();
-
     renderCategorySummary(categories);
 };
 
@@ -170,13 +162,13 @@ const renderCategorySummary = (categories) => {
     summaryDiv.style.display = 'grid';
     summaryDiv.style.gridTemplateColumns = 'repeat(auto-fit, minmax(120px, 1fr))';
     summaryDiv.style.gap = '15px';
-
     for (const category in categories) {
         const item = document.createElement('div');
         item.className = 'summary-item';
         item.style.textAlign = 'center';
         item.innerHTML = `
-            <div style="font-size: 1.5rem;">${iconMap[category] || '📦'}</div>
+            <div style="font-size: 1.5rem;">${iconMap[category] ||
+'📦'}</div>
             <span>${category}</span>
             <h4>${formatCurrency(categories[category])}</h4>
         `;
@@ -191,7 +183,6 @@ const calculateDashboardData = () => {
         const transactionDate = new Date(t.date + 'T12:00:00-03:00');
         return transactionDate.getFullYear() === currentMonth.getFullYear() && transactionDate.getMonth() === currentMonth.getMonth();
     });
-
     filteredTransactions.forEach(t => {
         const amount = parseFloat(t.amount);
         if (t.type === 'income') {
@@ -200,7 +191,6 @@ const calculateDashboardData = () => {
             expense += amount;
         }
     });
-    
     document.getElementById('month-income').textContent = formatCurrency(income);
     document.getElementById('month-expense').textContent = formatCurrency(expense);
     document.getElementById('month-balance').textContent = formatCurrency(income - expense);
@@ -209,12 +199,10 @@ const calculateDashboardData = () => {
 const renderTransactions = () => {
     const list = document.getElementById('transaction-list');
     list.innerHTML = '';
-
     const filteredTransactions = transactionsData.filter(t => {
         const transactionDate = new Date(t.date + 'T12:00:00-03:00');
         return transactionDate.getFullYear() === currentMonth.getFullYear() && transactionDate.getMonth() === currentMonth.getMonth();
     }).sort((a, b) => new Date(b.date) - new Date(a.date));
-
     filteredTransactions.forEach(t => {
         const li = document.createElement('li');
         li.className = 'transaction-item';
@@ -266,7 +254,6 @@ const renderPayables = () => {
   today.setHours(0, 0, 0, 0);
 
   payablesData.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-
   const categoryIcons = {
     'Alimentação': '🍽️',
     'Transporte': '🚌',
@@ -282,7 +269,6 @@ const renderPayables = () => {
     'Investimento': '📉',
     'Outros': '📦'
   };
-
   payablesData.forEach(payable => {
     const dueDate = new Date(payable.dueDate + 'T00:00:00');
     const isOverdue = dueDate < today && !payable.paid;
@@ -315,7 +301,7 @@ const renderPayables = () => {
       payable.paid = !payable.paid;
       renderPayables(); // Re-renderiza para atualizar visual
     });
-  });
+});
 };
 
 const updateAlertBadge = () => {
@@ -337,13 +323,11 @@ const listenForData = () => {
         transactionsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         refreshDashboard();
     });
-
     const goalsRef = collection(db, `users/${user.uid}/goals`);
     onSnapshot(goalsRef, (snapshot) => {
         goalsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderGoals();
     });
-
     const payablesRef = collection(db, `users/${user.uid}/payables`);
     onSnapshot(payablesRef, (snapshot) => {
         payablesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -450,10 +434,8 @@ const openTransactionModal = (transaction = null) => {
     document.getElementById('category').value = transaction.category;
     document.getElementById('date').value = transaction.date;
     document.getElementById('transaction-type').value = transaction.type;
-
     document.getElementById('type-expense-btn').classList.toggle('active', transaction.type === 'expense');
     document.getElementById('type-income-btn').classList.toggle('active', transaction.type === 'income');
-
     deleteBtn.style.display = 'inline-block';
   } else {
     title.textContent = 'Nova Transação';
@@ -464,14 +446,12 @@ const openTransactionModal = (transaction = null) => {
     deleteBtn.style.display = 'none';
     document.getElementById('date').valueAsDate = new Date();
   }
-
   modal.classList.add('active'); // ✅ novo controle
 };
 
 const closeTransactionModal = () => {
   document.getElementById('transaction-modal').classList.remove('active'); // ✅ novo controle
 };
-
 
 const editTransaction = (id) => {
     const transaction = transactionsData.find(t => t.id === id);
@@ -550,16 +530,13 @@ const updateMonthlySummary = (date) => {
     const monthYear = getMonthYearString(date);
     document.getElementById('mes-atual').textContent = monthYear;
     document.getElementById('resumo-current-month-year').textContent = monthYear;
-
     const filtered = transactionsData.filter(t => {
         const transactionDate = new Date(t.date + 'T12:00:00-03:00');
         return transactionDate.getFullYear() === date.getFullYear() && transactionDate.getMonth() === date.getMonth();
     });
-
     const income = filtered.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
     const expense = filtered.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0);
     const balance = income - expense;
-
     document.getElementById('monthly-revenue').textContent = formatCurrency(income);
     document.getElementById('monthly-expense').textContent = formatCurrency(expense);
     document.getElementById('monthly-balance').textContent = formatCurrency(balance);
@@ -568,11 +545,9 @@ const updateMonthlySummary = (date) => {
 const renderMonthlyChart = () => {
     const ctx = document.getElementById('monthly-bar-chart').getContext('2d');
     const monthlyData = calculateMonthlyTotals();
-
     if (window.monthlyChart) {
         window.monthlyChart.destroy();
     }
-
     window.monthlyChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -601,19 +576,15 @@ const renderMonthlyChart = () => {
 const renderAnnualChart = () => {
     const ctx = document.getElementById('annual-chart').getContext('2d');
     const monthlyData = calculateMonthlyTotals();
-
     const totalIncome = monthlyData.incomes.reduce((sum, val) => sum + val, 0);
     const totalExpense = monthlyData.expenses.reduce((sum, val) => sum + val, 0);
     const annualBalance = totalIncome - totalExpense;
-
     document.getElementById('annual-revenue').textContent = formatCurrency(totalIncome);
     document.getElementById('annual-expense').textContent = formatCurrency(totalExpense);
     document.getElementById('annual-balance').textContent = formatCurrency(annualBalance);
-
     if (window.annualChart) {
         window.annualChart.destroy();
     }
-
     window.annualChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -641,7 +612,6 @@ const renderAnnualChart = () => {
 const calculateMonthlyTotals = () => {
     const monthlyTotals = new Array(12).fill(0).map(() => ({ income: 0, expense: 0 }));
     const currentYear = new Date().getFullYear();
-
     transactionsData.forEach(t => {
         const transactionDate = new Date(t.date + 'T12:00:00-03:00');
         if (transactionDate.getFullYear() === currentYear) {
@@ -654,12 +624,10 @@ const calculateMonthlyTotals = () => {
             }
         }
     });
-
     const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
     const incomes = monthlyTotals.map(m => m.income);
     const expenses = monthlyTotals.map(m => m.expense);
     const balances = monthlyTotals.map(m => m.income - m.expense);
-
     return { months, incomes, expenses, balances };
 };
 
@@ -677,12 +645,10 @@ const checkAndDisplayPayableAlerts = () => {
     today.setHours(0, 0, 0, 0);
     const oneWeekFromNow = new Date(today);
     oneWeekFromNow.setDate(today.getDate() + 7);
-
     const upcomingPayables = payablesData.filter(p => {
         const dueDate = new Date(p.dueDate + 'T00:00:00');
         return !p.paid && dueDate >= today && dueDate <= oneWeekFromNow;
     });
-    
     if (upcomingPayables.length > 0) {
         upcomingPayables.forEach(p => {
             const li = document.createElement('li');
@@ -714,7 +680,8 @@ const closeSidebar = () => {
 
 const toggleSidebar = () => {
     const sidebar = document.getElementById('menu-perfil');
-    sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
+    sidebar.style.display = sidebar.style.display === 'none' ?
+'block' : 'none';
 };
 
 // ----------------------
@@ -742,7 +709,6 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
     window.location.href = "login.html";
 });
 
-
 // Envio do formulário de transação
 document.getElementById('transaction-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -765,7 +731,7 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
       await addTransaction(data);
     }
 
-    refreshDashboard(); // Atualiza a interface
+    refreshDashboard(); 
     closeTransactionModal(); // Fecha o modal
     document.getElementById('transaction-form').reset(); // Limpa o formulário
     document.getElementById('transaction-id').value = '';
@@ -778,7 +744,6 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     alert('Erro ao salvar. Verifique os dados e tente novamente.');
   }
 });
-
 
 // Botão de deletar transação
 document.getElementById('delete-transaction-btn').addEventListener('click', async () => {
@@ -838,12 +803,14 @@ document.getElementById('goal-form').addEventListener('submit', async (e) => {
     };
     if (id) {
         await updateGoal(id, data);
-    } else {
+    } else 
+ {
         await addGoal(data);
     }
     closeGoalModal();
     document.getElementById('transaction-form').reset();
 });
+
 document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
 document.getElementById('delete-goal-btn').addEventListener('click', async () => {
     const id = document.getElementById('goal-id').value;
@@ -867,12 +834,14 @@ document.getElementById('payable-form').addEventListener('submit', async (e) => 
     };
     if (id) {
         await updatePayable(id, data);
-    } else {
+    } else 
+ {
         await addPayable(data);
     }
     closePayableModal();
     document.getElementById('payable-form').reset();
 });
+
 document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
 document.getElementById('payable-list').addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
@@ -885,30 +854,35 @@ document.getElementById('payable-list').addEventListener('click', async (e) => {
     }
 });
 
-
 // Funções do menu lateral
 window.abrirResumoMensal = () => {
     showPage('resumo-mensal-page');
     updateMonthlySummary(currentMonth);
     renderMonthlyChart();
 };
+
 window.abrirResumoAnual = () => {
     showPage('resumo-anual-page');
     renderAnnualChart();
 };
+
 window.abrirPagina = showPage;
 window.exportarDados = () => {
     alert('Funcionalidade de exportar dados não implementada.');
 };
+
 window.abrirConfig = () => {
     showPage('config-page');
 };
+
 window.trocarTema = () => {
     document.body.classList.toggle('dark-theme');
 };
+
 window.resetarApp = () => {
     alert('Funcionalidade de resetar app não implementada.');
 };
+
 window.abrirAlerta = openAlertModal;
 window.fecharAlerta = closeAlertModal;
 
@@ -917,6 +891,7 @@ document.getElementById('resumo-prev-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() - 1);
     updateMonthlySummary(currentMonth);
 });
+
 document.getElementById('resumo-next-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() + 1);
     updateMonthlySummary(currentMonth);
@@ -927,6 +902,7 @@ document.getElementById('menu-botao').addEventListener('click', (e) => {
     e.stopPropagation();
     toggleSidebar();
 });
+
 document.addEventListener('click', (e) => {
     const sidebar = document.getElementById('menu-perfil');
     const menuBtn = document.getElementById('menu-botao');
@@ -938,7 +914,6 @@ document.addEventListener('click', (e) => {
 // ----------------------
 // 🚀 Inicialização
 // ----------------------
-
 auth.onAuthStateChanged(user => {
     if (user) {
         currentUser = user;
@@ -946,11 +921,9 @@ auth.onAuthStateChanged(user => {
         document.getElementById('current-user-name').textContent = user.email; // Atualiza o nome do usuário
         document.getElementById('perfil-usuario').textContent = user.displayName || 'Nome não definido';
         document.getElementById('perfil-email').textContent = user.email;
-        
         listenForData();
         setupChart();
         refreshDashboard();
-        
         // Simulação de conexão bancária
         window.connectBank = (bank) => {
             document.getElementById('perfil-banco').textContent = bank.charAt(0).toUpperCase() + bank.slice(1);

@@ -1,4 +1,20 @@
 // 🔗 app.js - Gerenciador de Finanças Pessoal
+// 
+// Este arquivo contém toda a lógica do aplicativo de controle financeiro.
+// Ele utiliza o Firebase Firestore para armazenar dados em tempo real,
+// e Chart.js para a visualização de gráficos.
+// 
+// Funcionalidades:
+// - Dashboard com resumo financeiro e gráfico de despesas.
+// - Páginas de resumo mensal e anual com gráficos e detalhamento.
+// - Gerenciamento de transações (receitas e despesas).
+// - Gerenciamento de metas de poupança.
+// - Gerenciamento de contas a pagar.
+// - Modais para inserção e edição de dados.
+// - Tema claro/escuro.
+// 
+// Arquivo revisado para corrigir o fechamento de modais e reestruturar
+// as páginas de resumo.
 
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, signInWithCustomToken, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -44,7 +60,7 @@ const initializeFirebase = async () => {
         } else {
             // Em caso de ausência de token, faz o login anônimo
             console.log("Token de autenticação não encontrado. Autenticando anonimamente.");
-            // await signInAnonymously(auth); // Descomente para login anônimo
+            // await signInAnonymously(auth);
         }
 
         // Listener para o estado de autenticação do usuário

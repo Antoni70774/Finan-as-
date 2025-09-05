@@ -597,6 +597,14 @@ section {
     font-weight: 700;
 }
 
+.summary-box {
+  margin-bottom: 0.5rem; /* Reduz o espaçamento entre os cartões */
+}
+
+#dashboard-page .summary-box:first-child {
+  margin-top: 0; /* Remove espaço acima do primeiro cartão */
+}
+
 /* 🔷 Bloco superior do Resumo Mensal */
 .resumo-mensal-top {
   position: relative;

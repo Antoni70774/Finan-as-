@@ -1,605 +1,375 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Financeiro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
-    <style>
-        :root {
-            --bg-color: #f7fafc;
-            --card-bg-color: #ffffff;
-            --text-color: #2d3748;
-            --secondary-text-color: #718096;
-            --primary-color: #4299e1;
-            --primary-dark-color: #3182ce;
-            --success-color: #48bb78;
-            --danger-color: #e53e3e;
-            --warning-color: #f6ad55;
-            --border-color: #e2e8f0;
-            --shadow-color: rgba(0, 0, 0, 0.05);
-            --light-gradient: linear-gradient(135deg, #f7fafc, #edf2f7);
-            --dark-gradient: linear-gradient(135deg, #2d3748, #1a202c);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #1a202c;
-                --card-bg-color: #2d3748;
-                --text-color: #e2e8f0;
-                --secondary-text-color: #a0aec0;
-                --border-color: #4a5568;
-                --shadow-color: rgba(0, 0, 0, 0.5);
-            }
-        }
-
-        body.dark-mode {
-            --bg-color: #1a202c;
-            --card-bg-color: #2d3748;
-            --text-color: #e2e8f0;
-            --secondary-text-color: #a0aec0;
-            --border-color: #4a5568;
-            --shadow-color: rgba(0, 0, 0, 0.5);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            transition: background-color 0.3s ease;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 450px;
-            padding: 25px;
-            background-color: var(--card-bg-color);
-            border-radius: 20px;
-            box-shadow: 0 10px 25px var(--shadow-color);
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0;
-            color: var(--primary-color);
-        }
-
-        .header p {
-            font-size: 0.875rem;
-            color: var(--secondary-text-color);
-            margin-top: 5px;
-        }
-
-        .section-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-top: 25px;
-            margin-bottom: 15px;
-            color: var(--text-color);
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 0.875rem;
-            color: var(--secondary-text-color);
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-size: 1rem;
-            transition: border-color 0.2s;
-            box-sizing: border-box;
-        }
-
-        .input-group input:focus,
-        .input-group select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.2s;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: #ffffff;
-            margin-top: 20px;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark-color);
-            transform: translateY(-2px);
-        }
-
-        .expense-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .expense-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: var(--bg-color);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            transition: background-color 0.2s, box-shadow 0.2s;
-            border: 1px solid var(--border-color);
-        }
-
-        .expense-item:hover {
-            box-shadow: 0 4px 10px var(--shadow-color);
-        }
-
-        .expense-info {
-            flex-grow: 1;
-        }
-
-        .expense-info .title {
-            font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .expense-info .date {
-            font-size: 0.75rem;
-            color: var(--secondary-text-color);
-            margin-top: 4px;
-        }
-
-        .expense-amount {
-            font-size: 1rem;
-            font-weight: 700;
-        }
-
-        .expense-amount.income {
-            color: var(--success-color);
-        }
-
-        .expense-amount.expense {
-            color: var(--danger-color);
-        }
-
-        .total-card {
-            background-color: var(--card-bg-color);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 4px 10px var(--shadow-color);
-            margin-top: 20px;
-        }
-
-        .total-card h3 {
-            font-size: 1rem;
-            margin: 0;
-            color: var(--secondary-text-color);
-            font-weight: 500;
-        }
-
-        .total-card p {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 10px 0 0;
-            color: var(--primary-color);
-        }
-
-        .actions-btn {
-            display: flex;
-            gap: 10px;
-            margin-left: 15px;
-        }
-
-        .actions-btn .btn-icon {
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 50%;
-            transition: background-color 0.2s;
-        }
-
-        .actions-btn .btn-icon:hover {
-            background-color: var(--border-color);
-        }
-
-        .actions-btn .btn-icon .material-symbols-rounded {
-            font-size: 1.25rem;
-        }
-
-        #btn-add-expense {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s;
-        }
-
-        #btn-add-expense:hover {
-            transform: scale(1.1);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 10;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .modal-content {
-            background-color: var(--card-bg-color);
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 10px 25px var(--shadow-color);
-            position: relative;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--secondary-text-color);
-        }
-
-        .toggle-switch {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 50px;
-            height: 25px;
-            background-color: var(--border-color);
-            border-radius: 34px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .toggle-switch:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 2px;
-            bottom: 2.5px;
-            background-color: var(--card-bg-color);
-            border-radius: 50%;
-            transition: transform 0.4s;
-        }
-
-        body.dark-mode .toggle-switch:before {
-            transform: translateX(25px);
-        }
-
-        body.dark-mode .toggle-switch {
-            background-color: var(--primary-color);
-        }
-
-        /* Views */
-        #login-view, #app-view {
-            display: none;
-            width: 100%;
-        }
-
-        #app-view {
-            position: relative;
-        }
-
-        .profile-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .profile-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-id {
-            font-size: 0.875rem;
-            color: var(--secondary-text-color);
-        }
-        
-        #btn-logout {
-            color: var(--danger-color);
-            font-weight: 700;
-            border-top: 1px solid var(--border-color);
-            margin-top: 10px;
-            padding-top: 15px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle Financeiro</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4A90E2">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
-<body>
 
-    <div id="login-view" class="container">
-        <div class="header">
-            <span class="material-symbols-rounded" style="font-size: 4rem; color: var(--primary-color);">account_balance_wallet</span>
-            <h1>Bem-vindo ao Controle Financeiro</h1>
-            <p>Faça login para começar a gerenciar suas finanças.</p>
+<body class="dark-theme">
+  <!-- 🔧 Script para alternância de tema -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const temaSalvo = localStorage.getItem('tema');
+      if (temaSalvo === 'claro') {
+        document.body.classList.remove('dark-theme');
+      } else {
+        document.body.classList.add('dark-theme'); // modo escuro por padrão
+      }
+    });
+
+    window.trocarTema = () => {
+      document.body.classList.toggle('dark-theme');
+      const temaAtual = document.body.classList.contains('dark-theme') ? 'escuro' : 'claro';
+      localStorage.setItem('tema', temaAtual);
+    };
+  </script>
+
+  <!-- 🔗 Firebase SDK + inicialização -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import { 
+      getFirestore, enableIndexedDbPersistence, collection, doc,
+      setDoc, getDocs, onSnapshot, writeBatch
+    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    // 🔧 Configuração correta
+    const firebaseConfig = {
+      apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
+      authDomain: "controle-financeiro-65744.firebaseapp.com",
+      projectId: "controle-financeiro-65744",
+      storageBucket: "controle-financeiro-65744.appspot.com",
+      messagingSenderId: "587527394934",
+      appId: "1:587527394934:web:c142740ef0139a5cf63157",
+      measurementId: "G-RT2T1HNV4G"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Ativa cache offline
+    (async () => {
+      try { await enableIndexedDbPersistence(db); }
+      catch (e) { console.warn("IndexedDB não disponível:", e); }
+    })();
+
+    window.firebase = { auth, db, collection, doc, setDoc, getDocs, onSnapshot, writeBatch };
+
+    // 🔒 Redireciona para login se não houver usuário
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        console.log("Usuário logado:", user.email);
+      }
+    });
+
+    // 🚪 Logout
+    document.addEventListener("click", async (e) => {
+      if (e.target.id === "btn-logout") {
+        await signOut(auth);
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>Visão Geral</h1>
+      <div class="profile-icon">
+        <div id="alert-icon" onclick="abrirAlerta()">
+          🔔 <span id="alert-count" class="badge">0</span>
         </div>
-        <!-- O login será automático com base na autenticação do ambiente -->
-    </div>
-
-    <div id="app-view" class="container">
-        <div class="toggle-switch" onclick="toggleDarkMode()"></div>
-        <div class="profile-container">
-            <div class="profile-info">
-                <span class="material-symbols-rounded" style="font-size: 2.5rem; color: var(--text-color);">account_circle</span>
-                <div>
-                    <div class="user-id">ID do Usuário: <span id="user-id"></span></div>
-                    <div class="user-id">ID da Aplicação: <span id="app-id"></span></div>
-                </div>
-            </div>
-            <button id="btn-logout" class="btn">Sair</button>
+      </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main id="app-main">
+      <!-- Dashboard Page -->
+      <div id="dashboard-page" class="page active">
+        <div class="month-nav">
+          <button id="prev-month" class="btn-secondary">&lt;</button>
+          <span id="current-month-year"></span>
+          <button id="next-month" class="btn-secondary">&gt;</button>
         </div>
-
-        <div class="section-title">Resumo Financeiro</div>
-        <div class="total-card">
-            <h3>Saldo Total</h3>
-            <p id="total-balance">R$ 0,00</p>
+        <div class="dashboard-summary" id="dashboard-summary">
+          <div class="summary-item">
+            <span>Receita</span>
+            <h4 id="month-income">R$ 0,00</h4>
+          </div>
+          <div class="summary-item">
+            <span>Despesa</span>
+            <h4 id="month-expense">R$ 0,00</h4>
+          </div>
+          <div class="summary-item">
+            <span>Saldo</span>
+            <h4 id="month-balance">R$ 0,00</h4>
+          </div>
         </div>
-
-        <div class="section-title">Minhas Transações</div>
-        <ul id="expense-list" class="expense-list">
-            <!-- As despesas serão adicionadas aqui via JS -->
-        </ul>
-
-        <button id="btn-add-expense" class="btn">
-            <span class="material-symbols-rounded">add</span>
-        </button>
-    </div>
-
-    <div id="expense-modal" class="modal">
-        <div class="modal-content">
-            <span class="material-symbols-rounded close-btn" onclick="closeModal()">close</span>
-            <div class="header">
-                <h2>Adicionar Transação</h2>
-            </div>
-            <form id="expense-form">
-                <div class="input-group">
-                    <label for="description">Descrição</label>
-                    <input type="text" id="description" placeholder="Ex: Conta de luz" required>
-                </div>
-                <div class="input-group">
-                    <label for="amount">Valor (R$)</label>
-                    <input type="number" id="amount" placeholder="50.00" step="0.01" required>
-                </div>
-                <div class="input-group">
-                    <label for="type">Tipo</label>
-                    <select id="type" required>
-                        <option value="expense">Despesa</option>
-                        <option value="income">Receita</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Salvar Transação</button>
-            </form>
+        <div class="chart-selector">
+          <button class="chart-btn active" data-type="all">Geral</button>
+          <button class="chart-btn" data-type="expense">Despesas</button>
+          <button class="chart-btn" data-type="income">Receitas</button>
         </div>
-    </div>
+        <div class="chart-container">
+          <h3 id="chart-title">Movimentação por Categoria</h3>
+          <canvas id="main-chart"></canvas>
+        </div>
+        <div id="chart-details" class="chart-details"></div>
 
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { 
-            getFirestore, collection, doc,
-            setDoc, onSnapshot, query, where
-        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-
-        let app, auth, db, userId;
-
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // Inicializa o Firebase
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            document.getElementById('app-id').textContent = appId;
-        } catch (error) {
-            console.error("Erro ao inicializar Firebase:", error);
-        }
-
-        // =====================================
-        // Autenticação
-        // =====================================
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // Usuário logado
-                userId = user.uid;
-                document.getElementById('user-id').textContent = userId;
-                showAppView();
-                setupRealtimeListener();
-            } else {
-                // Nenhum usuário logado.
-                // Tenta logar com o token personalizado se ele existir.
-                try {
-                    const customToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                    if (customToken) {
-                        await signInWithCustomToken(auth, customToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Erro ao autenticar:", error);
-                }
-            }
-        });
-
-        // Botão de Logout
-        document.getElementById('btn-logout').addEventListener('click', async () => {
-            await signOut(auth);
-            showLoginView();
-            userId = null;
-        });
-
-        // =====================================
-        // Funções de UI
-        // =====================================
-        function showAppView() {
-            document.getElementById('login-view').style.display = 'none';
-            document.getElementById('app-view').style.display = 'block';
-        }
-
-        function showLoginView() {
-            document.getElementById('login-view').style.display = 'flex';
-            document.getElementById('app-view').style.display = 'none';
-        }
-
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-        }
-
-        const modal = document.getElementById('expense-modal');
-        function showModal() {
-            modal.style.display = 'flex';
-        }
-
-        function closeModal() {
-            modal.style.display = 'none';
-        }
-
-        document.getElementById('btn-add-expense').addEventListener('click', showModal);
+        <div class="category-summary-section">
+          <h3>Resumo por Categoria</h3>
+          <div id="category-summary" class="category-grid"></div>
+        </div>
         
-        // =====================================
-        // Lógica de Dados
-        // =====================================
-        const expenseForm = document.getElementById('expense-form');
-        expenseForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        <div class="recent-transactions">
+          <h3>Transações Recentes</h3>
+          <ul id="transaction-list"></ul>
+        </div>
+      </div>
+
+            <!-- Goals Page -->
+            <div id="goals-page" class="page">
+              <h2>Metas Pessoais</h2>
+              <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
+              <div id="goal-list"></div>
+            </div>
             
-            const description = document.getElementById('description').value;
-            const amount = parseFloat(document.getElementById('amount').value);
-            const type = document.getElementById('type').value;
+            <div id="payables-page" class="page">
+                <h2>Despesas a Pagar</h2>
+                <button id="add-payable-btn" class="btn-primary">Nova Conta</button>
+                <div id="payable-list"></div>
+            </div>
 
-            if (isNaN(amount) || amount <= 0) {
-                console.error("Valor inválido.");
-                return;
-            }
-
-            try {
-                const userDocRef = doc(db, 'artifacts', appId, 'users', userId);
-                const transactionsColRef = collection(userDocRef, 'transactions');
-                const newTransactionRef = doc(transactionsColRef);
-
-                await setDoc(newTransactionRef, {
-                    description: description,
-                    amount: amount,
-                    type: type,
-                    timestamp: new Date()
-                });
-
-                closeModal();
-                expenseForm.reset();
-            } catch (error) {
-                console.error("Erro ao adicionar transação: ", error);
-            }
-        });
-
-        function renderExpenses(transactions) {
-            const expenseList = document.getElementById('expense-list');
-            expenseList.innerHTML = '';
-            
-            let totalBalance = 0;
-            
-            if (transactions.length === 0) {
-                expenseList.innerHTML = '<p style="text-align: center; color: var(--secondary-text-color);">Nenhuma transação adicionada ainda.</p>';
-            }
-
-            transactions.forEach(transaction => {
-                if (transaction.type === 'income') {
-                    totalBalance += transaction.amount;
-                } else {
-                    totalBalance -= transaction.amount;
-                }
-                
-                const li = document.createElement('li');
-                li.className = 'expense-item';
-                li.innerHTML = `
-                    <div class="expense-info">
-                        <div class="title">${transaction.description}</div>
-                        <div class="date">${new Date(transaction.timestamp.seconds * 1000).toLocaleDateString()}</div>
+            <!-- Profile Page -->
+            <div id="profile-page" class="page">
+                <h2>Perfil</h2>
+                <div>
+                    <span>Usuário atual: <span id="current-user-name"></span></span>
+                </div>
+                <div class="bank-connect">
+                    <h4>Conexão Bancária</h4>
+                    <p>Selecione seu banco para conectar:</p>
+                    <div class="bank-integration">
+                        <button class="bank-button" onclick="connectBank('nubank')">
+                            <img src="assets/nubank-icon.png" alt="Nubank">
+                            Nubank
+                        </button>
+                        <button class="bank-button" onclick="connectBank('itau')">
+                            <img src="assets/itau-icon.png" alt="Itaú">
+                            Itaú
+                        </button>
+                        <button class="bank-button" onclick="connectBank('caixa')">
+                            <img src="assets/caixa-icon.png" alt="Caixa">
+                            Caixa
+                        </button>
                     </div>
-                    <div class="expense-amount ${transaction.type}">R$ ${transaction.amount.toFixed(2)}</div>
-                `;
-                expenseList.appendChild(li);
-            });
+                </div>
+                <button id="export-data-btn" class="btn-secondary">Exportar Dados</button>
+            </div>
+        </main>
 
-            document.getElementById('total-balance').textContent = `R$ ${totalBalance.toFixed(2)}`;
-        }
+        <!-- Transaction Modal -->
+        <div id="transaction-modal" class="modal-overlay">
+            <div class="modal-content">
+                <form id="transaction-form">
+                    <h3 id="transaction-modal-title">Nova Transação</h3>
+                    <div class="toggle-type">
+                        <button type="button" id="type-expense-btn" class="toggle-btn active">Despesa</button>
+                        <button type="button" id="type-income-btn" class="toggle-btn">Receita</button>
+                    </div>
+                    <input type="hidden" id="transaction-type" value="expense">
+                    <label for="amount">Valor</label>
+                    <input type="number" id="amount" placeholder="R$ 0,00" step="0.01" required>
+                    <label for="description">Descrição</label>
+                    <input type="text" id="description" placeholder="Ex: Almoço" required>
+                    <label for="category">Categoria</label>
+                    <select id="category" required></select>
+                    <label for="date">Data</label>
+                    <input type="date" id="date" required>
+                    <input type="hidden" id="transaction-id">
+                    <div class="modal-actions" id="transaction-modal-actions">
+                        <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                        <button type="button" id="delete-transaction-btn" class="btn-danger" style="display:none;">Excluir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Goal Modal -->
+        <div id="goal-modal" class="modal-overlay">
+            <div class="modal-content">
+                <form id="goal-form">
+                    <h3 id="goal-modal-title">Nova Meta Financeira</h3>
+                    <input type="hidden" id="goal-id">
+                    <label for="goal-name">Nome</label>
+                    <input type="text" id="goal-name" required>
+                    <label for="goal-target">Valor alvo</label>
+                    <input type="number" id="goal-target" step="0.01" required>
+                    <label for="goal-current">Valor atual</label>
+                    <input type="number" id="goal-current" step="0.01" required>
+                    <label for="goal-date">Data limite</label>
+                    <input type="date" id="goal-date" required>
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-goal-btn" class="btn-secondary">Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                        <button type="button" id="delete-goal-btn" class="btn-danger" style="display:none;">Excluir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Payable Modal -->
+        <div id="payable-modal" class="modal-overlay">
+            <div class="modal-content">
+                <!-- CORRIGIDO: todos campos e ids alinhados com JS -->
+                <form id="payable-form">
+                    <h3 id="payable-modal-title">Nova Conta a Pagar</h3>
+                    <input type="hidden" id="payable-id">
+                    <label for="payable-description">Descrição</label>
+                    <input type="text" id="payable-description" required>
+                    <label for="payable-category">Categoria</label>
+                    <input type="text" id="payable-category" required>
+                    <label for="payable-amount">Valor</label>
+                    <input type="number" id="payable-amount" step="0.01" required>
+                    <label for="payable-date">Data de Vencimento</label>
+                    <input type="date" id="payable-date" required>
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-payable-btn" class="btn-secondary">Cancelar</button>
+                        <button type="submit" class="btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-        function setupRealtimeListener() {
-            const userTransactionsRef = collection(db, 'artifacts', appId, 'users', userId, 'transactions');
-            const q = query(userTransactionsRef);
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="dashboard-page">
+                <span class="material-icons-sharp">home</span>
+            </button>
+            <button class="nav-item" data-page="goals-page">
+                <span class="material-icons-sharp">flag</span>
+            </button>
+            <button id="add-transaction-btn" class="fab">
+                <span class="material-icons-sharp">add</span>
+            </button>
+            <button class="nav-item" data-page="payables-page">
+                <span class="material-icons-sharp">notifications</span>
+            </button>
+            <button id="menu-botao" class="nav-item profile-trigger">
+              <span class="material-icons-sharp">menu</span>
+            </button>
+        </nav>
+        <!-- Menu lateral -->
+        <div id="menu-perfil" class="menu-lateral" style="display: none;">
+          <ul>
+            <li onclick="abrirResumoMensal()">📅 Resumo Mensal</li>
+            <li onclick="abrirResumoAnual()">📈 Resumo Anual</li>
+            <li onclick="abrirPagina('profile-page')">👤 Perfil</li>
+            <li onclick="exportarDados()">📤 Exportar Dados</li>
+            <li onclick="abrirConfig()">⚙️ Configurações</li>
+            <li>
+              <button id="btn-logout" class="btn-secondary">🚪 Sair</button>
+            </li>
+          </ul>
+        </div>
+         <!-- Página: Resumo Mensal -->
+        <div id="resumo-mensal-page" class="page">
+          <div class="resumo-mensal-top">
+            <h2>📅 Resumo Mensal</h2>
+            <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
+        
+            <div class="dashboard-summary" id="resumo-mensal-summary">
+              <div class="summary-item">
+                <span>Receita</span>
+                <h4 id="monthly-revenue">R$ 0,00</h4>
+              </div>
+              <div class="summary-item">
+                <span>Despesa</span>
+                <h4 id="monthly-expense">R$ 0,00</h4>
+              </div>
+              <div class="summary-item">
+                <span>Saldo</span>
+                <h4 id="monthly-balance">R$ 0,00</h4>
+              </div>
+            </div>
+        
+            <div class="chart-container">
+              <canvas id="monthly-bar-chart" width="300" height="130"></canvas>
+            </div>
+          </div>
+        
+          <div class="month-nav">
+            <button id="resumo-prev-month" class="btn-secondary">&lt;</button>
+            <span id="resumo-current-month-year"></span>
+            <button id="resumo-next-month" class="btn-secondary">&gt;</button>
+          </div>
+        </div>
 
-            onSnapshot(q, (snapshot) => {
-                const transactions = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                renderExpenses(transactions);
-            }, (error) => {
-                console.error("Erro ao receber transações em tempo real:", error);
-            });
-        }
-    </script>
+        <!-- Página: Resumo Anual -->
+        <div id="resumo-anual-page" class="page">
+          <h2>📈 Resumo Anual</h2>
+          <div class="summary-boxes">
+            <div class="box"><h4>Receita Total</h4><p id="annual-revenue">R$ 0,00</p></div>
+            <div class="box"><h4>Despesa Total</h4><p id="annual-expense">R$ 0,00</p></div>
+            <div class="box"><h4>Saldo Acumulado</h4><p id="annual-balance">R$ 0,00</p></div>
+          </div>
+          <canvas id="annual-chart" width="100%" height="70"></canvas>
+        </div>
+      </div>
+        <!-- Perfil -->
+        <div id="perfil-page" class="page">
+          <h2>👤 Perfil do Usuário</h2>
+          <p><b>Usuário atual:</b> <span id="perfil-usuario"></span></p>
+          <p><b>Email:</b> <span id="perfil-email"></span></p>
+          <p><b>Banco conectado:</b> <span id="perfil-banco"></span></p>
+        </div>
+        
+        <!-- Página: Configurações -->
+        <div id="config-page" class="page">
+          <h2>⚙️ Configurações</h2>
+          <ul class="config-options">
+            <li><button onclick="exportarDados()">📤 Exportar Dados</button></li>
+            <li><button onclick="trocarTema()">🎨 Alterar Tema</button></li>
+            <li><button onclick="resetarApp()">♻️ Resetar Aplicativo</button></li>
+          </ul>
+        </div>
+        
+        <!-- Ajuda -->
+        <div id="ajuda-page" class="page">
+          <h2>❓ Ajuda</h2>
+          <p>Bem-vindo ao <b>Controle Financeiro</b>!</p>
+          <ul>
+            <li>📅 Resumo Mensal → Veja receitas, despesas e saldo do mês.</li>
+            <li>📊 Resumo Anual → Acompanhe seu desempenho no ano.</li>
+            <li>👤 Perfil → Gerencie suas informações pessoais.</li>
+            <li>⚙️ Configurações → Exporte dados, mude tema ou reset.</li>
+          </ul>
+        </div>
+
+    <!-- Modal de alerta -->
+                <div id="alert-modal" class="modal">
+                  <div class="modal-content">
+                    <h3>Contas a vencer</h3>
+                    <ul id="alert-list"></ul>
+                    <button onclick="fecharAlerta()">Fechar</button>
+                  </div>
+                </div>
+            </div>
+    
+   </main>
+  
+  </div>
+
+  <!-- Seu app.js -->
+ <script type="module" src="./app.js"></script>
+</body>
+</html>

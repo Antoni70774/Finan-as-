@@ -117,79 +117,88 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Modal de transações
-  addButton.addEventListener('click', () => {
-    transactionModal.style.display = 'block';
-    transactionModalTitle.textContent = 'Nova Transação';
-    transactionForm.reset();
-    transactionIdInput.value = '';
-    deleteTransactionBtn.style.display = 'none';
+ // Modal de transações
+addButton.addEventListener('click', () => {
+  transactionModal.style.display = 'block';
+  transactionModalTitle.textContent = 'Nova Transação';
+  transactionForm.reset();
+  transactionIdInput.value = '';
+  deleteTransactionBtn.style.display = 'none';
+
+  // Preenche data atual automaticamente
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date').value = today;
+});
+
+cancelBtn.addEventListener('click', () => {
+  transactionModal.style.display = 'none';
+});
+
+typeExpenseBtn.addEventListener('click', () => {
+  transactionTypeInput.value = 'expense';
+  categorySelect.innerHTML = '';
+  state.expenseCategories.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    categorySelect.appendChild(option);
   });
+});
 
-  cancelBtn.addEventListener('click', () => {
-    transactionModal.style.display = 'none';
+typeIncomeBtn.addEventListener('click', () => {
+  transactionTypeInput.value = 'income';
+  categorySelect.innerHTML = '';
+  state.incomeCategories.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    categorySelect.appendChild(option);
   });
+});
 
-  typeExpenseBtn.addEventListener('click', () => {
-    transactionTypeInput.value = 'despesa';
-    categorySelect.innerHTML = '';
-    state.expenseCategories.forEach(cat => {
-      const option = document.createElement('option');
-      option.value = cat;
-      option.textContent = cat;
-      categorySelect.appendChild(option);
-    });
-  });
+transactionForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const id = transactionIdInput.value;
+  const type = transactionTypeInput.value;
+  const category = categorySelect.value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  const description = document.getElementById('description').value;
+  const date = document.getElementById('date').value;
 
-  typeIncomeBtn.addEventListener('click', () => {
-    transactionTypeInput.value = 'receita';
-    categorySelect.innerHTML = '';
-    state.incomeCategories.forEach(cat => {
-      const option = document.createElement('option');
-      option.value = cat;
-      option.textContent = cat;
-      categorySelect.appendChild(option);
-    });
-  });
+  if (!type || !category || isNaN(amount) || !description || !date) {
+    alert("Preencha todos os campos corretamente.");
+    return;
+  }
 
-  transactionForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const id = transactionIdInput.value;
-    const tipo = transactionTypeInput.value;
-    const categoria = categorySelect.value;
-    const valor = parseFloat(document.getElementById('amount').value);
-    const descricao = document.getElementById('description').value;
-    const data = document.getElementById('date').value;
-
-    if (id) {
-      const index = state.transactions.findIndex(t => t.id === id);
-      if (index !== -1) {
-        state.transactions[index] = { id, tipo, categoria, valor, descricao, data };
-      }
-    } else {
-      const novaTransacao = {
-        id: Date.now().toString(),
-        tipo,
-        categoria,
-        valor,
-        descricao,
-        data
-      };
-      state.transactions.push(novaTransacao);
+  if (id) {
+    const index = state.transactions.findIndex(t => t.id === id);
+    if (index !== -1) {
+      state.transactions[index] = { id, type, category, amount, description, date };
     }
+  } else {
+    const novaTransacao = {
+      id: Date.now().toString(),
+      type,
+      category,
+      amount,
+      description,
+      date
+    };
+    state.transactions.push(novaTransacao);
+  }
 
-    localStorage.setItem('transactions', JSON.stringify(state.transactions));
-    transactionModal.style.display = 'none';
-    updateAll();
-  });
+  localStorage.setItem('transactions', JSON.stringify(state.transactions));
+  transactionModal.style.display = 'none';
+  updateAll();
+});
 
-  deleteTransactionBtn.addEventListener('click', () => {
-    const id = transactionIdInput.value;
-    state.transactions = state.transactions.filter(t => t.id !== id);
-    localStorage.setItem('transactions', JSON.stringify(state.transactions));
-    transactionModal.style.display = 'none';
-    updateAll();
-  });
+deleteTransactionBtn.addEventListener('click', () => {
+  const id = transactionIdInput.value;
+  state.transactions = state.transactions.filter(t => t.id !== id);
+  localStorage.setItem('transactions', JSON.stringify(state.transactions));
+  transactionModal.style.display = 'none';
+  updateAll();
+});
 
   // Modal de metas
   addGoalBtn.addEventListener('click', () => {

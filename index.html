@@ -1,37 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle Financeiro</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#4A90E2">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4A90E2">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
+<body>
 
-<body class="dark-theme">
-  <!-- 🔧 Script para alternância de tema -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const temaSalvo = localStorage.getItem('tema');
-      if (temaSalvo === 'claro') {
-        document.body.classList.remove('dark-theme');
-      } else {
-        document.body.classList.add('dark-theme'); // modo escuro por padrão
-      }
-    });
-
-    window.trocarTema = () => {
-      document.body.classList.toggle('dark-theme');
-      const temaAtual = document.body.classList.contains('dark-theme') ? 'escuro' : 'claro';
-      localStorage.setItem('tema', temaAtual);
-    };
-  </script>
-
-  <!-- 🔗 Firebase SDK + inicialização -->
+<!-- 🔗 Firebase SDK + inicialização -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -80,62 +62,63 @@
       }
     });
   </script>
-
-  <div class="app-container">
-    <!-- Header -->
-    <header class="app-header">
-      <h1>Visão Geral</h1>
-      <div class="profile-icon">
-        <div id="alert-icon" onclick="abrirAlerta()">
-          🔔 <span id="alert-count" class="badge">0</span>
-        </div>
-      </div>
-    </header>
-    
-    <!-- Main Content -->
-    <main id="app-main">
-      <!-- Dashboard Page -->
-      <div id="dashboard-page" class="page active">
-        <div class="month-nav">
-          <button id="prev-month" class="btn-secondary">&lt;</button>
-          <span id="current-month-year"></span>
-          <button id="next-month" class="btn-secondary">&gt;</button>
-        </div>
-        <div class="dashboard-summary" id="dashboard-summary">
-          <div class="summary-item">
-            <span>Receita</span>
-            <h4 id="month-income">R$ 0,00</h4>
-          </div>
-          <div class="summary-item">
-            <span>Despesa</span>
-            <h4 id="month-expense">R$ 0,00</h4>
-          </div>
-          <div class="summary-item">
-            <span>Saldo</span>
-            <h4 id="month-balance">R$ 0,00</h4>
-          </div>
-        </div>
-        <div class="chart-selector">
-          <button class="chart-btn active" data-type="all">Geral</button>
-          <button class="chart-btn" data-type="expense">Despesas</button>
-          <button class="chart-btn" data-type="income">Receitas</button>
-        </div>
-        <div class="chart-container">
-          <h3 id="chart-title">Movimentação por Categoria</h3>
-          <canvas id="main-chart"></canvas>
-        </div>
-        <div id="chart-details" class="chart-details"></div>
-
-        <div class="category-summary-section">
-          <h3>Resumo por Categoria</h3>
-          <div id="category-summary" class="category-grid"></div>
-        </div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>Visão Geral</h1>
+            <div class="profile-icon">
+                <div id="alert-icon" onclick="abrirAlerta()">
+                    🔔 <span id="alert-count" class="badge">0</span>
+                </div>
+            </div>
+        </header>
         
-        <div class="recent-transactions">
-          <h3>Transações Recentes</h3>
-          <ul id="transaction-list"></ul>
-        </div>
-      </div>
+        <!-- Main Content -->
+        <main id="app-main">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page active">
+                <div class="month-nav">
+                    <button id="prev-month" class="btn-secondary">&lt;</button>
+                    <span id="current-month-year"></span>
+                    <button id="next-month" class="btn-secondary">&gt;</button>
+                </div>
+                <div class="dashboard-summary" id="dashboard-summary">
+                    <div class="summary-item">
+                        <span>Receita</span>
+                        <h4 id="month-income">R$ 0,00</h4>
+                        <div id="display-month-income" class="summary-display"></div>
+                    </div>
+                    <div class="summary-item">
+                        <span>Despesa</span>
+                        <h4 id="month-expense">R$ 0,00</h4>
+                        <div id="display-month-expense" class="summary-display"></div>
+                    </div>
+                    <div class="summary-item">
+                        <span>Saldo</span>
+                        <h4 id="month-balance">R$ 0,00</h4>
+                    </div>
+                </div>
+                <div class="chart-selector">
+                    <button class="chart-btn active" data-type="all">Geral</button>
+                    <button class="chart-btn" data-type="expense">Despesas</button>
+                    <button class="chart-btn" data-type="income">Receitas</button>
+                </div>
+                <div class="chart-container">
+                    <h3 id="chart-title">Movimentação por Categoria</h3>
+                    <canvas id="main-chart"></canvas>
+                </div>
+                <div id="chart-details" class="chart-details"></div>
+
+                <div class="category-summary-section">
+                    <h3>Resumo por Categoria</h3>
+                    <div id="category-summary" class="category-grid"></div>
+                </div>
+                
+                <div class="recent-transactions">
+                    <h3>Transações Recentes</h3>
+                    <ul id="transaction-list"></ul>
+                </div>
+            </div>
 
             <!-- Goals Page -->
             <div id="goals-page" class="page">
@@ -268,7 +251,7 @@
               <span class="material-icons-sharp">menu</span>
             </button>
         </nav>
-        <!-- Menu lateral -->
+        <!-- Menu lateral do perfil -->
         <div id="menu-perfil" class="menu-lateral" style="display: none;">
           <ul>
             <li onclick="abrirResumoMensal()">📅 Resumo Mensal</li>
@@ -276,36 +259,29 @@
             <li onclick="abrirPagina('profile-page')">👤 Perfil</li>
             <li onclick="exportarDados()">📤 Exportar Dados</li>
             <li onclick="abrirConfig()">⚙️ Configurações</li>
-            <li>
-              <button id="btn-logout" class="btn-secondary">🚪 Sair</button>
-            </li>
           </ul>
         </div>
          <!-- Página: Resumo Mensal -->
         <div id="resumo-mensal-page" class="page">
-          <div class="resumo-mensal-top">
-            <h2>📅 Resumo Mensal</h2>
-            <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
-        
-            <div class="dashboard-summary" id="resumo-mensal-summary">
-              <div class="summary-item">
-                <span>Receita</span>
-                <h4 id="monthly-revenue">R$ 0,00</h4>
-              </div>
-              <div class="summary-item">
-                <span>Despesa</span>
-                <h4 id="monthly-expense">R$ 0,00</h4>
-              </div>
-              <div class="summary-item">
-                <span>Saldo</span>
-                <h4 id="monthly-balance">R$ 0,00</h4>
-              </div>
+          <h2>📅 Resumo Mensal</h2>
+          <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
+          
+          <div class="dashboard-summary" id="resumo-mensal-summary">
+            <div class="summary-item">
+              <span>Receita</span>
+              <h4 id="monthly-revenue">R$ 0,00</h4>
             </div>
-        
-            <div class="chart-container">
-              <canvas id="monthly-bar-chart" width="300" height="130"></canvas>
+            <div class="summary-item">
+              <span>Despesa</span>
+              <h4 id="monthly-expense">R$ 0,00</h4>
+            </div>
+            <div class="summary-item">
+              <span>Saldo</span>
+              <h4 id="monthly-balance">R$ 0,00</h4>
             </div>
           </div>
+        
+          <canvas id="monthly-bar-chart" width="300" height="130"></canvas>
         
           <div class="month-nav">
             <button id="resumo-prev-month" class="btn-secondary">&lt;</button>
@@ -313,18 +289,17 @@
             <button id="resumo-next-month" class="btn-secondary">&gt;</button>
           </div>
         </div>
-
+        
         <!-- Página: Resumo Anual -->
         <div id="resumo-anual-page" class="page">
-          <h2>📈 Resumo Anual</h2>
-          <div class="summary-boxes">
-            <div class="box"><h4>Receita Total</h4><p id="annual-revenue">R$ 0,00</p></div>
-            <div class="box"><h4>Despesa Total</h4><p id="annual-expense">R$ 0,00</p></div>
-            <div class="box"><h4>Saldo Acumulado</h4><p id="annual-balance">R$ 0,00</p></div>
-          </div>
-          <canvas id="annual-chart" width="100%" height="70"></canvas>
-        </div>
-      </div>
+          <h2>📈 Resumo Anual</h2>
+          <div class="summary-boxes">
+            <div class="box"><h4>Receita Total</h4><p id="annual-revenue">R$ 0,00</p></div>
+            <div class="box"><h4>Despesa Total</h4><p id="annual-expense">R$ 0,00</p></div>
+            <div class="box"><h4>Saldo Acumulado</h4><p id="annual-balance">R$ 0,00</p></div>
+          </div>
+          <canvas id="annual-chart" width="100%" height="70"></canvas>
+        </div>
         <!-- Perfil -->
         <div id="perfil-page" class="page">
           <h2>👤 Perfil do Usuário</h2>
@@ -365,11 +340,6 @@
                 </div>
             </div>
     
-   </main>
-  
-  </div>
-
-  <!-- Seu app.js -->
- <script type="module" src="./app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>

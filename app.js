@@ -464,12 +464,14 @@ const openTransactionModal = (transaction = null) => {
         deleteBtn.style.display = 'none';
         document.getElementById('date').valueAsDate = new Date(); // Define data atual para nova transação
     }
-    modal.style.display = 'flex';
+    modal.classList.add('active'); // ✅ abre corretamente
 };
 
 const closeTransactionModal = () => {
-    document.getElementById('transaction-modal').style.display = 'none';
+  const modal = document.getElementById('transaction-modal');
+  modal.classList.remove('active'); // ✅ fecha corretamente
 };
+
 
 const editTransaction = (id) => {
     const transaction = transactionsData.find(t => t.id === id);

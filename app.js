@@ -79,6 +79,15 @@ document.addEventListener('DOMContentLoaded', () => {
   updateAll();
   registerServiceWorker();
 
+  function setCurrentDate() {
+    const today = new Date();
+    const input = document.getElementById('date');
+    if (input) {
+      input.value = today.toISOString().split('T')[0];
+    }
+  }
+
+
   // Navegação entre páginas
   navItems.forEach(item => {
     item.addEventListener('click', () => {

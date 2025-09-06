@@ -114,6 +114,7 @@ main {
 
 .pages-container {
     width: 100%;
+    padding-bottom: 70px; /* Espaço para a navegação inferior */
 }
 
 .page {
@@ -195,6 +196,50 @@ main {
 
 #btn-logout:hover {
     background-color: rgba(229, 62, 62, 0.1);
+}
+
+/*
+ * ========================================
+ * Nova barra de navegação para mobile
+ * ========================================
+ */
+
+.bottom-nav {
+    display: none; /* Oculta por padrão */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--card-bg);
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    height: 60px;
+    z-index: 50;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.nav-item-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    text-decoration: none;
+    color: var(--text-light);
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 5px 0;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.nav-item-mobile.active {
+    color: var(--primary-color);
+}
+
+.nav-item-mobile i {
+    font-size: 1.5rem;
 }
 
 /*
@@ -791,8 +836,18 @@ canvas {
         flex-direction: column;
     }
     
+    #menu-botao, #current-user-name {
+        display: none;
+    }
+    
     #menu-perfil {
         width: 70%;
+        display: block; /* Habilita o menu como modal */
+        transform: translateX(-100%); /* Garante que ele fique oculto */
+    }
+
+    #menu-perfil.active {
+        transform: translateX(0);
     }
     
     main {
@@ -801,5 +856,17 @@ canvas {
 
     .card-grid {
         grid-template-columns: 1fr;
+    }
+
+    .bottom-nav {
+        display: flex; /* Exibe a navegação inferior */
+    }
+
+    .fab {
+      bottom: 75px; /* Ajusta a posição para não cobrir a barra de navegação */
+    }
+
+    .pages-container {
+        padding-bottom: 70px; /* Garante que o conteúdo não seja coberto pela barra de navegação */
     }
 }

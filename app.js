@@ -826,66 +826,104 @@ document.getElementById('delete-goal-btn').addEventListener('click', async () =>
     }
 });
 
-// Contas a Pagar
-document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
+// ✅ CONTAS A PAGAR — Revisado e Estável
 
-document.getElementById('payable-form').addEventListener('submit', async (e) => {
+// Abrir modal de nova conta
+const addBtn = document.getElementById('add-payable-btn');
+if (addBtn) {
+  addBtn.addEventListener('click', () => openPayableModal());
+}
+
+// Submissão do formulário
+const payableForm = document.getElementById('payable-form');
+if (payableForm) {
+  payableForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
-        const id = document.getElementById('payable-id').value;
-        const data = {
-            description: document.getElementById('payable-description').value,
-            category: document.getElementById('payable-category').value,
-            amount: parseFloat(document.getElementById('payable-amount').value),
-            dueDate: document.getElementById('payable-date').value,
-            paid: false
-        };
+      const id = document.getElementById('payable-id')?.value;
+      const data = {
+        description: document.getElementById('payable-description')?.value || '',
+        category: document.getElementById('payable-category')?.value || '',
+        amount: parseFloat(document.getElementById('payable-amount')?.value) || 0,
+        dueDate: document.getElementById('payable-date')?.value || '',
+        paid: false
+      };
 
-        if (id) {
-            await updatePayable(id, data);
-        } else {
-            await addPayable(data);
-        }
+      if (id) {
+        await updatePayable(id, data);
+      } else {
+        await addPayable(data);
+      }
 
-        if (typeof saveAndRerender === 'function') {
-            await saveAndRerender();
-        } else {
-            renderPayables();
-            refreshDashboard();
-        }
+      if (typeof saveAndRerender === 'function') {
+        await saveAndRerender();
+      } else {
+        await renderPayables();
+        await refreshDashboard();
+      }
 
-        // ✅ Fecha e reseta corretamente
-        closePayableModal();
-        const form = document.getElementById('payable-form');
-        if (form) form.reset();
+      closePayableModal();
+      payableForm.reset();
     } catch (error) {
-        console.error('Erro ao salvar conta a pagar:', error);
-        alert('Erro ao salvar. Verifique os dados e tente novamente.');
+      console.error('Erro ao salvar conta a pagar:', error);
+      alert('Erro ao salvar. Verifique os dados e tente novamente.');
     }
-});
+  });
+}
 
-document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
+// Cancelar e fechar modal
+const cancelBtn = document.getElementById('cancel-payable-btn');
+if (cancelBtn) {
+  cancelBtn.addEventListener('click', closePayableModal);
+}
 
-document.getElementById('payable-list').addEventListener('click', async (e) => {
+// Interações com a lista de contas
+const payableList = document.getElementById('payable-list');
+if (payableList) {
+  payableList.addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
     const id = btn.dataset.id;
-    if (btn.classList.contains('btn-check')) {
-        await markPayableAsPaid(id);
-    } else if (btn.classList.contains('btn-edit-payable')) {
-        editPayable(id);
-    }
-});
+    if (!id) return;
 
-document.getElementById('delete-payable-btn').addEventListener('click', async () => {
-  const id = document.getElementById('payable-id').value;
-  if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
-    await deletePayable(id);
-    await saveAndRerender();
-    closePayableModal();
-    document.getElementById('payable-form').reset();
-  }
-});
+    if (btn.classList.contains('btn-check')) {
+      await markPayableAsPaid(id);
+    } else if (btn.classList.contains('btn-edit-payable')) {
+      editPayable(id);
+    }
+  });
+}
+
+// Exclusão de conta
+const deleteBtn = document.getElementById('delete-payable-btn');
+if (deleteBtn) {
+  deleteBtn.addEventListener('click', async () => {
+    const idInput = document.getElementById('payable-id');
+    const id = idInput?.value;
+    if (!id) {
+      alert("ID da conta a pagar não encontrado.");
+      return;
+    }
+
+    if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
+      try {
+        await deletePayable(id);
+        if (typeof saveAndRerender === 'function') {
+          await saveAndRerender();
+        } else {
+          await renderPayables();
+          await refreshDashboard();
+        }
+        closePayableModal();
+        payableForm?.reset();
+      } catch (error) {
+        console.error("Erro ao excluir conta:", error);
+        alert("Erro ao excluir. Tente novamente.");
+      }
+    }
+  });
+}
+
 
 // Funções do menu lateral
 window.abrirResumoMensal = () => {

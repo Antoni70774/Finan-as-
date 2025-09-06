@@ -45,8 +45,22 @@ const formatter = new Intl.NumberFormat('pt-BR', {
 const showPage = (pageId) => {
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
+    
+    // Atualiza o estado da navegação
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    document.querySelector(`.nav-item[data-page="${pageId}"]`)?.classList.add('active');
+    document.querySelectorAll('.nav-item-mobile').forEach(item => item.classList.remove('active'));
+    
+    const sidebarItem = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+    if (sidebarItem) {
+        sidebarItem.classList.add('active');
+    }
+    
+    const mobileTab = document.querySelector(`.nav-item-mobile[data-page="${pageId}"]`);
+    if (mobileTab) {
+        mobileTab.classList.add('active');
+    }
+
+    // Fecha o menu lateral após a navegação
     closeSidebar();
 };
 
@@ -692,12 +706,12 @@ const closeAlertModal = () => {
 };
 
 const closeSidebar = () => {
-    document.getElementById('menu-perfil').style.display = 'none';
+    document.getElementById('menu-perfil').classList.remove('active');
 };
 
 const toggleSidebar = () => {
     const sidebar = document.getElementById('menu-perfil');
-    sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
+    sidebar.classList.toggle('active');
 };
 
 // ----------------------
@@ -706,10 +720,21 @@ const toggleSidebar = () => {
 
 // Navegação
 document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
         const pageId = btn.getAttribute('data-page');
         if (pageId) {
             showPage(pageId);
+        }
+    });
+});
+// Nova navegação mobile
+document.querySelectorAll('.nav-item-mobile').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const pageId = btn.getAttribute('data-page');
+        if (pageId) {
+            showPage(pageId);
+        } else if (btn.id === 'mobile-more-menu-btn') {
+            toggleSidebar();
         }
     });
 });

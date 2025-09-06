@@ -726,25 +726,21 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
 
   try {
     if (id) {
-        await updateTransaction(id, data);
+      await updateTransaction(id, data);
     } else {
-        await addTransaction(data);
+      await addTransaction(data);
     }
     await saveAndRerender();
-
-    // 🔹 Fecha e reseta
-    closeTransactionModal();
-    document.getElementById('transaction-form').reset();
-});
-
     refreshDashboard();
+
+    // ✅ Fecha e reseta corretamente
     closeTransactionModal();
-    document.getElementById('transaction-form').reset();
+    const form = document.getElementById('transaction-form');
+    form.reset();
     document.getElementById('transaction-id').value = '';
     document.getElementById('transaction-type').value = 'expense';
     document.getElementById('type-expense-btn').classList.add('active');
     document.getElementById('type-income-btn').classList.remove('active');
-
   } catch (error) {
     console.error('Erro ao salvar transação:', error);
     alert('Erro ao salvar. Verifique os dados e tente novamente.');

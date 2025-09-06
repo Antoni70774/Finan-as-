@@ -450,8 +450,10 @@ const openTransactionModal = (transaction = null) => {
 };
 
 const closeTransactionModal = () => {
-    document.getElementById('transaction-modal').classList.remove('active');
+  console.log('Fechando modal de transação');
+  document.getElementById('transaction-modal').classList.remove('active');
 };
+
 
 const editTransaction = (id) => {
     const transaction = transactionsData.find(t => t.id === id);
@@ -735,12 +737,18 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
 
     // ✅ Fecha e reseta corretamente
     closeTransactionModal();
+
     const form = document.getElementById('transaction-form');
-    form.reset();
-    document.getElementById('transaction-id').value = '';
-    document.getElementById('transaction-type').value = 'expense';
-    document.getElementById('type-expense-btn').classList.add('active');
-    document.getElementById('type-income-btn').classList.remove('active');
+    if (form) form.reset();
+    
+    const idField = document.getElementById('transaction-id');
+    if (idField) idField.value = '';
+    
+    const typeField = document.getElementById('transaction-type');
+    if (typeField) typeField.value = 'expense';
+    
+    document.getElementById('type-expense-btn')?.classList.add('active');
+    document.getElementById('type-income-btn')?.classList.remove('active');
   } catch (error) {
     console.error('Erro ao salvar transação:', error);
     alert('Erro ao salvar. Verifique os dados e tente novamente.');
@@ -754,7 +762,8 @@ document.getElementById('delete-transaction-btn').addEventListener('click', asyn
         await deleteTransaction(id);
         await saveAndRerender();
         closeTransactionModal();
-        document.getElementById('transaction-form').reset();
+        const form = document.getElementById('transaction-form');
+    if (form) form.reset();
     }
 });
 

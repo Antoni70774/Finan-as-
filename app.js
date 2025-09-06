@@ -828,6 +828,7 @@ document.getElementById('delete-goal-btn').addEventListener('click', async () =>
 
 // Contas a Pagar
 document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
+
 document.getElementById('payable-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
@@ -853,6 +854,7 @@ document.getElementById('payable-form').addEventListener('submit', async (e) => 
             refreshDashboard();
         }
 
+        // ✅ Fecha e reseta corretamente
         closePayableModal();
         const form = document.getElementById('payable-form');
         if (form) form.reset();
@@ -860,7 +862,10 @@ document.getElementById('payable-form').addEventListener('submit', async (e) => 
         console.error('Erro ao salvar conta a pagar:', error);
         alert('Erro ao salvar. Verifique os dados e tente novamente.');
     }
-});document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
+});
+
+document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
+
 document.getElementById('payable-list').addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;

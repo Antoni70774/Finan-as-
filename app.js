@@ -71,6 +71,9 @@ const setupChart = () => {
     const chartType = 'all';
     const chartTitle = getChartTitle(chartType);
     document.getElementById('chart-title').textContent = chartTitle;
+    if (myChart) {
+      myChart.destroy();
+    }
     myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -359,65 +362,56 @@ const listenForData = () => {
 };
 
 const addTransaction = async (data) => {
-    const user = currentUser;
-    if (!user) return;
-    const newDocRef = doc(collection(db, `users/${user.uid}/transactions`));
+    if (!currentUser) return alert('Você precisa estar logado para adicionar transações.');
+    const newDocRef = doc(collection(db, `users/${currentUser.uid}/transactions`));
     await setDoc(newDocRef, data);
 };
 
 const updateTransaction = async (id, data) => {
-    const user = currentUser;
-    if (!user) return;
-    const docRef = doc(db, `users/${user.uid}/transactions`, id);
+    if (!currentUser) return alert('Você precisa estar logado para atualizar transações.');
+    const docRef = doc(db, `users/${currentUser.uid}/transactions`, id);
     await updateDoc(docRef, data);
 };
 
 const deleteTransaction = async (id) => {
-    const user = currentUser;
-    if (!user) return;
-    const docRef = doc(db, `users/${user.uid}/transactions`, id);
+    if (!currentUser) return alert('Você precisa estar logado para excluir transações.');
+    const docRef = doc(db, `users/${currentUser.uid}/transactions`, id);
     await deleteDoc(docRef);
 };
 
 const addGoal = async (data) => {
-    const user = currentUser;
-    if (!user) return;
-    const newDocRef = doc(collection(db, `users/${user.uid}/goals`));
+    if (!currentUser) return alert('Você precisa estar logado para adicionar metas.');
+    const newDocRef = doc(collection(db, `users/${currentUser.uid}/goals`));
     await setDoc(newDocRef, data);
 };
 
 const updateGoal = async (id, data) => {
-    const user = currentUser;
-    if (!user) return;
-    const docRef = doc(db, `users/${user.uid}/goals`, id);
+    if (!currentUser) return alert('Você precisa estar logado para atualizar metas.');
+    const docRef = doc(db, `users/${currentUser.uid}/goals`, id);
     await updateDoc(docRef, data);
 };
 
 const deleteGoal = async (id) => {
-    const user = currentUser;
-    if (!user) return;
-    const docRef = doc(db, `users/${user.uid}/goals`, id);
+    if (!currentUser) return alert('Você precisa estar logado para excluir metas.');
+    const docRef = doc(db, `users/${currentUser.uid}/goals`, id);
     await deleteDoc(docRef);
 };
 
 const addPayable = async (data) => {
-    const user = currentUser;
-    if (!user) return;
-    const newDocRef = doc(collection(db, `users/${user.uid}/payables`));
+    if (!currentUser) return alert('Você precisa estar logado para adicionar contas.');
+    const newDocRef = doc(collection(db, `users/${currentUser.uid}/payables`));
     await setDoc(newDocRef, data);
 };
 
 const updatePayable = async (id, data) => {
-    const user = currentUser;
-    if (!user) return;
-    const docRef = doc(db, `users/${user.uid}/payables`, id);
+    if (!currentUser) return alert('Você precisa estar logado para atualizar contas.');
+    const docRef = doc(db, `users/${currentUser.uid}/payables`, id);
     await updateDoc(docRef, data);
 };
 
 const deletePayable = async (id) => {
-    const user = currentUser;
-    if (!user) return;
-    const docRef = doc(db, `users/${user.uid}/payables`, id);
+    if (!currentUser) return alert('Você precisa estar logado para excluir contas.');
+    const docRef = doc(db, `users/${currentUser.uid}/payables`, id);
     await deleteDoc(docRef);
 };
 
@@ -830,7 +824,8 @@ auth.onAuthStateChanged(user => {
     if (user) {
         currentUser = user;
         console.log("Usuário logado:", user.email);
-        document.getElementById('current-user-name').textContent = user.email;
+        
+        // Atualiza as informações do usuário
         document.getElementById('perfil-usuario').textContent = user.displayName || user.email;
         document.getElementById('perfil-email').textContent = user.email;
         document.getElementById('perfil-usuario-content').textContent = user.displayName || user.email;

@@ -872,6 +872,18 @@ section {
     float: right;
 }
 
+.modal-overlay {
+  transition: opacity 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+  display: flex;
+}
+
 /*
  * ========================================
  * Botões

@@ -443,6 +443,8 @@ main {
     border-radius: 15px;
     box-shadow: var(--shadow);
     margin-bottom: 30px;
+    position: sticky; /* Adicione esta linha */
+    top: 20px;       /* E esta linha para definir a distância do topo */
 }
 
 .chart-header {

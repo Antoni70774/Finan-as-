@@ -810,7 +810,7 @@ document.getElementById('goal-form').addEventListener('submit', async (e) => {
         await addGoal(data);
     }
     closeGoalModal();
-    document.getElementById('transaction-form').reset();
+    document.getElementById('goal-form').reset();
 });
 
 document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
@@ -840,8 +840,13 @@ document.getElementById('payable-form').addEventListener('submit', async (e) => 
  {
         await addPayable(data);
     }
+    // ✅ Fecha e reseta corretamente
     closePayableModal();
     document.getElementById('payable-form').reset();
+  } catch (error) {
+    console.error('Erro ao salvar conta a pagar:', error);
+    alert('Erro ao salvar. Verifique os dados e tente novamente.');
+  }
 });
 
 document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);

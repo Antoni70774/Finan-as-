@@ -450,9 +450,13 @@ const openTransactionModal = (transaction = null) => {
 };
 
 const closeTransactionModal = () => {
-  console.log('Fechando modal de transação');
-  document.getElementById('transaction-modal').classList.remove('active');
+  const modal = document.getElementById('transaction-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none'; // força o fechamento
+  }
 };
+
 
 
 const editTransaction = (id) => {

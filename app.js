@@ -2,7 +2,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
     getFirestore, enableIndexedDbPersistence, collection, doc,
-    setDoc, onSnapshot, updateDoc, deleteDoc
+    setDoc, getDocs, onSnapshot, writeBatch, deleteDoc, updateDoc, query, where, orderBy
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // 🔗 Configuração do Firebase
@@ -45,22 +45,8 @@ const formatter = new Intl.NumberFormat('pt-BR', {
 const showPage = (pageId) => {
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
-    
-    // Atualiza o estado da navegação
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    document.querySelectorAll('.nav-item-mobile').forEach(item => item.classList.remove('active'));
-    
-    const sidebarItem = document.querySelector(`.nav-item[data-page="${pageId}"]`);
-    if (sidebarItem) {
-        sidebarItem.classList.add('active');
-    }
-    
-    const mobileTab = document.querySelector(`.nav-item-mobile[data-page="${pageId}"]`);
-    if (mobileTab) {
-        mobileTab.classList.add('active');
-    }
-
-    // Fecha o menu lateral após a navegação
+    document.querySelector(`.nav-item[data-page="${pageId}"]`)?.classList.add('active');
     closeSidebar();
 };
 
@@ -77,9 +63,6 @@ const setupChart = () => {
     const chartType = 'all';
     const chartTitle = getChartTitle(chartType);
     document.getElementById('chart-title').textContent = chartTitle;
-    if (myChart) {
-        myChart.destroy();
-    }
     myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -143,12 +126,10 @@ const updateChart = (type = 'all') => {
     ];
     const backgroundColors = labels.map((_, i) => pastelColors[i % pastelColors.length]);
 
-    if (myChart) {
-      myChart.data.labels = labels;
-      myChart.data.datasets[0].data = data;
-      myChart.data.datasets[0].backgroundColor = backgroundColors;
-      myChart.update();
-    }
+    myChart.data.labels = labels;
+    myChart.data.datasets[0].data = data;
+    myChart.data.datasets[0].backgroundColor = backgroundColors;
+    myChart.update();
     renderCategorySummary(categories);
 };
 
@@ -186,7 +167,8 @@ const renderCategorySummary = (categories) => {
         item.className = 'summary-item';
         item.style.textAlign = 'center';
         item.innerHTML = `
-            <div style="font-size: 1.5rem;">${iconMap[category] || '📦'}</div>
+            <div style="font-size: 1.5rem;">${iconMap[category] ||
+'📦'}</div>
             <span>${category}</span>
             <h4>${formatCurrency(categories[category])}</h4>
         `;
@@ -314,24 +296,16 @@ const renderPayables = () => {
     `;
     list.appendChild(item);
 
-    // Adiciona os event listeners
-    item.querySelector('.btn-check').addEventListener('click', async () => {
-        await markPayableAsPaid(payable.id);
+    // Alternar status de pagamento ao clicar
+    item.querySelector('.btn-check').addEventListener('click', () => {
+      payable.paid = !payable.paid;
+      renderPayables(); // Re-renderiza para atualizar visual
     });
-    item.querySelector('.btn-edit-payable').addEventListener('click', () => {
-        editPayable(payable.id);
-    });
-    item.querySelector('.btn-delete-payable').addEventListener('click', async () => {
-        if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
-            await deletePayable(payable.id);
-        }
-    });
-  });
+});
 };
 
 const updateAlertBadge = () => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
     const futurePayables = payablesData.filter(p => !p.paid && new Date(p.dueDate + 'T00:00:00') >= today);
     document.getElementById('alert-count').textContent = futurePayables.length;
 };
@@ -347,15 +321,7 @@ const listenForData = () => {
     const transactionsRef = collection(db, `users/${user.uid}/transactions`);
     onSnapshot(transactionsRef, (snapshot) => {
         transactionsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        // Salva a posição de rolagem antes de atualizar a página
-        const mainContent = document.querySelector('main');
-        const scrollPosition = mainContent.scrollTop;
-        
         refreshDashboard();
-        
-        // Restaura a posição de rolagem após a atualização
-        mainContent.scrollTop = scrollPosition;
     });
     const goalsRef = collection(db, `users/${user.uid}/goals`);
     onSnapshot(goalsRef, (snapshot) => {
@@ -432,12 +398,7 @@ const markPayableAsPaid = async (id) => {
     const docRef = doc(db, `users/${user.uid}/payables`, id);
     await updateDoc(docRef, { paid: true });
 };
-const deletePayable = async (id) => {
-    const user = currentUser;
-    if (!user) return;
-    const docRef = doc(db, `users/${user.uid}/payables`, id);
-    await deleteDoc(docRef);
-};
+
 // ----------------------
 // 🖥️ Lógica da UI
 // ----------------------
@@ -714,12 +675,13 @@ const closeAlertModal = () => {
 };
 
 const closeSidebar = () => {
-    document.getElementById('menu-perfil').classList.remove('active');
+    document.getElementById('menu-perfil').style.display = 'none';
 };
 
 const toggleSidebar = () => {
     const sidebar = document.getElementById('menu-perfil');
-    sidebar.classList.toggle('active');
+    sidebar.style.display = sidebar.style.display === 'none' ?
+'block' : 'none';
 };
 
 // ----------------------
@@ -728,33 +690,25 @@ const toggleSidebar = () => {
 
 // Navegação
 document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
         const pageId = btn.getAttribute('data-page');
         if (pageId) {
             showPage(pageId);
         }
     });
 });
-// Nova navegação mobile
-document.querySelectorAll('.nav-item-mobile').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const pageId = btn.getAttribute('data-page');
-        if (pageId) {
-            showPage(pageId);
-        } else if (btn.id === 'mobile-more-menu-btn') {
-            toggleSidebar();
-        }
-    });
-});
+
 // Botão FAB para nova transação
 document.getElementById('add-transaction-btn').addEventListener('click', () => {
     openTransactionModal();
 });
+
 // Botão de logout
 document.getElementById('btn-logout').addEventListener('click', async () => {
     await signOut(auth);
     window.location.href = "login.html";
 });
+
 // Envio do formulário de transação
 document.getElementById('transaction-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -776,7 +730,8 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     } else {
       await addTransaction(data);
     }
-    
+
+    refreshDashboard();
     closeTransactionModal();
     document.getElementById('transaction-form').reset();
     document.getElementById('transaction-id').value = '';
@@ -789,25 +744,29 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     alert('Erro ao salvar. Verifique os dados e tente novamente.');
   }
 });
+
 // Botão de deletar transação
 document.getElementById('delete-transaction-btn').addEventListener('click', async () => {
     const id = document.getElementById('transaction-id').value;
     if (confirm('Tem certeza que deseja excluir esta transação?')) {
         await deleteTransaction(id);
-        closeTransactionModal();
+        closeTransactionModal(); // Fecha o modal após a exclusão
     }
 });
+
 // Botões de tipo de transação (Despesa/Receita)
 document.getElementById('type-expense-btn').addEventListener('click', () => {
     document.getElementById('transaction-type').value = 'expense';
     document.getElementById('type-expense-btn').classList.add('active');
     document.getElementById('type-income-btn').classList.remove('active');
 });
+
 document.getElementById('type-income-btn').addEventListener('click', () => {
     document.getElementById('transaction-type').value = 'income';
     document.getElementById('type-expense-btn').classList.remove('active');
     document.getElementById('type-income-btn').classList.add('active');
 });
+
 // Botão de cancelamento de modal
 document.getElementById('cancel-btn').addEventListener('click', closeTransactionModal);
 
@@ -816,10 +775,12 @@ document.getElementById('prev-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() - 1);
     refreshDashboard();
 });
+
 document.getElementById('next-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() + 1);
     refreshDashboard();
 });
+
 // Filtro de gráfico por tipo
 document.querySelectorAll('.chart-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -828,30 +789,26 @@ document.querySelectorAll('.chart-btn').forEach(btn => {
         updateChart(btn.getAttribute('data-type'));
     });
 });
+
 // Metas
 document.getElementById('add-goal-btn').addEventListener('click', () => openGoalModal());
 document.getElementById('goal-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    try {
-        const id = document.getElementById('goal-id').value;
-        const data = {
-            name: document.getElementById('goal-name').value,
-            target: parseFloat(document.getElementById('goal-target').value),
-            current: parseFloat(document.getElementById('goal-current').value),
-            date: document.getElementById('goal-date').value
-        };
-        if (id) {
-            await updateGoal(id, data);
-        } else {
-            await addGoal(data);
-        }
-        closeGoalModal();
-        document.getElementById('goal-form').reset();
-    } catch (error) {
-        console.error('Erro ao salvar meta:', error);
-        alert('Erro ao salvar a meta. Verifique os dados e tente novamente.');
-        closeGoalModal();
+    const id = document.getElementById('goal-id').value;
+    const data = {
+        name: document.getElementById('goal-name').value,
+        target: parseFloat(document.getElementById('goal-target').value),
+        current: parseFloat(document.getElementById('goal-current').value),
+        date: document.getElementById('goal-date').value
+    };
+    if (id) {
+        await updateGoal(id, data);
+    } else
+ {
+        await addGoal(data);
     }
+    closeGoalModal();
+    document.getElementById('transaction-form').reset();
 });
 
 document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
@@ -862,32 +819,29 @@ document.getElementById('delete-goal-btn').addEventListener('click', async () =>
         closeGoalModal();
     }
 });
+
 // Contas a Pagar
 document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
 document.getElementById('payable-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    try {
-        const id = document.getElementById('payable-id').value;
-        const data = {
-            description: document.getElementById('payable-description').value,
-            category: document.getElementById('payable-category').value,
-            amount: parseFloat(document.getElementById('payable-amount').value),
-            dueDate: document.getElementById('payable-date').value,
-            paid: false
-        };
-        if (id) {
-            await updatePayable(id, data);
-        } else {
-            await addPayable(data);
-        }
-        closePayableModal();
-        document.getElementById('payable-form').reset();
-    } catch (error) {
-        console.error('Erro ao salvar conta:', error);
-        alert('Erro ao salvar a conta. Verifique os dados e tente novamente.');
-        closePayableModal();
+    const id = document.getElementById('payable-id').value;
+    const data = {
+        description: document.getElementById('payable-description').value,
+        category: document.getElementById('payable-category').value,
+        amount: parseFloat(document.getElementById('payable-amount').value),
+        dueDate: document.getElementById('payable-date').value,
+        paid: false
+    };
+    if (id) {
+        await updatePayable(id, data);
+    } else
+ {
+        await addPayable(data);
     }
+    closePayableModal();
+    document.getElementById('payable-form').reset();
 });
+
 document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
 document.getElementById('payable-list').addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
@@ -897,18 +851,16 @@ document.getElementById('payable-list').addEventListener('click', async (e) => {
         await markPayableAsPaid(id);
     } else if (btn.classList.contains('btn-edit-payable')) {
         editPayable(id);
-    } else if (btn.classList.contains('btn-delete-payable')) {
-        if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
-            await deletePayable(id);
-        }
     }
 });
+
 // Funções do menu lateral
 window.abrirResumoMensal = () => {
     showPage('resumo-mensal-page');
     updateMonthlySummary(currentMonth);
     renderMonthlyChart();
 };
+
 window.abrirResumoAnual = () => {
     showPage('resumo-anual-page');
     renderAnnualChart();
@@ -918,6 +870,7 @@ window.abrirPagina = showPage;
 window.exportarDados = () => {
     alert('Funcionalidade de exportar dados não implementada.');
 };
+
 window.abrirConfig = () => {
     showPage('config-page');
 };
@@ -925,6 +878,7 @@ window.abrirConfig = () => {
 window.trocarTema = () => {
     document.body.classList.toggle('dark-theme');
 };
+
 window.resetarApp = () => {
     alert('Funcionalidade de resetar app não implementada.');
 };
@@ -937,15 +891,18 @@ document.getElementById('resumo-prev-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() - 1);
     updateMonthlySummary(currentMonth);
 });
+
 document.getElementById('resumo-next-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() + 1);
     updateMonthlySummary(currentMonth);
 });
+
 // Menu lateral
 document.getElementById('menu-botao').addEventListener('click', (e) => {
     e.stopPropagation();
     toggleSidebar();
 });
+
 document.addEventListener('click', (e) => {
     const sidebar = document.getElementById('menu-perfil');
     const menuBtn = document.getElementById('menu-botao');
@@ -953,6 +910,7 @@ document.addEventListener('click', (e) => {
         closeSidebar();
     }
 });
+
 // ----------------------
 // 🚀 Inicialização
 // ----------------------

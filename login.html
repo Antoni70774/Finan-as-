@@ -1,88 +1,250 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Controle Financeiro</title>
-  <link rel="stylesheet" href="login.css">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar | Controle Financeiro</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        .login-container h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        .login-container p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .input-group input:focus {
+            border-color: #4A90E2;
+            outline: none;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: #4A90E2;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #357ABD;
+        }
+        .btn-google {
+            width: 100%;
+            padding: 12px;
+            background-color: #DB4437;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-google:hover {
+            background-color: #C2372E;
+        }
+        .btn-google img {
+            height: 20px;
+        }
+        .login-links {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+        .login-links a {
+            color: #4A90E2;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .error-message {
+            color: #DB4437;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2>Entrar ou Cadastrar</h2>
-    <input type="email" id="email" placeholder="E-mail">
-    <input type="password" id="senha" placeholder="Senha">
-    <div class="button-group">
-      <button id="btn-login-email">Entrar</button>
-      <button id="btn-criar-conta">Criar Conta</button>
-      <button id="btn-login-google">Continuar com Google</button>
+    <div class="login-container">
+        <h1>Entrar no Aplicativo</h1>
+        <p>Acesse sua conta para gerenciar suas finanças.</p>
+        <form id="login-form">
+            <div class="input-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="seu-email@exemplo.com" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="********" required>
+            </div>
+            <div class="input-group">
+              <button type="submit" class="btn-primary">Entrar</button>
+            </div>
+            <div class="input-group">
+              <button type="button" id="btn-create-account" class="btn-primary">Criar Conta</button>
+            </div>
+            <p class="error-message" id="error-message"></p>
+        </form>
+        <div class="login-links">
+            <a href="#" id="btn-forgot-password">Esqueceu a senha?</a>
+        </div>
+        <button id="btn-login-google" class="btn-google">
+            <img src="https://www.google.com/images/branding/googlelogo/svg/googlelogo_color_200x200dp.svg" alt="Google Logo">
+            Entrar com Google
+        </button>
     </div>
-  </div>
 
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      GoogleAuthProvider,
-      signInWithPopup
-    } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    // 🔧 Configuração correta do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
-      authDomain: "controle-financeiro-65744.firebaseapp.com",
-      projectId: "controle-financeiro-65744",
-      storageBucket: "controle-financeiro-65744.appspot.com",
-      messagingSenderId: "587527394934",
-      appId: "1:587527394934:web:c142740ef0139a5cf63157",
-      measurementId: "G-RT2T1HNV4G"
-    };
+        // Sua configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
+            authDomain: "controle-financeiro-65744.firebaseapp.com",
+            projectId: "controle-financeiro-65744",
+            storageBucket: "controle-financeiro-65744.firebasestorage.app",
+            messagingSenderId: "587527394934",
+            appId: "1:587527394934:web:c142740ef0139a5cf63157",
+            measurementId: "G-RT2T1HNV4G"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const errorMessageDiv = document.getElementById('error-message');
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+        const showErrorMessage = (message) => {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.style.display = 'block';
+        };
 
-    // Login com email/senha
-    document.getElementById('btn-login-email').addEventListener('click', () => {
-      const email = document.getElementById('email').value.trim();
-      const senha = document.getElementById('senha').value;
+        const hideErrorMessage = () => {
+            errorMessageDiv.style.display = 'none';
+        };
 
-      if (!email || !senha) {
-        alert("Preencha e-mail e senha.");
-        return;
-      }
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideErrorMessage();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
-      signInWithEmailAndPassword(auth, email, senha)
-        .then(() => window.location.href = 'index.html')
-        .catch(err => alert('Erro ao entrar: ' + err.message));
-    });
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    let message = 'Erro ao entrar. Por favor, verifique seu e-mail e senha.';
+                    if (error.code === 'auth/invalid-email') {
+                        message = 'O formato do e-mail é inválido.';
+                    } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                        message = 'E-mail ou senha incorretos.';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        message = 'Muitas tentativas de login. Tente novamente mais tarde.';
+                    }
+                    showErrorMessage(message);
+                });
+        });
 
-    // Criar conta
-    document.getElementById('btn-criar-conta').addEventListener('click', () => {
-      const email = document.getElementById('email').value.trim();
-      const senha = document.getElementById('senha').value;
+        document.getElementById('btn-create-account').addEventListener('click', () => {
+            hideErrorMessage();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
-      if (!email || !senha) {
-        alert("Preencha e-mail e senha.");
-        return;
-      }
+            if (password.length < 6) {
+                showErrorMessage('A senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
 
-      createUserWithEmailAndPassword(auth, email, senha)
-        .then(() => window.location.href = 'index.html')
-        .catch(err => alert('Erro ao criar conta: ' + err.message));
-    });
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    alert('Conta criada com sucesso! Você será redirecionado para a página principal.');
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    let message = 'Erro ao criar conta. Por favor, tente novamente.';
+                    if (error.code === 'auth/email-already-in-use') {
+                        message = 'Este e-mail já está em uso.';
+                    } else if (error.code === 'auth/weak-password') {
+                        message = 'A senha é muito fraca.';
+                    }
+                    showErrorMessage(message);
+                });
+        });
 
-    // Login com Google
-    document.getElementById('btn-login-google').addEventListener('click', () => {
-      const provider = new GoogleAuthProvider();
+        document.getElementById('btn-forgot-password').addEventListener('click', () => {
+            hideErrorMessage();
+            const email = document.getElementById('email').value;
+            if (!email) {
+                showErrorMessage('Por favor, digite seu e-mail para recuperar a senha.');
+                return;
+            }
+            sendPasswordResetEmail(auth, email)
+                .then(() => {
+                    alert('Um e-mail de recuperação de senha foi enviado para ' + email);
+                })
+                .catch((error) => {
+                    showErrorMessage('Erro ao enviar e-mail de recuperação. Verifique se o e-mail está correto.');
+                });
+        });
 
-      signInWithPopup(auth, provider)
-        .then(() => window.location.href = 'index.html')
-        .catch(err => alert('Erro ao entrar com Google: ' + err.message));
-    });
-  </script>
+        document.getElementById('btn-login-google').addEventListener('click', () => {
+            hideErrorMessage();
+            const provider = new GoogleAuthProvider();
+
+            signInWithPopup(auth, provider)
+                .then(() => {
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    let message = 'Erro ao entrar com Google. Por favor, tente novamente.';
+                    showErrorMessage(message);
+                });
+        });
+
+    </script>
 </body>
 </html>
-
-

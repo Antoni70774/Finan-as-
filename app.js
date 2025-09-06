@@ -793,24 +793,31 @@ document.querySelectorAll('.chart-btn').forEach(btn => {
 });
 
 // Metas
-document.getElementById('add-goal-btn').addEventListener('click', () => openGoalModal());
 document.getElementById('goal-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  try {
     const id = document.getElementById('goal-id').value;
     const data = {
-        name: document.getElementById('goal-name').value,
-        target: parseFloat(document.getElementById('goal-target').value),
-        current: parseFloat(document.getElementById('goal-current').value),
-        date: document.getElementById('goal-date').value
+      name: document.getElementById('goal-name').value,
+      target: parseFloat(document.getElementById('goal-target').value),
+      current: parseFloat(document.getElementById('goal-current').value),
+      date: document.getElementById('goal-date').value
     };
+
     if (id) {
-        await updateGoal(id, data);
-    } else
- {
-        await addGoal(data);
+      await updateGoal(id, data);
+    } else {
+      await addGoal(data);
     }
+    await saveAndRerender();
+
+    // ✅ Fecha e reseta corretamente
     closeGoalModal();
     document.getElementById('goal-form').reset();
+  } catch (error) {
+    console.error('Erro ao salvar meta:', error);
+    alert('Erro ao salvar. Verifique os dados e tente novamente.');
+  }
 });
 
 document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
@@ -823,23 +830,25 @@ document.getElementById('delete-goal-btn').addEventListener('click', async () =>
 });
 
 // Contas a Pagar
-document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
 document.getElementById('payable-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  try {
     const id = document.getElementById('payable-id').value;
     const data = {
-        description: document.getElementById('payable-description').value,
-        category: document.getElementById('payable-category').value,
-        amount: parseFloat(document.getElementById('payable-amount').value),
-        dueDate: document.getElementById('payable-date').value,
-        paid: false
+      description: document.getElementById('payable-description').value,
+      category: document.getElementById('payable-category').value,
+      amount: parseFloat(document.getElementById('payable-amount').value),
+      dueDate: document.getElementById('payable-date').value,
+      paid: false
     };
+
     if (id) {
-        await updatePayable(id, data);
-    } else
- {
-        await addPayable(data);
+      await updatePayable(id, data);
+    } else {
+      await addPayable(data);
     }
+    await saveAndRerender();
+
     // ✅ Fecha e reseta corretamente
     closePayableModal();
     document.getElementById('payable-form').reset();

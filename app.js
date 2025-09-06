@@ -726,10 +726,16 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
 
   try {
     if (id) {
-      await updateTransaction(id, data);
+        await updateTransaction(id, data);
     } else {
-      await addTransaction(data);
+        await addTransaction(data);
     }
+    await saveAndRerender();
+
+    // 🔹 Fecha e reseta
+    closeTransactionModal();
+    document.getElementById('transaction-form').reset();
+});
 
     refreshDashboard();
     closeTransactionModal();

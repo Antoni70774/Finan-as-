@@ -167,7 +167,8 @@ const renderCategorySummary = (categories) => {
         item.className = 'summary-item';
         item.style.textAlign = 'center';
         item.innerHTML = `
-            <div style="font-size: 1.5rem;">${iconMap[category] || '📦'}</div>
+            <div style="font-size: 1.5rem;">${iconMap[category] ||
+'📦'}</div>
             <span>${category}</span>
             <h4>${formatCurrency(categories[category])}</h4>
         `;
@@ -300,7 +301,7 @@ const renderPayables = () => {
       payable.paid = !payable.paid;
       renderPayables(); // Re-renderiza para atualizar visual
     });
-  });
+});
 };
 
 const updateAlertBadge = () => {
@@ -679,7 +680,8 @@ const closeSidebar = () => {
 
 const toggleSidebar = () => {
     const sidebar = document.getElementById('menu-perfil');
-    sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
+    sidebar.style.display = sidebar.style.display === 'none' ?
+'block' : 'none';
 };
 
 // ----------------------
@@ -695,15 +697,18 @@ document.querySelectorAll('.nav-item').forEach(btn => {
         }
     });
 });
+
 // Botão FAB para nova transação
 document.getElementById('add-transaction-btn').addEventListener('click', () => {
     openTransactionModal();
 });
+
 // Botão de logout
 document.getElementById('btn-logout').addEventListener('click', async () => {
     await signOut(auth);
     window.location.href = "login.html";
 });
+
 // Envio do formulário de transação
 document.getElementById('transaction-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -725,7 +730,8 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     } else {
       await addTransaction(data);
     }
-    
+
+    refreshDashboard();
     closeTransactionModal();
     document.getElementById('transaction-form').reset();
     document.getElementById('transaction-id').value = '';
@@ -738,25 +744,29 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     alert('Erro ao salvar. Verifique os dados e tente novamente.');
   }
 });
+
 // Botão de deletar transação
 document.getElementById('delete-transaction-btn').addEventListener('click', async () => {
     const id = document.getElementById('transaction-id').value;
     if (confirm('Tem certeza que deseja excluir esta transação?')) {
         await deleteTransaction(id);
-        closeTransactionModal();
+        closeTransactionModal(); // Fecha o modal após a exclusão
     }
 });
+
 // Botões de tipo de transação (Despesa/Receita)
 document.getElementById('type-expense-btn').addEventListener('click', () => {
     document.getElementById('transaction-type').value = 'expense';
     document.getElementById('type-expense-btn').classList.add('active');
     document.getElementById('type-income-btn').classList.remove('active');
 });
+
 document.getElementById('type-income-btn').addEventListener('click', () => {
     document.getElementById('transaction-type').value = 'income';
     document.getElementById('type-expense-btn').classList.remove('active');
     document.getElementById('type-income-btn').classList.add('active');
 });
+
 // Botão de cancelamento de modal
 document.getElementById('cancel-btn').addEventListener('click', closeTransactionModal);
 
@@ -765,10 +775,12 @@ document.getElementById('prev-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() - 1);
     refreshDashboard();
 });
+
 document.getElementById('next-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() + 1);
     refreshDashboard();
 });
+
 // Filtro de gráfico por tipo
 document.querySelectorAll('.chart-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -777,6 +789,7 @@ document.querySelectorAll('.chart-btn').forEach(btn => {
         updateChart(btn.getAttribute('data-type'));
     });
 });
+
 // Metas
 document.getElementById('add-goal-btn').addEventListener('click', () => openGoalModal());
 document.getElementById('goal-form').addEventListener('submit', async (e) => {
@@ -790,11 +803,12 @@ document.getElementById('goal-form').addEventListener('submit', async (e) => {
     };
     if (id) {
         await updateGoal(id, data);
-    } else {
+    } else
+ {
         await addGoal(data);
     }
     closeGoalModal();
-    document.getElementById('goal-form').reset();
+    document.getElementById('transaction-form').reset();
 });
 
 document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
@@ -805,6 +819,7 @@ document.getElementById('delete-goal-btn').addEventListener('click', async () =>
         closeGoalModal();
     }
 });
+
 // Contas a Pagar
 document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
 document.getElementById('payable-form').addEventListener('submit', async (e) => {
@@ -819,12 +834,14 @@ document.getElementById('payable-form').addEventListener('submit', async (e) => 
     };
     if (id) {
         await updatePayable(id, data);
-    } else {
+    } else
+ {
         await addPayable(data);
     }
     closePayableModal();
     document.getElementById('payable-form').reset();
 });
+
 document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
 document.getElementById('payable-list').addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
@@ -836,12 +853,14 @@ document.getElementById('payable-list').addEventListener('click', async (e) => {
         editPayable(id);
     }
 });
+
 // Funções do menu lateral
 window.abrirResumoMensal = () => {
     showPage('resumo-mensal-page');
     updateMonthlySummary(currentMonth);
     renderMonthlyChart();
 };
+
 window.abrirResumoAnual = () => {
     showPage('resumo-anual-page');
     renderAnnualChart();
@@ -851,6 +870,7 @@ window.abrirPagina = showPage;
 window.exportarDados = () => {
     alert('Funcionalidade de exportar dados não implementada.');
 };
+
 window.abrirConfig = () => {
     showPage('config-page');
 };
@@ -858,6 +878,7 @@ window.abrirConfig = () => {
 window.trocarTema = () => {
     document.body.classList.toggle('dark-theme');
 };
+
 window.resetarApp = () => {
     alert('Funcionalidade de resetar app não implementada.');
 };
@@ -870,15 +891,18 @@ document.getElementById('resumo-prev-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() - 1);
     updateMonthlySummary(currentMonth);
 });
+
 document.getElementById('resumo-next-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() + 1);
     updateMonthlySummary(currentMonth);
 });
+
 // Menu lateral
 document.getElementById('menu-botao').addEventListener('click', (e) => {
     e.stopPropagation();
     toggleSidebar();
 });
+
 document.addEventListener('click', (e) => {
     const sidebar = document.getElementById('menu-perfil');
     const menuBtn = document.getElementById('menu-botao');
@@ -886,6 +910,7 @@ document.addEventListener('click', (e) => {
         closeSidebar();
     }
 });
+
 // ----------------------
 // 🚀 Inicialização
 // ----------------------

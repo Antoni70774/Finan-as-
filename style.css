@@ -423,6 +423,18 @@ section {
   display: flex;
 }
 
+#transaction-modal {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#transaction-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+  display: flex;
+}
+
 
 /*
  * ========================================

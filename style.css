@@ -19,6 +19,7 @@
     --font-family: 'Roboto', sans-serif;
     --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
+
 /* 🌙 Modo Escuro (padrão) */
 body.dark-theme {
     --text-color: #E2E8F0;
@@ -32,17 +33,18 @@ body.dark-theme {
 /* ☀️ Modo Claro */
 body:not(.dark-theme) {
     --text-color: #1A202C;
-    --text-light: #718096;
+    --text-light: #4A5568;
     --bg-color: #F7FAFC;
     --card-bg: #FFFFFF;
     --border-color: #E2E8F0;
     --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
+/* Reset básico e tipografia */
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
@@ -50,133 +52,196 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     line-height: 1.6;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    overflow-x: hidden;
 }
 
-.container {
+h1, h2, h3, h4 {
+    color: var(--text-color);
+    margin-bottom: 10px;
+}
+
+/* Layout */
+.app-container {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-}
-
-main {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 70px; /* Espaço para a barra de navegação mobile */
+    padding-top: 60px; /* Espaço para a barra de navegação fixa */
 }
 
 /*
  * ========================================
- * Layout Principal e Navegação Mobile
+ * Barra de Navegação Superior (Header)
  * ========================================
  */
-header {
+
+.top-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
+    padding: 10px 20px;
     background-color: var(--card-bg);
-    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
 }
 
-.app-info {
-    flex-grow: 1;
-}
-
-.app-info h1 {
+.nav-brand {
+    font-weight: 700;
     font-size: 1.2rem;
     color: var(--primary-color);
 }
 
-.app-info p {
-    font-size: 0.8rem;
-    color: var(--text-light);
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-.menu-icon {
+.nav-button {
     background: none;
     border: none;
     cursor: pointer;
+    color: var(--text-light);
+    transition: color 0.2s;
+    font-size: 1.5rem;
+}
+
+.nav-button:hover {
     color: var(--text-color);
-    display: none; /* Escondido no desktop */
-    margin-right: 15px;
+}
+
+.alert-btn {
+    position: relative;
 }
 
 .alert-badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--accent-color);
+    top: 0;
+    right: 0;
+    background-color: var(--danger-color);
     color: white;
     font-size: 0.7rem;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 2px 6px;
     border-radius: 50%;
-}
-
-.mobile-nav {
-    display: none; /* Escondido no desktop */
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: var(--card-bg);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    display: flex;
-    justify-content: space-around;
-    padding: 5px 0;
-}
-
-.mobile-nav .nav-item-mobile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    transform: translate(50%, -50%);
+    min-width: 20px;
     text-align: center;
-    color: var(--text-light);
-    background: none;
-    border: none;
+}
+
+.profile-trigger {
     cursor: pointer;
-    font-size: 0.8rem;
-    padding: 5px;
-}
-
-.mobile-nav .nav-item-mobile.active {
-    color: var(--primary-color);
-}
-
-.mobile-nav .nav-item-mobile:hover {
-    color: var(--primary-color);
-}
-
-#add-transaction-btn {
     font-size: 2rem;
-    background-color: var(--primary-color);
-    color: white;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    transform: translateY(-20px);
-    box-shadow: var(--shadow);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    color: var(--text-light);
 }
 
 /*
  * ========================================
- * Páginas e Conteúdo
+ * Menu Lateral (Sidebar)
  * ========================================
  */
-.pages-container {
+
+.menu-lateral {
+    position: fixed;
+    top: 60px;
+    right: -250px;
+    width: 250px;
+    height: calc(100% - 60px);
+    background-color: var(--card-bg);
+    border-left: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    transition: right 0.3s ease-in-out;
+    z-index: 999;
     padding: 20px;
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.menu-lateral.active {
+    right: 0;
+}
+
+.perfil-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.perfil-info .profile-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+}
+
+.perfil-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.perfil-details span {
+    font-weight: 500;
+}
+
+.perfil-details small {
+    color: var(--text-light);
+    font-size: 0.8rem;
+}
+
+.menu-lista {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.menu-lista li {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+}
+
+.menu-lista li:hover {
+    background-color: var(--bg-color);
+}
+
+.menu-lista li .material-icons-sharp {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.menu-lista #btn-logout {
+    color: var(--danger-color);
+    font-weight: 700;
+    border-top: 1px solid var(--border-color);
+    margin-top: 10px;
+    padding-top: 15px;
+}
+
+.menu-lista #btn-logout:hover {
+    background-color: rgba(229, 62, 62, 0.1);
+}
+
+/*
+ * ========================================
+ * Conteúdo Principal (Main)
+ * ========================================
+ */
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .page {
@@ -185,18 +250,53 @@ header {
 }
 
 .page.active {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.main-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--card-bg);
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: var(--shadow);
+}
+
+.main-nav .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-light);
+    font-size: 0.7rem;
+    padding: 5px 10px;
+    border-radius: 10px;
+    transition: all 0.2s;
+}
+
+.main-nav .nav-item.active {
+    color: var(--primary-color);
+    background-color: var(--bg-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.main-nav .nav-item .material-icons-sharp {
+    font-size: 1.5rem;
 }
 
 /*
@@ -205,31 +305,30 @@ header {
  * ========================================
  */
 
-.month-selector {
+.dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
 }
 
-.month-selector h3 {
+.dashboard-header h2 {
+    font-weight: 500;
     font-size: 1.2rem;
-    flex-grow: 1;
-    text-align: center;
 }
 
-.month-selector button {
+.nav-arrow {
     background: none;
     border: none;
-    color: var(--primary-color);
+    color: var(--text-color);
+    font-size: 1.5rem;
     cursor: pointer;
 }
 
-.cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+.balance-cards {
+    display: flex;
     gap: 15px;
-    margin-top: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .card {
@@ -237,127 +336,169 @@ header {
     padding: 20px;
     border-radius: 15px;
     box-shadow: var(--shadow);
+    flex-grow: 1;
+    min-width: 150px;
     text-align: center;
 }
 
 .card h4 {
-    font-size: 0.9rem;
     color: var(--text-light);
+    font-size: 0.9rem;
+    margin-bottom: 5px;
 }
 
-.card span {
-    font-size: 1.5rem;
-    font-weight: bold;
-    display: block;
-    margin-top: 5px;
-}
-
-.income-card span {
+.card.income p {
     color: var(--success-color);
+    font-weight: 700;
 }
 
-.expense-card span {
+.card.expense p {
     color: var(--danger-color);
+    font-weight: 700;
 }
 
-.balance-card span {
+.card.balance p {
     color: var(--primary-color);
+    font-weight: 700;
 }
 
-.dashboard-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.chart-container {
-    background-color: var(--card-bg);
+.dashboard-chart-container {
+    height: 300px;
     padding: 20px;
-    border-radius: 15px;
-    box-shadow: var(--shadow);
-    margin-bottom: 30px;
-    position: sticky; /* Torna o gráfico fixo */
-    top: 20px;       /* Distância do topo */
 }
 
 .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
+    margin-bottom: 10px;
 }
 
-.chart-controls .chart-btn {
+.chart-options {
+    display: flex;
+    gap: 5px;
+}
+
+.chart-btn {
     background-color: var(--bg-color);
-    color: var(--text-light);
     border: 1px solid var(--border-color);
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
+    color: var(--text-light);
     font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.chart-controls .chart-btn.active {
+.chart-btn.active {
     background-color: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
 }
 
-canvas#main-chart {
-    max-height: 250px;
-    width: 100% !important;
-    height: auto !important;
-}
-
-.category-summary-grid {
+#category-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 15px;
-    margin-top: 20px;
 }
 
 .summary-item {
-    background-color: var(--bg-color);
+    background-color: var(--card-bg);
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .summary-item h4 {
     margin-top: 5px;
-    font-size: 1rem;
+    color: var(--text-color);
 }
 
-.transaction-list-container {
+/*
+ * ========================================
+ * Listas (Transações, Metas, Contas)
+ * ========================================
+ */
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+}
+
+.list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     background-color: var(--card-bg);
-    padding: 20px;
+    padding: 15px;
     border-radius: 15px;
     box-shadow: var(--shadow);
-    margin-bottom: 20px;
 }
 
-#transaction-list {
+.transaction-list {
     list-style: none;
-    padding: 0;
-}
-
-.transaction-item {
     display: flex;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border-color);
-    cursor: pointer;
+    flex-direction: column;
+    gap: 10px;
+    background-color: var(--card-bg);
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
 }
 
-.transaction-item:last-child {
-    border-bottom: none;
+.transaction-item, .goal-item, .payable-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.transaction-item:hover, .goal-item:hover, .payable-item:hover {
+    background-color: var(--border-color);
+}
+
+.transaction-details, .goal-details, .payable-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.transaction-info {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
 }
 
 .transaction-type {
-    font-size: 1.5rem;
-    font-weight: bold;
-    width: 30px;
-    text-align: center;
+    font-weight: 700;
+    font-size: 1.2rem;
 }
 
 .transaction-type.income {
@@ -368,44 +509,118 @@ canvas#main-chart {
     color: var(--danger-color);
 }
 
-.transaction-details {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-grow: 1;
-    margin-left: 15px;
-}
-
 .description {
     font-weight: 500;
 }
 
 .date {
-    color: var(--text-light);
     font-size: 0.8rem;
-    display: block;
+    color: var(--text-light);
 }
 
 .transaction-amount {
-    font-weight: bold;
+    font-weight: 700;
 }
+
+/* Estilos específicos para Metas */
+.goal-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.goal-amounts {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background-color: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    transition: width 0.5s;
+}
+
+.goal-progress-text {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+/* Estilos específicos para Contas a Pagar */
+.payable-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.payable-details {
+    flex-grow: 1;
+}
+
+.payable-details h4 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.payable-details p {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.payable-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.payable-actions button {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.payable-actions button:hover {
+    transform: scale(1.1);
+}
+
+.payable-item.overdue {
+    background-color: rgba(255, 107, 107, 0.1); /* Cor de fundo suave para atraso */
+    border-left: 5px solid var(--danger-color); /* Borda lateral para destaque */
+}
+
+.payable-item.due-today {
+    background-color: rgba(255, 215, 0, 0.1); /* Cor de fundo suave para vencimento hoje */
+    border-left: 5px solid gold; /* Borda lateral */
+}
+
 
 /*
  * ========================================
- * Modais
+ * Modais (Pop-ups)
  * ========================================
  */
+
 .modal {
-    display: none;
     position: fixed;
-    z-index: 1000;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
+    display: none;
     align-items: center;
+    justify-content: center;
+    z-index: 2000;
 }
 
 .modal.active {
@@ -417,311 +632,112 @@ canvas#main-chart {
     padding: 25px;
     border-radius: 15px;
     width: 90%;
-    max-width: 500px;
+    max-width: 450px;
     box-shadow: var(--shadow);
+    position: relative;
+    animation: scaleIn 0.3s ease-out;
 }
 
-.modal h3 {
-    margin-bottom: 20px;
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-content h3 {
     text-align: center;
+    margin-bottom: 20px;
     color: var(--primary-color);
 }
 
-.modal .input-group {
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-light);
+    cursor: pointer;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
     margin-bottom: 15px;
 }
 
-.modal label {
-    display: block;
-    margin-bottom: 5px;
+.input-group label {
+    font-size: 0.9rem;
     color: var(--text-light);
+    margin-bottom: 5px;
 }
 
-.modal input,
-.modal select {
-    width: 100%;
+.input-group input, .input-group select {
     padding: 12px;
     border: 1px solid var(--border-color);
+    border-radius: 8px;
     background-color: var(--bg-color);
     color: var(--text-color);
-    border-radius: 8px;
-    font-size: 1rem;
 }
 
-.modal-actions {
+.transaction-type-toggle {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
     gap: 10px;
-    margin-top: 20px;
 }
 
-.modal-actions button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-#save-transaction-btn,
-#save-goal-btn,
-#save-payable-btn,
-#alert-modal button {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-#cancel-btn,
-#cancel-goal-btn,
-#cancel-payable-btn {
-    background-color: var(--border-color);
-    color: var(--text-color);
-}
-
-#delete-transaction-btn,
-#delete-goal-btn {
-    background-color: var(--danger-color);
-    color: white;
-    margin-right: auto;
-}
-
-.modal-type-buttons {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.modal-type-buttons button {
-    flex: 1;
+.toggle-btn {
+    flex-grow: 1;
     padding: 10px;
     border: 1px solid var(--border-color);
     background-color: var(--bg-color);
     color: var(--text-light);
     border-radius: 8px;
     cursor: pointer;
-    font-weight: bold;
+    transition: background-color 0.2s, color 0.2s;
 }
 
-.modal-type-buttons button.active {
+.toggle-btn.active {
     background-color: var(--primary-color);
     color: white;
-    border-color: var(--primary-color);
 }
 
-/*
- * ========================================
- * FAB - Botão de Ação Flutuante
- * ========================================
- */
-.fab-btn {
-    position: fixed;
-    bottom: 80px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    color: white;
-    font-size: 2rem;
+.modal-actions {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: var(--shadow);
-    border: none;
-    cursor: pointer;
-    z-index: 999;
-}
-
-/*
- * ========================================
- * Metas e Contas a Pagar
- * ========================================
- */
-
-.goals-container, .payables-container {
-    display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     gap: 15px;
     margin-top: 20px;
 }
 
-.goal-item, .payable-item {
-    background-color: var(--card-bg);
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: var(--shadow);
-    cursor: pointer;
-}
-
-.goal-item h4, .payable-item h4 {
-    margin-bottom: 10px;
-}
-
-.goal-amounts {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9rem;
-    color: var(--text-light);
-    margin-bottom: 5px;
-}
-
-.progress-bar-container {
-    width: 100%;
-    background-color: var(--bg-color);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 10px;
-    background-color: var(--primary-color);
-    transition: width 0.3s ease-in-out;
-}
-
-.goal-progress-text {
-    display: block;
-    margin-top: 10px;
-    font-size: 0.8rem;
-    text-align: right;
-    color: var(--text-light);
-}
-
-.payable-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.payable-item.overdue {
-    border: 2px solid var(--danger-color);
-}
-
-.payable-item.due-today {
-    border: 2px solid var(--accent-color);
-}
-
-.payable-actions {
-    display: flex;
-    gap: 5px;
-}
-
-.payable-actions button {
-    background: none;
+.modal-actions .btn-primary, .modal-actions .btn-secondary {
+    flex-grow: 1;
+    padding: 12px;
     border: none;
-    color: var(--text-light);
-    cursor: pointer;
-    font-size: 1.2rem;
-    padding: 5px;
-}
-
-.payable-actions .btn-check {
-    background-color: var(--success-color);
-    color: white;
-    font-size: 0.8rem;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-.payable-actions .btn-edit-payable, .btn-delete-payable {
-  font-size: 1rem;
-}
-
-/*
- * ========================================
- * Resumos
- * ========================================
- */
-#monthly-bar-chart, #annual-chart {
-  max-height: 300px;
-}
-
-/*
- * ========================================
- * Menu Lateral
- * ========================================
- */
-
-.menu-lateral {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 250px;
-    background-color: var(--card-bg);
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-    z-index: 1000;
-}
-
-.menu-lateral.active {
-    transform: translateX(0);
-}
-
-.perfil-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 30px;
-}
-
-.perfil-info .material-icons-sharp {
-    font-size: 2.5rem;
-    background-color: var(--primary-color);
-    color: white;
-    padding: 5px;
-    border-radius: 50%;
-}
-
-.perfil-texto h4 {
-    font-size: 1rem;
-}
-
-.perfil-texto small {
-    color: var(--text-light);
-}
-
-.menu {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 30px;
-}
-
-.menu li button, .config-options li button {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-    padding: 12px 15px;
-    text-align: left;
-    background-color: transparent;
-    border: none;
-    color: var(--text-color);
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
     border-radius: 8px;
+    cursor: pointer;
     font-weight: 500;
+    transition: background-color 0.2s;
 }
 
-.menu li:hover {
-    background-color: var(--bg-color);
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
 }
 
-#btn-logout {
-    color: var(--danger-color);
-    font-weight: 700;
-    border-top: 1px solid var(--border-color);
-    margin-top: 10px;
-    padding-top: 15px;
+.btn-primary:hover {
+    background-color: var(--primary-dark);
 }
 
-#btn-logout:hover {
-    background-color: rgba(229, 62, 62, 0.1);
+.btn-secondary {
+    background-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--text-light);
+    color: white;
 }
 
 /*
@@ -758,6 +774,60 @@ canvas#main-chart {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
+.bank-button .material-icons-sharp {
+    font-size: 2rem;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+}
+
+/*
+ * ========================================
+ * Páginas de Ajuda e Configuração
+ * ========================================
+ */
+
+.config-options {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.config-options li button {
+    width: 100%;
+    text-align: left;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    font-size: 1rem;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.config-options li button:hover {
+    background-color: var(--bg-color);
+}
+
+.config-options li button::before {
+    margin-right: 10px;
+}
+
+#ajuda-page ul {
+    list-style: none;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#ajuda-page ul li {
+    background-color: var(--card-bg);
+    padding: 15px;
+    border-radius: 10px;
+}
+
 /*
  * ========================================
  * Responsividade
@@ -765,39 +835,44 @@ canvas#main-chart {
  */
 
 @media (min-width: 768px) {
-    .container {
+    .app-container {
         flex-direction: row;
+        padding-top: 0;
     }
-    main {
-        flex: 1;
-        overflow-y: auto;
-        padding-bottom: 20px;
-    }
-    header {
+    .top-nav {
         display: none;
     }
     .menu-lateral {
-        position: relative;
-        transform: translateX(0);
+        position: static;
+        top: auto;
+        right: auto;
+        height: auto;
         box-shadow: none;
+        border-right: 1px solid var(--border-color);
+        width: 280px;
     }
-    .menu-icon {
-        display: none;
+    .main-content {
+        padding: 40px;
     }
-    .mobile-nav {
-        display: none;
-    }
-    .pages-container {
-        width: 100%;
-    }
-    .dashboard-content {
-        flex-direction: row;
+    .main-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+        position: sticky;
+        top: 40px;
         gap: 20px;
     }
-    .chart-container, .transaction-list-container {
-        flex: 1;
+    .main-nav .nav-item {
+        flex-direction: row;
+        padding: 15px;
+        font-size: 1rem;
+        width: 100%;
+        justify-content: flex-start;
     }
-    .transaction-list-container {
-        margin-top: 20px;
+    .main-nav .nav-item .material-icons-sharp {
+        margin-right: 15px;
+    }
+    .modal-content {
+        width: 450px;
     }
 }

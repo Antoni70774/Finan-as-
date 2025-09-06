@@ -752,7 +752,9 @@ document.getElementById('delete-transaction-btn').addEventListener('click', asyn
     const id = document.getElementById('transaction-id').value;
     if (confirm('Tem certeza que deseja excluir esta transação?')) {
         await deleteTransaction(id);
-        closeTransactionModal(); // Fecha o modal após a exclusão
+        await saveAndRerender();
+        closeTransactionModal();
+        document.getElementById('transaction-form').reset();
     }
 });
 
@@ -818,7 +820,9 @@ document.getElementById('delete-goal-btn').addEventListener('click', async () =>
     const id = document.getElementById('goal-id').value;
     if (confirm('Tem certeza que deseja excluir esta meta?')) {
         await deleteGoal(id);
+        await saveAndRerender();
         closeGoalModal();
+        document.getElementById('goal-form').reset();
     }
 });
 
@@ -866,6 +870,16 @@ document.getElementById('payable-list').addEventListener('click', async (e) => {
     } else if (btn.classList.contains('btn-edit-payable')) {
         editPayable(id);
     }
+});
+
+document.getElementById('delete-payable-btn').addEventListener('click', async () => {
+  const id = document.getElementById('payable-id').value;
+  if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
+    await deletePayable(id);
+    await saveAndRerender();
+    closePayableModal();
+    document.getElementById('payable-form').reset();
+  }
 });
 
 // Funções do menu lateral

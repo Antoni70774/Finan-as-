@@ -2,7 +2,7 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import {
     getFirestore, enableIndexedDbPersistence, collection, doc,
-    setDoc, getDocs, onSnapshot, writeBatch, deleteDoc, updateDoc, query, where, orderBy
+    setDoc, onSnapshot, updateDoc, deleteDoc
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 // 🔗 Configuração do Firebase
@@ -63,6 +63,9 @@ const setupChart = () => {
     const chartType = 'all';
     const chartTitle = getChartTitle(chartType);
     document.getElementById('chart-title').textContent = chartTitle;
+    if (myChart) {
+        myChart.destroy();
+    }
     myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -126,10 +129,12 @@ const updateChart = (type = 'all') => {
     ];
     const backgroundColors = labels.map((_, i) => pastelColors[i % pastelColors.length]);
 
-    myChart.data.labels = labels;
-    myChart.data.datasets[0].data = data;
-    myChart.data.datasets[0].backgroundColor = backgroundColors;
-    myChart.update();
+    if (myChart) {
+      myChart.data.labels = labels;
+      myChart.data.datasets[0].data = data;
+      myChart.data.datasets[0].backgroundColor = backgroundColors;
+      myChart.update();
+    }
     renderCategorySummary(categories);
 };
 
@@ -167,8 +172,7 @@ const renderCategorySummary = (categories) => {
         item.className = 'summary-item';
         item.style.textAlign = 'center';
         item.innerHTML = `
-            <div style="font-size: 1.5rem;">${iconMap[category] ||
-'📦'}</div>
+            <div style="font-size: 1.5rem;">${iconMap[category] || '📦'}</div>
             <span>${category}</span>
             <h4>${formatCurrency(categories[category])}</h4>
         `;
@@ -296,16 +300,24 @@ const renderPayables = () => {
     `;
     list.appendChild(item);
 
-    // Alternar status de pagamento ao clicar
-    item.querySelector('.btn-check').addEventListener('click', () => {
-      payable.paid = !payable.paid;
-      renderPayables(); // Re-renderiza para atualizar visual
+    // Adiciona os event listeners
+    item.querySelector('.btn-check').addEventListener('click', async () => {
+        await markPayableAsPaid(payable.id);
     });
-});
+    item.querySelector('.btn-edit-payable').addEventListener('click', () => {
+        editPayable(payable.id);
+    });
+    item.querySelector('.btn-delete-payable').addEventListener('click', async () => {
+        if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
+            await deletePayable(payable.id);
+        }
+    });
+  });
 };
 
 const updateAlertBadge = () => {
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const futurePayables = payablesData.filter(p => !p.paid && new Date(p.dueDate + 'T00:00:00') >= today);
     document.getElementById('alert-count').textContent = futurePayables.length;
 };
@@ -398,7 +410,12 @@ const markPayableAsPaid = async (id) => {
     const docRef = doc(db, `users/${user.uid}/payables`, id);
     await updateDoc(docRef, { paid: true });
 };
-
+const deletePayable = async (id) => {
+    const user = currentUser;
+    if (!user) return;
+    const docRef = doc(db, `users/${user.uid}/payables`, id);
+    await deleteDoc(docRef);
+};
 // ----------------------
 // 🖥️ Lógica da UI
 // ----------------------
@@ -680,8 +697,7 @@ const closeSidebar = () => {
 
 const toggleSidebar = () => {
     const sidebar = document.getElementById('menu-perfil');
-    sidebar.style.display = sidebar.style.display === 'none' ?
-'block' : 'none';
+    sidebar.style.display = sidebar.style.display === 'none' ? 'block' : 'none';
 };
 
 // ----------------------
@@ -697,18 +713,15 @@ document.querySelectorAll('.nav-item').forEach(btn => {
         }
     });
 });
-
 // Botão FAB para nova transação
 document.getElementById('add-transaction-btn').addEventListener('click', () => {
     openTransactionModal();
 });
-
 // Botão de logout
 document.getElementById('btn-logout').addEventListener('click', async () => {
     await signOut(auth);
     window.location.href = "login.html";
 });
-
 // Envio do formulário de transação
 document.getElementById('transaction-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -730,8 +743,7 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     } else {
       await addTransaction(data);
     }
-
-    refreshDashboard();
+    
     closeTransactionModal();
     document.getElementById('transaction-form').reset();
     document.getElementById('transaction-id').value = '';
@@ -744,29 +756,25 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     alert('Erro ao salvar. Verifique os dados e tente novamente.');
   }
 });
-
 // Botão de deletar transação
 document.getElementById('delete-transaction-btn').addEventListener('click', async () => {
     const id = document.getElementById('transaction-id').value;
     if (confirm('Tem certeza que deseja excluir esta transação?')) {
         await deleteTransaction(id);
-        closeTransactionModal(); // Fecha o modal após a exclusão
+        closeTransactionModal();
     }
 });
-
 // Botões de tipo de transação (Despesa/Receita)
 document.getElementById('type-expense-btn').addEventListener('click', () => {
     document.getElementById('transaction-type').value = 'expense';
     document.getElementById('type-expense-btn').classList.add('active');
     document.getElementById('type-income-btn').classList.remove('active');
 });
-
 document.getElementById('type-income-btn').addEventListener('click', () => {
     document.getElementById('transaction-type').value = 'income';
     document.getElementById('type-expense-btn').classList.remove('active');
     document.getElementById('type-income-btn').classList.add('active');
 });
-
 // Botão de cancelamento de modal
 document.getElementById('cancel-btn').addEventListener('click', closeTransactionModal);
 
@@ -775,12 +783,10 @@ document.getElementById('prev-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() - 1);
     refreshDashboard();
 });
-
 document.getElementById('next-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() + 1);
     refreshDashboard();
 });
-
 // Filtro de gráfico por tipo
 document.querySelectorAll('.chart-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -789,7 +795,6 @@ document.querySelectorAll('.chart-btn').forEach(btn => {
         updateChart(btn.getAttribute('data-type'));
     });
 });
-
 // Metas
 document.getElementById('add-goal-btn').addEventListener('click', () => openGoalModal());
 document.getElementById('goal-form').addEventListener('submit', async (e) => {
@@ -803,12 +808,11 @@ document.getElementById('goal-form').addEventListener('submit', async (e) => {
     };
     if (id) {
         await updateGoal(id, data);
-    } else
- {
+    } else {
         await addGoal(data);
     }
     closeGoalModal();
-    document.getElementById('transaction-form').reset();
+    document.getElementById('goal-form').reset();
 });
 
 document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
@@ -819,7 +823,6 @@ document.getElementById('delete-goal-btn').addEventListener('click', async () =>
         closeGoalModal();
     }
 });
-
 // Contas a Pagar
 document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
 document.getElementById('payable-form').addEventListener('submit', async (e) => {
@@ -834,14 +837,12 @@ document.getElementById('payable-form').addEventListener('submit', async (e) => 
     };
     if (id) {
         await updatePayable(id, data);
-    } else
- {
+    } else {
         await addPayable(data);
     }
     closePayableModal();
     document.getElementById('payable-form').reset();
 });
-
 document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
 document.getElementById('payable-list').addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
@@ -851,16 +852,18 @@ document.getElementById('payable-list').addEventListener('click', async (e) => {
         await markPayableAsPaid(id);
     } else if (btn.classList.contains('btn-edit-payable')) {
         editPayable(id);
+    } else if (btn.classList.contains('btn-delete-payable')) {
+        if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
+            await deletePayable(id);
+        }
     }
 });
-
 // Funções do menu lateral
 window.abrirResumoMensal = () => {
     showPage('resumo-mensal-page');
     updateMonthlySummary(currentMonth);
     renderMonthlyChart();
 };
-
 window.abrirResumoAnual = () => {
     showPage('resumo-anual-page');
     renderAnnualChart();
@@ -870,7 +873,6 @@ window.abrirPagina = showPage;
 window.exportarDados = () => {
     alert('Funcionalidade de exportar dados não implementada.');
 };
-
 window.abrirConfig = () => {
     showPage('config-page');
 };
@@ -878,7 +880,6 @@ window.abrirConfig = () => {
 window.trocarTema = () => {
     document.body.classList.toggle('dark-theme');
 };
-
 window.resetarApp = () => {
     alert('Funcionalidade de resetar app não implementada.');
 };
@@ -891,18 +892,15 @@ document.getElementById('resumo-prev-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() - 1);
     updateMonthlySummary(currentMonth);
 });
-
 document.getElementById('resumo-next-month').addEventListener('click', () => {
     currentMonth.setMonth(currentMonth.getMonth() + 1);
     updateMonthlySummary(currentMonth);
 });
-
 // Menu lateral
 document.getElementById('menu-botao').addEventListener('click', (e) => {
     e.stopPropagation();
     toggleSidebar();
 });
-
 document.addEventListener('click', (e) => {
     const sidebar = document.getElementById('menu-perfil');
     const menuBtn = document.getElementById('menu-botao');
@@ -910,7 +908,6 @@ document.addEventListener('click', (e) => {
         closeSidebar();
     }
 });
-
 // ----------------------
 // 🚀 Inicialização
 // ----------------------

@@ -46,7 +46,7 @@ const showPage = (pageId) => {
     document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-    document.querySelector(`.nav-item[data-page="${pageId}"]`)?.classList.add('active');
+    document.querySelector(`.main-nav .nav-item[data-page="${pageId}"]`)?.classList.add('active');
     closeSidebar();
 };
 
@@ -224,7 +224,7 @@ const renderTransactions = () => {
                 <div class="transaction-amount">${formatCurrency(parseFloat(t.amount))}</div>
             </div>
         `;
-        li.addEventListener('click', () => editTransaction(t.id));
+        li.addEventListener('click', () => openTransactionModal(t));
         list.appendChild(li);
     });
 };
@@ -249,7 +249,7 @@ const renderGoals = () => {
             </div>
             <span class="goal-progress-text">${progressClamped.toFixed(0)}% (${formatDate(goal.date)})</span>
         `;
-        item.addEventListener('click', () => editGoal(goal.id));
+        item.addEventListener('click', () => openGoalModal(goal));
         list.appendChild(item);
     });
 };
@@ -290,9 +290,15 @@ const renderPayables = () => {
             </div>
         `;
         list.appendChild(item);
-
+        
         item.querySelector('.btn-check').addEventListener('click', async () => {
             await updatePayable(payable.id, { paid: !payable.paid });
+        });
+        item.querySelector('.btn-edit-payable').addEventListener('click', () => openPayableModal(payable));
+        item.querySelector('.btn-delete-payable').addEventListener('click', async () => {
+            if(confirm('Tem certeza que deseja excluir esta conta?')){
+                await deletePayable(payable.id);
+            }
         });
     });
 };
@@ -301,6 +307,29 @@ const updateAlertBadge = () => {
     const today = new Date();
     const futurePayables = payablesData.filter(p => !p.paid && new Date(p.dueDate + 'T00:00:00') >= today);
     document.getElementById('alert-count').textContent = futurePayables.length;
+};
+
+const showPayablesAlert = () => {
+    const today = new Date();
+    const upcomingPayables = payablesData.filter(p => !p.paid && new Date(p.dueDate + 'T00:00:00') >= today);
+
+    const alertList = document.getElementById('alert-list');
+    alertList.innerHTML = '';
+    
+    if(upcomingPayables.length === 0) {
+      alertList.innerHTML = '<li>Nenhuma conta a vencer nos próximos dias.</li>';
+    } else {
+      upcomingPayables.forEach(p => {
+        const item = document.createElement('li');
+        const dueDate = new Date(p.dueDate + 'T00:00:00');
+        const daysUntilDue = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        item.innerHTML = `
+          <strong>${p.description}</strong> (${formatCurrency(p.amount)}) - Vence em ${daysUntilDue} dias.
+        `;
+        alertList.appendChild(item);
+      });
+    }
+    openModal('alert-modal');
 };
 
 // ----------------------
@@ -398,17 +427,19 @@ const deletePayable = async (id) => {
 
 const populateCategories = () => {
     const select = document.getElementById('category');
-    select.innerHTML = '';
-    const categories = [
-        "Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação",
-        "Salário", "Freelance", "Rendimentos", "Presentes", "Outros"
-    ];
-    categories.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.textContent = cat;
-        select.appendChild(option);
-    });
+    if (select) {
+        select.innerHTML = '';
+        const categories = [
+            "Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação",
+            "Salário", "Freelance", "Rendimentos", "Presentes", "Outros"
+        ];
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            select.appendChild(option);
+        });
+    }
 };
 
 const openTransactionModal = (transaction = null) => {
@@ -445,7 +476,6 @@ const openTransactionModal = (transaction = null) => {
         typeExpenseBtn.classList.add('active');
         typeIncomeBtn.classList.remove('active');
     }
-
     openModal('transaction-modal');
 };
 
@@ -654,7 +684,10 @@ document.getElementById('delete-payable-btn').addEventListener('click', async ()
 // Event listeners para navegação
 document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', (e) => {
-        showPage(e.currentTarget.getAttribute('data-page'));
+        const pageId = e.currentTarget.getAttribute('data-page');
+        if (pageId) {
+            showPage(pageId);
+        }
     });
 });
 
@@ -776,6 +809,20 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Logout
+document.getElementById('btn-logout').addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+        window.location.href = "login.html";
+    } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+    }
+});
+
+document.getElementById('alert-btn').addEventListener('click', showPayablesAlert);
+document.getElementById('close-alert-modal').addEventListener('click', () => closeModal('alert-modal'));
+
+
 // ----------------------
 // 🚀 Inicialização
 // ----------------------
@@ -783,13 +830,16 @@ auth.onAuthStateChanged(user => {
     if (user) {
         currentUser = user;
         console.log("Usuário logado:", user.email);
-        document.getElementById('current-user-name').textContent = user.email; // Atualiza o nome do usuário
-        document.getElementById('perfil-usuario').textContent = user.displayName || 'Nome não definido';
+        document.getElementById('current-user-name').textContent = user.email;
+        document.getElementById('perfil-usuario').textContent = user.displayName || user.email;
         document.getElementById('perfil-email').textContent = user.email;
+        document.getElementById('perfil-usuario-content').textContent = user.displayName || user.email;
+        document.getElementById('perfil-email-content').textContent = user.email;
+
         listenForData();
         setupChart();
         refreshDashboard();
-        // Simulação de conexão bancária
+        
         window.connectBank = (bank) => {
             document.getElementById('perfil-banco').textContent = bank.charAt(0).toUpperCase() + bank.slice(1);
             alert(`Conectado ao ${bank.charAt(0).toUpperCase() + bank.slice(1)}! (Simulado)`);

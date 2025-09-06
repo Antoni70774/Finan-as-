@@ -820,24 +820,29 @@ document.querySelectorAll('.chart-btn').forEach(btn => {
         updateChart(btn.getAttribute('data-type'));
     });
 });
-// Metas
-document.getElementById('add-goal-btn').addEventListener('click', () => openGoalModal());
+// Envio do formulário de metas
 document.getElementById('goal-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const id = document.getElementById('goal-id').value;
-    const data = {
-        name: document.getElementById('goal-name').value,
-        target: parseFloat(document.getElementById('goal-target').value),
-        current: parseFloat(document.getElementById('goal-current').value),
-        date: document.getElementById('goal-date').value
-    };
-    if (id) {
-        await updateGoal(id, data);
-    } else {
-        await addGoal(data);
+    try {
+        const id = document.getElementById('goal-id').value;
+        const data = {
+            name: document.getElementById('goal-name').value,
+            target: parseFloat(document.getElementById('goal-target').value),
+            current: parseFloat(document.getElementById('goal-current').value),
+            date: document.getElementById('goal-date').value
+        };
+        if (id) {
+            await updateGoal(id, data);
+        } else {
+            await addGoal(data);
+        }
+        closeGoalModal();
+        document.getElementById('goal-form').reset();
+    } catch (error) {
+        console.error('Erro ao salvar meta:', error);
+        alert('Erro ao salvar a meta. Verifique os dados e tente novamente.');
+        closeGoalModal(); // Tenta fechar o modal mesmo em caso de erro
     }
-    closeGoalModal();
-    document.getElementById('goal-form').reset();
 });
 
 document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
@@ -850,23 +855,29 @@ document.getElementById('delete-goal-btn').addEventListener('click', async () =>
 });
 // Contas a Pagar
 document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
-document.getElementById('payable-form').addEventListener('submit', async (e) => {
+// Envio do formulário de metas
+document.getElementById('goal-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const id = document.getElementById('payable-id').value;
-    const data = {
-        description: document.getElementById('payable-description').value,
-        category: document.getElementById('payable-category').value,
-        amount: parseFloat(document.getElementById('payable-amount').value),
-        dueDate: document.getElementById('payable-date').value,
-        paid: false
-    };
-    if (id) {
-        await updatePayable(id, data);
-    } else {
-        await addPayable(data);
+    try {
+        const id = document.getElementById('goal-id').value;
+        const data = {
+            name: document.getElementById('goal-name').value,
+            target: parseFloat(document.getElementById('goal-target').value),
+            current: parseFloat(document.getElementById('goal-current').value),
+            date: document.getElementById('goal-date').value
+        };
+        if (id) {
+            await updateGoal(id, data);
+        } else {
+            await addGoal(data);
+        }
+        closeGoalModal();
+        document.getElementById('goal-form').reset();
+    } catch (error) {
+        console.error('Erro ao salvar meta:', error);
+        alert('Erro ao salvar a meta. Verifique os dados e tente novamente.');
+        closeGoalModal(); // Tenta fechar o modal mesmo em caso de erro
     }
-    closePayableModal();
-    document.getElementById('payable-form').reset();
 });
 document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
 document.getElementById('payable-list').addEventListener('click', async (e) => {

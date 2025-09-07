@@ -717,8 +717,10 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
 });
 
 // Envio do formulário de transação
+// Envio do formulário de transação
 document.getElementById('transaction-form').addEventListener('submit', async (e) => {
   e.preventDefault();
+
   const id = document.getElementById('transaction-id').value;
   const data = {
     amount: parseFloat(document.getElementById('amount').value),
@@ -729,6 +731,7 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     createdAt: new Date().toISOString(),
     user: currentUser?.email || 'Desconhecido'
   };
+
   try {
     if (id) {
       await updateTransaction(id, data);
@@ -737,9 +740,10 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     }
     await saveAndRerender();
     refreshDashboard();
+
+    // ✅ Fecha modal e reseta corretamente
     closeTransactionModal();
-    const form = document.getElementById('transaction-form');
-    form.reset();
+    document.getElementById('transaction-form').reset();
     document.getElementById('transaction-id').value = '';
     document.getElementById('transaction-type').value = 'expense';
     document.getElementById('type-expense-btn').classList.add('active');
@@ -748,48 +752,47 @@ document.getElementById('transaction-form').addEventListener('submit', async (e)
     console.error('Erro ao salvar transação:', error);
     alert('Erro ao salvar. Verifique os dados e tente novamente.');
   }
-});// Botão de deletar transação
+});
+
+// Botão de deletar transação
 document.getElementById('delete-transaction-btn').addEventListener('click', async () => {
-    const id = document.getElementById('transaction-id').value;
-    if (confirm('Tem certeza que deseja excluir esta transação?')) {
-        await deleteTransaction(id);
-        closeTransactionModal(); // Fecha o modal após a exclusão
-    }
+  const id = document.getElementById('transaction-id').value;
+  if (confirm('Tem certeza que deseja excluir esta transação?')) {
+    await deleteTransaction(id);
+    await saveAndRerender();
+
+    // ✅ Fecha modal e limpa formulário
+    closeTransactionModal();
+    document.getElementById('transaction-form').reset();
+    document.getElementById('transaction-id').value = '';
+  }
 });
 
 // Botões de tipo de transação (Despesa/Receita)
 document.getElementById('type-expense-btn').addEventListener('click', () => {
-    document.getElementById('transaction-type').value = 'expense';
-    document.getElementById('type-expense-btn').classList.add('active');
-    document.getElementById('type-income-btn').classList.remove('active');
+  document.getElementById('transaction-type').value = 'expense';
+  document.getElementById('type-expense-btn').classList.add('active');
+  document.getElementById('type-income-btn').classList.remove('active');
 });
 
 document.getElementById('type-income-btn').addEventListener('click', () => {
-    document.getElementById('transaction-type').value = 'income';
-    document.getElementById('type-expense-btn').classList.remove('active');
-    document.getElementById('type-income-btn').classList.add('active');
+  document.getElementById('transaction-type').value = 'income';
+  document.getElementById('type-expense-btn').classList.remove('active');
+  document.getElementById('type-income-btn').classList.add('active');
 });
 
 // Botão de cancelamento de modal
-// Fechar Transaction Modal
-document
-  .getElementById('close-transaction-modal')
-  .addEventListener('click', closeTransactionModal);
+document.getElementById('close-transaction-modal').addEventListener('click', closeTransactionModal);
 
 // Fechar Goal Modal
-document
-  .getElementById('close-goal-modal')
-  .addEventListener('click', closeGoalModal);
+document.getElementById('close-goal-modal').addEventListener('click', closeGoalModal);
 
 // Fechar Payable Modal
-document
-  .getElementById('close-payable-modal')
-  .addEventListener('click', closePayableModal);
+document.getElementById('close-payable-modal').addEventListener('click', closePayableModal);
 
 // Fechar Alert Modal
-document
-  .getElementById('close-alert-modal')
-  .addEventListener('click', closeAlertModal);
+document.getElementById('close-alert-modal').addEventListener('click', closeAlertModal);
+
 
 // Navegação de meses no dashboard
 document.getElementById('prev-month').addEventListener('click', () => {
@@ -847,6 +850,7 @@ document.getElementById('delete-goal-btn').addEventListener('click', async () =>
 
 // Contas a Pagar
 document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
+
 document.getElementById('payable-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
@@ -855,32 +859,54 @@ document.getElementById('payable-form').addEventListener('submit', async (e) => 
       description: document.getElementById('payable-description').value,
       category: document.getElementById('payable-category').value,
       amount: parseFloat(document.getElementById('payable-amount').value),
-      dueDate: document.getElementById('payable-date').value,
+      dueDate: document.getElementById('payable-dueDate').value, // ✅ id corrigido
       paid: false
     };
+
     if (id) {
       await updatePayable(id, data);
     } else {
       await addPayable(data);
     }
+
     await saveAndRerender();
+
+    // ✅ Fecha e reseta corretamente
     closePayableModal();
     document.getElementById('payable-form').reset();
+    document.getElementById('payable-id').value = '';
   } catch (error) {
     console.error('Erro ao salvar conta a pagar:', error);
     alert('Erro ao salvar. Verifique os dados e tente novamente.');
   }
 });
 
+// Lista de ações nas contas a pagar
 document.getElementById('payable-list').addEventListener('click', async (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    const id = btn.dataset.id;
-    if (btn.classList.contains('btn-check')) {
-        await markPayableAsPaid(id);
-    } else if (btn.classList.contains('btn-edit-payable')) {
-        editPayable(id);
-    }
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const id = btn.dataset.id;
+
+  if (btn.classList.contains('btn-check')) {
+    await markPayableAsPaid(id);
+    await saveAndRerender();
+  } else if (btn.classList.contains('btn-edit-payable')) {
+    editPayable(id);
+  }
+});
+
+// Botão de excluir conta a pagar
+document.getElementById('delete-payable-btn').addEventListener('click', async () => {
+  const id = document.getElementById('payable-id').value;
+  if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
+    await deletePayable(id);
+    await saveAndRerender();
+
+    // ✅ Fecha e reseta corretamente
+    closePayableModal();
+    document.getElementById('payable-form').reset();
+    document.getElementById('payable-id').value = '';
+  }
 });
 
 // Funções do menu lateral

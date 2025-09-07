@@ -48,7 +48,7 @@ body:not(.dark-theme) {
 }
 
 body {
-    font-family: var(--font-family, 'Segoe UI', sans-serif);
+    font-family: var(--font-family);
     background-color: var(--bg-color);
     color: var(--text-color);
     line-height: 1.6;
@@ -71,7 +71,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    position: relative; /* Adiciona esta linha para os modais */
+    position: relative;
 }
 
 .app-header {

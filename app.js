@@ -588,120 +588,184 @@ const updateMonthlySummary = (date) => {
     });
 };
 
-document.getElementById('add-transaction-btn').addEventListener('click', () => openTransactionModal());
-document.getElementById('close-transaction-modal').addEventListener('click', closeTransactionModal);
+// 🚀 Inicialização e Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Event listeners para abrir modais
+    document.getElementById('add-transaction-btn')?.addEventListener('click', () => openTransactionModal());
+    document.getElementById('close-transaction-modal')?.addEventListener('click', closeTransactionModal);
+    
+    document.getElementById('add-goal-btn')?.addEventListener('click', () => openGoalModal());
+    document.getElementById('close-goal-modal')?.addEventListener('click', closeGoalModal);
+    
+    document.getElementById('add-payable-btn')?.addEventListener('click', () => openPayableModal());
+    document.getElementById('close-payable-modal')?.addEventListener('click', closePayableModal);
+    
+    // Event listeners para o toggle de Despesa/Receita
+    document.querySelectorAll('.transaction-type-toggle .toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.transaction-type-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
 
-document.getElementById('add-goal-btn').addEventListener('click', () => openGoalModal());
-document.getElementById('close-goal-modal').addEventListener('click', closeGoalModal);
+    // Event listeners para envio de formulários
+    document.getElementById('transaction-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('transaction-id').value;
+        const data = {
+            description: document.getElementById('description').value,
+            amount: parseFloat(document.getElementById('amount').value),
+            date: document.getElementById('date').value,
+            category: document.getElementById('category').value,
+            type: document.querySelector('.toggle-btn.active').getAttribute('data-type')
+        };
 
-document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
-document.getElementById('close-payable-modal').addEventListener('click', closePayableModal);
-
-document.getElementById('transaction-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('transaction-id').value;
-    const data = {
-        description: document.getElementById('description').value,
-        amount: parseFloat(document.getElementById('amount').value),
-        date: document.getElementById('date').value,
-        category: document.getElementById('category').value,
-        type: document.querySelector('.toggle-btn.active').getAttribute('data-type')
-    };
-
-    if (id) {
-        await updateTransaction(id, data);
-    } else {
-        await addTransaction(data);
-    }
-    closeTransactionModal();
-});
-
-document.getElementById('delete-transaction-btn').addEventListener('click', async () => {
-    const id = document.getElementById('transaction-id').value;
-    if (confirm('Tem certeza que deseja excluir esta transação?')) {
-        await deleteTransaction(id);
+        if (id) {
+            await updateTransaction(id, data);
+        } else {
+            await addTransaction(data);
+        }
         closeTransactionModal();
-    }
-});
+    });
 
-document.getElementById('goal-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('goal-id').value;
-    const data = {
-        name: document.getElementById('goal-name').value,
-        target: parseFloat(document.getElementById('goal-target').value),
-        current: parseFloat(document.getElementById('goal-current').value) || 0,
-        date: document.getElementById('goal-date').value
-    };
-    if (id) {
-        await updateGoal(id, data);
-    } else {
-        await addGoal(data);
-    }
-    closeGoalModal();
-});
-
-document.getElementById('delete-goal-btn').addEventListener('click', async () => {
-    const id = document.getElementById('goal-id').value;
-    if (confirm('Tem certeza que deseja excluir esta meta?')) {
-        await deleteGoal(id);
-        closeGoalModal();
-    }
-});
-
-document.getElementById('payable-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('payable-id').value;
-    const data = {
-        description: document.getElementById('payable-description').value,
-        amount: parseFloat(document.getElementById('payable-amount').value),
-        category: document.getElementById('payable-category').value,
-        dueDate: document.getElementById('payable-dueDate').value,
-        paid: false
-    };
-    if (id) {
-        await updatePayable(id, data);
-    } else {
-        await addPayable(data);
-    }
-    closePayableModal();
-});
-
-document.getElementById('delete-payable-btn').addEventListener('click', async () => {
-    const id = document.getElementById('payable-id').value;
-    if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
-        await deletePayable(id);
-        closePayableModal();
-    }
-});
-
-// Event listeners para navegação
-document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-        const pageId = e.currentTarget.getAttribute('data-page');
-        if (pageId) {
-            showPage(pageId);
+    document.getElementById('delete-transaction-btn')?.addEventListener('click', async () => {
+        const id = document.getElementById('transaction-id').value;
+        if (confirm('Tem certeza que deseja excluir esta transação?')) {
+            await deleteTransaction(id);
+            closeTransactionModal();
         }
     });
-});
 
-document.getElementById('prev-month').addEventListener('click', () => {
-    currentMonth.setMonth(currentMonth.getMonth() - 1);
-    refreshDashboard();
-});
-
-document.getElementById('next-month').addEventListener('click', () => {
-    currentMonth.setMonth(currentMonth.getMonth() + 1);
-    refreshDashboard();
-});
-
-// Event listeners para botões do gráfico
-document.querySelectorAll('.chart-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        updateChart(btn.getAttribute('data-type'));
+    document.getElementById('goal-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('goal-id').value;
+        const data = {
+            name: document.getElementById('goal-name').value,
+            target: parseFloat(document.getElementById('goal-target').value),
+            current: parseFloat(document.getElementById('goal-current').value) || 0,
+            date: document.getElementById('goal-date').value
+        };
+        if (id) {
+            await updateGoal(id, data);
+        } else {
+            await addGoal(data);
+        }
+        closeGoalModal();
     });
+
+    document.getElementById('delete-goal-btn')?.addEventListener('click', async () => {
+        const id = document.getElementById('goal-id').value;
+        if (confirm('Tem certeza que deseja excluir esta meta?')) {
+            await deleteGoal(id);
+            closeGoalModal();
+        }
+    });
+
+    document.getElementById('payable-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('payable-id').value;
+        const data = {
+            description: document.getElementById('payable-description').value,
+            amount: parseFloat(document.getElementById('payable-amount').value),
+            category: document.getElementById('payable-category').value,
+            dueDate: document.getElementById('payable-dueDate').value,
+            paid: false
+        };
+        if (id) {
+            await updatePayable(id, data);
+        } else {
+            await addPayable(data);
+        }
+        closePayableModal();
+    });
+
+    document.getElementById('delete-payable-btn')?.addEventListener('click', async () => {
+        const id = document.getElementById('payable-id').value;
+        if (confirm('Tem certeza que deseja excluir esta conta a pagar?')) {
+            await deletePayable(id);
+            closePayableModal();
+        }
+    });
+
+    // Event listeners para navegação
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const pageId = e.currentTarget.getAttribute('data-page');
+            if (pageId) {
+                showPage(pageId);
+            }
+        });
+    });
+
+    document.getElementById('prev-month')?.addEventListener('click', () => {
+        currentMonth.setMonth(currentMonth.getMonth() - 1);
+        refreshDashboard();
+    });
+
+    document.getElementById('next-month')?.addEventListener('click', () => {
+        currentMonth.setMonth(currentMonth.getMonth() + 1);
+        refreshDashboard();
+    });
+
+    // Event listeners para botões do gráfico
+    document.querySelectorAll('.chart-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateChart(btn.getAttribute('data-type'));
+        });
+    });
+
+    document.getElementById('resumo-anual-page')?.addEventListener('transitionend', () => {
+        if (document.getElementById('resumo-anual-page').classList.contains('active')) {
+            renderAnnualSummary();
+        }
+    });
+
+    document.getElementById('resumo-anual-page')?.addEventListener('click', () => {
+        renderAnnualSummary();
+    });
+
+    document.getElementById('resumo-prev-month')?.addEventListener('click', () => {
+        currentMonth.setMonth(currentMonth.getMonth() - 1);
+        updateMonthlySummary(currentMonth);
+    });
+
+    document.getElementById('resumo-next-month')?.addEventListener('click', () => {
+        currentMonth.setMonth(currentMonth.getMonth() + 1);
+        updateMonthlySummary(currentMonth);
+    });
+
+    // Menu lateral
+    const sidebar = document.getElementById('menu-perfil');
+    const toggleSidebar = () => sidebar?.classList.toggle('active');
+    const closeSidebar = () => sidebar?.classList.remove('active');
+
+    document.getElementById('menu-botao')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleSidebar();
+    });
+
+    document.addEventListener('click', (e) => {
+        const sidebar = document.getElementById('menu-perfil');
+        const menuBtn = document.getElementById('menu-botao');
+        if (sidebar && menuBtn && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+            closeSidebar();
+        }
+    });
+
+    // Logout
+    document.getElementById('btn-logout')?.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            window.location.href = "login.html";
+        } catch (error) {
+            console.error("Erro ao fazer logout:", error);
+        }
+    });
+
+    document.getElementById('alert-btn')?.addEventListener('click', showPayablesAlert);
+    document.getElementById('close-alert-modal')?.addEventListener('click', () => closeModal('alert-modal'));
 });
 
 // Resumo Anual
@@ -765,60 +829,8 @@ const renderAnnualSummary = () => {
     });
 };
 
-document.getElementById('resumo-anual-page').addEventListener('transitionend', () => {
-    if (document.getElementById('resumo-anual-page').classList.contains('active')) {
-        renderAnnualSummary();
-    }
-});
-
-document.getElementById('resumo-anual-page').addEventListener('click', () => {
-    renderAnnualSummary();
-});
-
-document.getElementById('resumo-prev-month').addEventListener('click', () => {
-    currentMonth.setMonth(currentMonth.getMonth() - 1);
-    updateMonthlySummary(currentMonth);
-});
-
-document.getElementById('resumo-next-month').addEventListener('click', () => {
-    currentMonth.setMonth(currentMonth.getMonth() + 1);
-    updateMonthlySummary(currentMonth);
-});
-
-// Menu lateral
-const sidebar = document.getElementById('menu-perfil');
-const toggleSidebar = () => sidebar.classList.toggle('active');
-const closeSidebar = () => sidebar.classList.remove('active');
-
-document.getElementById('menu-botao').addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleSidebar();
-});
-
-document.addEventListener('click', (e) => {
-    const sidebar = document.getElementById('menu-perfil');
-    const menuBtn = document.getElementById('menu-botao');
-    if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-        closeSidebar();
-    }
-});
-
-// Logout
-document.getElementById('btn-logout').addEventListener('click', async () => {
-    try {
-        await signOut(auth);
-        window.location.href = "login.html";
-    } catch (error) {
-        console.error("Erro ao fazer logout:", error);
-    }
-});
-
-document.getElementById('alert-btn').addEventListener('click', showPayablesAlert);
-document.getElementById('close-alert-modal').addEventListener('click', () => closeModal('alert-modal'));
-
-
 // ----------------------
-// 🚀 Inicialização
+// 🔑 Autenticação e Sincronização
 // ----------------------
 auth.onAuthStateChanged(user => {
     if (user) {
@@ -834,9 +846,13 @@ auth.onAuthStateChanged(user => {
         listenForData();
         setupChart();
         refreshDashboard();
+        populateCategories();
         
         window.connectBank = (bank) => {
-            document.getElementById('perfil-banco').textContent = bank.charAt(0).toUpperCase() + bank.slice(1);
+            const perfilBanco = document.getElementById('perfil-banco');
+            if (perfilBanco) {
+                perfilBanco.textContent = bank.charAt(0).toUpperCase() + bank.slice(1);
+            }
             alert(`Conectado ao ${bank.charAt(0).toUpperCase() + bank.slice(1)}! (Simulado)`);
         };
     } else {

@@ -47,6 +47,8 @@ body {
     display: flex;
     justify-content: center;
     transition: background-color 0.3s;
+    height: 100vh; /* Garante que o body ocupe 100% da altura da viewport */
+    overflow: hidden; /* Evita rolagem no body */
 }
 
 .app-container {
@@ -55,7 +57,7 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Evita a rolagem indesejada */
+    overflow: hidden; /* Garante que o container principal não role */
 }
 
 .app-header {
@@ -67,6 +69,7 @@ body {
     align-items: center;
     position: relative;
     z-index: 10;
+    flex-shrink: 0; /* Impede que o header encolha */
 }
 
 .user-buttons {
@@ -122,6 +125,7 @@ body {
     align-items: center;
     background-color: var(--card-bg);
     border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0; /* Impede que o nav encolha */
 }
 
 .nav-item {
@@ -145,12 +149,18 @@ body {
     padding: 20px;
     overflow-y: auto; /* Permite a rolagem apenas dentro do conteúdo principal */
     -webkit-overflow-scrolling: touch;
-    height: calc(100vh - 100px); /* Altura fixa para evitar rolagem da página inteira */
+    /* Remover 'height: calc(100vh - 100px);' e deixar flex-grow: 1 cuidar da altura */
+}
+
+.page-container {
+    height: 100%; /* Garante que o container das páginas ocupe a altura disponível */
+    overflow-y: auto; /* Permite rolagem dentro das páginas, se necessário */
+    padding-right: 10px; /* Adiciona um pequeno padding para a barra de rolagem não sobrepor o conteúdo */
 }
 
 .page {
     display: none;
-    height: 100%;
+    min-height: 100%; /* Garante que a página ocupe toda a altura disponível */
 }
 
 .page.active {

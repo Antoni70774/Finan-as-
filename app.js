@@ -450,8 +450,12 @@ const openTransactionModal = (transaction = null) => {
 };
 
 const closeTransactionModal = () => {
-    document.getElementById('transaction-modal').classList.remove('active');
-};
+        // --- ADICIONE ESTA LINHA ---
+        document.getElementById('transaction-modal').style.display = 'none';
+        // ----------------------------
+        document.getElementById('transaction-modal').classList.remove('active');
+        document.getElementById('transaction-form').reset();
+    };
 
 const editTransaction = (id) => {
     const transaction = transactionsData.find(t => t.id === id);

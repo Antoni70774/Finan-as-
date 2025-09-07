@@ -771,7 +771,7 @@ document.getElementById('type-income-btn').addEventListener('click', () => {
 });
 
 // Botão de cancelamento de modal
-
+document.getElementById('cancel-btn').addEventListener('click', closeTransactionModal);
 
 // Navegação de meses no dashboard
 document.getElementById('prev-month').addEventListener('click', () => {

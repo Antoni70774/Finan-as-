@@ -445,7 +445,7 @@ const openTransactionModal = (transaction = null) => {
     document.getElementById('type-income-btn').classList.remove('active');
     deleteBtn.style.display = 'none';
     document.getElementById('date').valueAsDate = new Date();
-  }
+}
   modal.classList.add('active');
 };
 

@@ -731,15 +731,13 @@ section {
 
 /*
  * ========================================
- * Modais (Pop-ups)
+ * Modals
  * ========================================
  */
-
-
 .modal-overlay {
-    /* estado padrão: invisivel */
+    /* Estado Padrão: Invisível */
+    display: none; 
     position: fixed;
-    display: none;
     top: 0;
     left: 0;
     width: 100%;
@@ -750,8 +748,9 @@ section {
     z-index: 1000;
 }
 
-.modal-overlay.active .modal-content {
-    tranform: scale(1);
+/* Estado Ativo: Visível */
+.modal-overlay.active {
+    display: flex;
 }
 
 .modal-content {
@@ -762,106 +761,11 @@ section {
     max-width: 500px;
     box-shadow: var(--shadow);
     transform: scale(0.95);
-    animation: slideIn 0.2s ease-out;
+    transition: transform 0.2s ease-out;
 }
 
-@keyframes slideIn {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-.modal-content form h3 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.modal-content label {
-    display: block;
-    margin-top: 15px;
-    font-size: 0.9rem;
-    color: var(--text-light);
-}
-
-.modal-content input, .modal-content select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.toggle-type {
-    display: flex;
-    background-color: var(--bg-color);
-    border-radius: 10px;
-    padding: 5px;
-}
-
-.toggle-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    color: var(--text-light);
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.toggle-btn.active {
-    background-color: var(--card-bg);
-    color: var(--primary-color);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.modal {
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
-    display: none;
-    align-items: center;
-    justify-content: center;
-}
-.modal .modal-content {
-    background-color: var(--card-bg);
-    margin: auto;
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    width: 80%;
-    max-width: 400px;
-    border-radius: 15px;
-}
-.modal h3 {
-    margin-top: 0;
-}
-#alert-list {
-    list-style: none;
-    padding: 0;
-    margin: 15px 0;
-}
-#alert-list li {
-    padding: 10px;
-    background-color: var(--bg-color);
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
-#alert-modal button {
-    float: right;
+.modal-overlay.active .modal-content {
+    transform: scale(1);
 }
 
 /*

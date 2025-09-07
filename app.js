@@ -625,6 +625,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             await addTransaction(data);
         }
+        // Fechar o modal após o sucesso da operação
         closeTransactionModal();
     });
 

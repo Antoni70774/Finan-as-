@@ -771,7 +771,25 @@ document.getElementById('type-income-btn').addEventListener('click', () => {
 });
 
 // Botão de cancelamento de modal
-document.getElementById('cancel-btn').addEventListener('click', closeTransactionModal);
+// Fechar Transaction Modal
+document
+  .getElementById('close-transaction-modal')
+  .addEventListener('click', closeTransactionModal);
+
+// Fechar Goal Modal
+document
+  .getElementById('close-goal-modal')
+  .addEventListener('click', closeGoalModal);
+
+// Fechar Payable Modal
+document
+  .getElementById('close-payable-modal')
+  .addEventListener('click', closePayableModal);
+
+// Fechar Alert Modal
+document
+  .getElementById('close-alert-modal')
+  .addEventListener('click', closeAlertModal);
 
 // Navegação de meses no dashboard
 document.getElementById('prev-month').addEventListener('click', () => {
@@ -817,7 +835,8 @@ document.getElementById('goal-form').addEventListener('submit', async (e) => {
     console.error('Erro ao salvar meta:', error);
     alert('Erro ao salvar. Verifique os dados e tente novamente.');
   }
-});document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
+});
+
 document.getElementById('delete-goal-btn').addEventListener('click', async () => {
     const id = document.getElementById('goal-id').value;
     if (confirm('Tem certeza que deseja excluir esta meta?')) {
@@ -851,7 +870,8 @@ document.getElementById('payable-form').addEventListener('submit', async (e) => 
     console.error('Erro ao salvar conta a pagar:', error);
     alert('Erro ao salvar. Verifique os dados e tente novamente.');
   }
-});document.getElementById('cancel-payable-btn').addEventListener('click', closePayableModal);
+});
+
 document.getElementById('payable-list').addEventListener('click', async (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;

@@ -19,6 +19,7 @@
     --font-family: 'Roboto', sans-serif;
     --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
+
 /* 🌙 Modo Escuro (padrão) */
 body.dark-theme {
     --text-color: #E2E8F0;
@@ -26,7 +27,7 @@ body.dark-theme {
     --bg-color: #1A202C;
     --card-bg: #2D3748;
     --border-color: #4A5568;
-    --shadow: 4px 10px rgba(0, 0, 0, 0.2);
+    --shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* ☀️ Modo Claro */
@@ -35,29 +36,42 @@ body:not(.dark-theme) {
     --text-light: #4A5568;
     --bg-color: #F7FAFC;
     --card-bg: #FFFFFF;
-    --border-color: #E2E8F0;
+    --border-color: #CBD5E0;
+    --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Reset e base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-    font-family: var(--font-family);
+    font-family: var(--font-family, 'Segoe UI', sans-serif);
     background-color: var(--bg-color);
     color: var(--text-color);
-    margin: 0;
-    padding: 0;
+    line-height: 1.6;
+    height: 100vh;
+    overflow: hidden;
     display: flex;
     justify-content: center;
-    transition: background-color 0.3s;
-    height: 100vh; /* Garante que o body ocupe 100% da altura da viewport */
-    overflow: hidden; /* Evita rolagem no body */
+    align-items: flex-start;
 }
 
+/* Container principal */
 .app-container {
     width: 100%;
-    max-width: 800px;
-    height: 100vh;
+    max-width: 450px;
+    height: 100%;
+    max-height: 800px;
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Garante que o container principal não role */
+    overflow: hidden;
+    position: relative; /* Adiciona esta linha para os modais */
 }
 
 .app-header {
@@ -69,7 +83,7 @@ body {
     align-items: center;
     position: relative;
     z-index: 10;
-    flex-shrink: 0; /* Impede que o header encolha */
+    flex-shrink: 0;
 }
 
 .user-buttons {
@@ -125,7 +139,7 @@ body {
     align-items: center;
     background-color: var(--card-bg);
     border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0; /* Impede que o nav encolha */
+    flex-shrink: 0;
 }
 
 .nav-item {
@@ -147,26 +161,24 @@ body {
 .app-main {
     flex-grow: 1;
     padding: 20px;
-    overflow-y: auto; /* Permite a rolagem apenas dentro do conteúdo principal */
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    /* Remover 'height: calc(100vh - 100px);' e deixar flex-grow: 1 cuidar da altura */
-}
-
-.page-container {
-    height: 100%; /* Garante que o container das páginas ocupe a altura disponível */
-    overflow-y: auto; /* Permite rolagem dentro das páginas, se necessário */
-    padding-right: 10px; /* Adiciona um pequeno padding para a barra de rolagem não sobrepor o conteúdo */
 }
 
 .page {
     display: none;
-    min-height: 100%; /* Garante que a página ocupe toda a altura disponível */
+    min-height: 100%;
 }
 
 .page.active {
     display: block;
 }
 
+/*
+ * ========================================
+ * Seções da página
+ * ========================================
+ */
 .resumo-periodo {
     display: flex;
     justify-content: space-between;
@@ -336,7 +348,11 @@ body {
     transform: scale(1.1);
 }
 
-/* Modals */
+/*
+ * ========================================
+ * Modais
+ * ========================================
+ */
 .modal {
     display: none;
     position: fixed;
@@ -459,6 +475,11 @@ body {
     color: white;
 }
 
+/*
+ * ========================================
+ * Menu Lateral
+ * ========================================
+ */
 .menu-lateral {
     position: fixed;
     right: 0;
@@ -573,7 +594,7 @@ body {
  * ========================================
  */
 #main-chart {
-    height: 250px; /* Altura fixa para o gráfico principal */
+    height: 250px;
     width: 100%;
     margin-top: 20px;
     padding-bottom: 20px;

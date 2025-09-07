@@ -422,119 +422,15 @@ const openTransactionModal = (transaction = null) => {
   const modal = document.getElementById('transaction-modal');
   const form = document.getElementById('transaction-form');
   const title = document.getElementById('transaction-modal-title');
-  const deleteBtn = document.getElementById('delete-transaction-btn');
-  form.reset();
-  populateCategories();
-
-  if (transaction) {
-    title.textContent = 'Editar Transação';
-    document.getElementById('transaction-id').value = transaction.id;
-    document.getElementById('amount').value = transaction.amount;
-    document.getElementById('description').value = transaction.description;
-    document.getElementById('category').value = transaction.category;
-    document.getElementById('date').value = transaction.date;
-    document.getElementById('transaction-type').value = transaction.type;
-    document.getElementById('type-expense-btn').classList.toggle('active', transaction.type === 'expense');
-    document.getElementById('type-income-btn').classList.toggle('active', transaction.type === 'income');
-    deleteBtn.style.display = 'inline-block';
-  } else {
-    title.textContent = 'Nova Transação';
-    document.getElementById('transaction-id').value = '';
-    document.getElementById('transaction-type').value = 'expense';
-    document.getElementById('type-expense-btn').classList.add('active');
-    document.getElementById('type-income-btn').classList.remove('active');
-    deleteBtn.style.display = 'none';
-    document.getElementById('date').valueAsDate = new Date();
-}
-  modal.classList.add('active');
-};
-
-const closeTransactionModal = () => {
-    document.getElementById('transaction-modal').classList.remove('active');
-};
-
-const editTransaction = (id) => {
-    const transaction = transactionsData.find(t => t.id === id);
-    if (transaction) {
-        openTransactionModal(transaction);
-    }
-};
-
-const openGoalModal = (goal = null) => {
-    const modal = document.getElementById('goal-modal');
-    const form = document.getElementById('goal-form');
-    const title = document.getElementById('goal-modal-title');
-    const deleteBtn = document.getElementById('delete-goal-btn');
-    form.reset();
-
-    if (goal) {
-        title.textContent = 'Editar Meta';
-        document.getElementById('goal-id').value = goal.id;
-        document.getElementById('goal-name').value = goal.name;
-        document.getElementById('goal-target').value = goal.target;
-        document.getElementById('goal-current').value = goal.current;
-        document.getElementById('goal-date').value = goal.date;
-        deleteBtn.style.display = 'inline-block';
-    } else {
-        title.textContent = 'Nova Meta Financeira';
-        document.getElementById('goal-id').value = '';
-        deleteBtn.style.display = 'none';
-    }
-    modal.style.display = 'flex';
-};
-
-const closeGoalModal = () => {
-    document.getElementById('goal-modal').style.display = 'none';
-};
-
-const editGoal = (id) => {
-    const goal = goalsData.find(g => g.id === id);
-    if (goal) {
-        openGoalModal(goal);
-    }
-};
-
-const openPayableModal = (payable = null) => {
-    const modal = document.getElementById('payable-modal');
-    const form = document.getElementById('payable-form');
-    const title = document.getElementById('payable-modal-title');
-    form.reset();
-
-    if (payable) {
-        title.textContent = 'Editar Conta a Pagar';
-        document.getElementById('payable-id').value = payable.id;
-        document.getElementById('payable-description').value = payable.description;
-        document.getElementById('payable-category').value = payable.category;
-        document.getElementById('payable-amount').value = parseFloat(payable.amount);
-        document.getElementById('payable-date').value = payable.dueDate;
-    } else {
-        title.textContent = 'Nova Conta a Pagar';
-        document.getElementById('payable-id').value = '';
-        document.getElementById('payable-date').valueAsDate = new Date();
-    }
-    modal.style.display = 'flex';
-};
-
-const closePayableModal = () => {
-    document.getElementById('payable-modal').style.display = 'none';
-};
-
-const editPayable = (id) => {
-    const payable = payablesData.find(p => p.id === id);
-    if (payable) {
-        openPayableModal(payable);
-    }
-};
-
-const updateMonthlySummary = (date) => {
-    const monthYear = getMonthYearString(date);
-    document.getElementById('mes-atual').textContent = monthYear;
-    document.getElementById('resumo-current-month-year').textContent = monthYear;
-    const filtered = transactionsData.filter(t => {
-        const transactionDate = new Date(t.date + 'T12:00:00-03:00');
-        return transactionDate.getFullYear() === date.getFullYear() && transactionDate.getMonth() === date.getMonth();
-    });
-    const income = filtered.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
+  const deleteBtn = document.getElementById('delete-transaction-btn').addEventListener('click', async () => {
+  const id = document.getElementById('transaction-id').value;
+  if (confirm('Tem certeza que deseja excluir esta transação?')) {
+    await deleteTransaction(id);
+    await saveAndRerender();
+    closeTransactionModal();
+    document.getElementById('transaction-form').reset();
+  }
+});const income = filtered.filter(t => t.type === 'income').reduce((sum, t) => sum + parseFloat(t.amount), 0);
     const expense = filtered.filter(t => t.type === 'expense').reduce((sum, t) => sum + parseFloat(t.amount), 0);
     const balance = income - expense;
     document.getElementById('monthly-revenue').textContent = formatCurrency(income);
@@ -812,14 +708,14 @@ document.getElementById('goal-form').addEventListener('submit', async (e) => {
   }
 });document.getElementById('cancel-goal-btn').addEventListener('click', closeGoalModal);
 document.getElementById('delete-goal-btn').addEventListener('click', async () => {
-    const id = document.getElementById('goal-id').value;
-    if (confirm('Tem certeza que deseja excluir esta meta?')) {
-        await deleteGoal(id);
-        closeGoalModal();
-    }
-});
-
-// Contas a Pagar
+  const id = document.getElementById('goal-id').value;
+  if (confirm('Tem certeza que deseja excluir esta meta?')) {
+    await deleteGoal(id);
+    await saveAndRerender();
+    closeGoalModal();
+    document.getElementById('goal-form').reset();
+  }
+});// Contas a Pagar
 document.getElementById('add-payable-btn').addEventListener('click', () => openPayableModal());
 document.getElementById('payable-form').addEventListener('submit', async (e) => {
   e.preventDefault();

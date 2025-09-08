@@ -37,12 +37,18 @@
   <script>
     const auth = firebase.auth();
 
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        // Aqui você pode carregar os dados do usuário
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
       } else {
+        console.log("Usuário logado:", user.email);
+      }
+    });
+
+    // 🚪 Logout
+    document.addEventListener("click", async (e) => {
+      if (e.target.id === "btn-logout") {
+        await signOut(auth);
         window.location.href = "login.html";
       }
     });
@@ -60,7 +66,7 @@
       document.getElementById('transaction-form').reset();
     }
     
-    <div id="app" style="display:none;">
+    <div class="app-container">
         <!-- Header -->
         <header class="app-header">
             <h1>Visão Geral</h1>

@@ -83,11 +83,9 @@ function startApp() {
     ],
     incomeCategories: ['Salário','Combustível','Aluguel','Outros'],
     chartType:       'all' // all | expense | income
-  };  // ← aqui fecha o objeto state
+  };
 
-  // -----------------------------
-  // 📄 Atualiza a UI da Página Perfil
-  // -----------------------------
+  // Atualiza a UI da Página Perfil
   document.getElementById('perfil-usuario').textContent =
     auth.currentUser.displayName || 'Sem nome';
   document.getElementById('perfil-email').textContent =
@@ -118,7 +116,7 @@ function startApp() {
       }
     });
 
-    // Inicialização do resto do app
+  // Inicialização do app
   createExpenseChart();
   setCurrentDate();
   updateAll();
@@ -130,15 +128,12 @@ function startApp() {
       menuFlutuante.style.display === 'none' ? 'block' : 'none';
   });
 
-  // -----------------------------
   // Navegação de meses (Dashboard)
-  // -----------------------------
   document.getElementById('prev-month')
     .addEventListener('click', () => changeMonth(-1));
   document.getElementById('next-month')
     .addEventListener('click', () => changeMonth(1));
 
-  // Função auxiliar para trocar mês e re-renderizar
   function changeMonth(direction) {
     state.currentDate.setMonth(
       state.currentDate.getMonth() + direction
@@ -146,15 +141,35 @@ function startApp() {
     updateAll();
   }
 
-  // Ajusta o campo <input type="date"> para hoje
   function setCurrentDate() {
     const today = new Date();
     const dateEl = document.getElementById('date');
     if (dateEl) dateEl.value = today.toISOString().split('T')[0];
   }
 
-// fecha startApp()
+  // Navegação de páginas
+  function navigateToPage(pageId) {
+    pages.forEach(page => page.classList.remove('active'));
+    const selectedPage = document.getElementById(pageId);
+    if (selectedPage) selectedPage.classList.add('active');
+
+    navItems.forEach(item => {
+      item.classList.remove('active');
+      if (item.getAttribute('data-page') === pageId) {
+        item.classList.add('active');
+      }
+    });
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const pageId = item.getAttribute('data-page');
+      if (pageId) navigateToPage(pageId);
+    });
+  });
 }
+
 
   // Navegação páginas
   function navigateToPage(pageId) {

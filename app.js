@@ -69,18 +69,21 @@ function startApp() {
   const payableForm = document.getElementById('payable-form');
   const payableList = document.getElementById('payable-list');
 
-  // Estado
-  const state = {
-    transactions: JSON.parse(localStorage.getItem('transactions')) || [],
-    goals: JSON.parse(localStorage.getItem('goals')) || [],
-    payables: JSON.parse(localocalStorage.getItem('payables')) || [],
-    currentUser: localStorage.getItem('currentUser') || 'Bem Vindo',
-    users: ['Esposo', 'Esposa'],
-    currentDate: new Date(),
-    expenseCategories: ['Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde', 'Empréstimo', 'Cartão de Crédito', 'Energia', 'Água', 'Gás', 'Internet', 'Investimento', 'Outros'],
-    incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
-    chartType: 'all' // all, expense, income
-  };
+// STATE MANAGEMENT
+const state = {
+  transactions: JSON.parse(localStorage.getItem('transactions')) || [],
+  goals:        JSON.parse(localStorage.getItem('goals'))        || [],
+  payables:     JSON.parse(localStorage.getItem('payables'))     || [],
+  currentUser:  localStorage.getItem('currentUser')              || 'Bem Vindo',
+  currentDate:  new Date(),
+  expenseCategories: [
+    'Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde',
+    'Empréstimo', 'Cartão de Crédito', 'Energia', 'Água',
+    'Gás', 'Internet', 'Investimento', 'Outros'
+  ],
+  incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
+  chartType: 'all' // all | expense | income
+};
 
   // Inicialização
   createExpenseChart();

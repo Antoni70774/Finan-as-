@@ -150,34 +150,6 @@
                 <div id="payable-list"></div>
             </div>
 
-            <!-- Profile Page -->
-            <div id="profile-page" class="page">
-                <h2>Perfil</h2>
-                <div>
-                    <span>Usuário atual: <span id="current-user-name"></span></span>
-                </div>
-                <div class="bank-connect">
-                    <h4>Conexão Bancária</h4>
-                    <p>Selecione seu banco para conectar:</p>
-                    <div class="bank-integration">
-                        <button class="bank-button" onclick="connectBank('nubank')">
-                            <img src="assets/nubank-icon.png" alt="Nubank">
-                            Nubank
-                        </button>
-                        <button class="bank-button" onclick="connectBank('itau')">
-                            <img src="assets/itau-icon.png" alt="Itaú">
-                            Itaú
-                        </button>
-                        <button class="bank-button" onclick="connectBank('caixa')">
-                            <img src="assets/caixa-icon.png" alt="Caixa">
-                            Caixa
-                        </button>
-                    </div>
-                </div>
-                <button id="export-data-btn" class="btn-secondary">Exportar Dados</button>
-            </div>
-        </main>
-
         <!-- Transaction Modal -->
         <div id="transaction-modal" class="modal-overlay">
             <div class="modal-content">
@@ -325,13 +297,61 @@
           <canvas id="annual-chart" width="100%" height="70"></canvas>
         </div>
       </div>
-        <!-- Perfil -->
-        <div id="perfil-page" class="page">
-          <h2>👤 Perfil do Usuário</h2>
-          <p><b>Usuário atual:</b> <span id="perfil-usuario"></span></p>
-          <p><b>Email:</b> <span id="perfil-email"></span></p>
-          <p><b>Banco conectado:</b> <span id="perfil-banco"></span></p>
+
+ <!-- Profile Page -->
+<div id="profile-page" class="page profile-page">
+  <h2>👤 Meu Perfil</h2>
+
+  <div class="profile-cards">
+    <!-- Cartão de Dados do Usuário -->
+    <section class="card user-card">
+      <div class="avatar">
+        <img src="assets/avatar-placeholder.png" alt="Avatar do usuário">
+        <button class="btn-edit-avatar" title="Editar avatar">✏️</button>
+      </div>
+      <div class="user-info">
+        <h3 id="perfil-usuario">–</h3>
+        <p id="perfil-email">–</p>
+        <button id="btn-change-password" class="btn-secondary">Alterar Senha</button>
+      </div>
+    </section>
+
+    <!-- Cartão Conexões Bancárias -->
+    <section class="card bank-card">
+      <h3>🏦 Conexões Bancárias</h3>
+      <div class="banks-list">
+        <div class="bank-item" data-bank="nubank">
+          <img src="assets/nubank-icon.png" alt="Nubank">
+          <span>Nubank</span>
+          <button class="btn-connect" onclick="connectBank('nubank')">Conectar</button>
         </div>
+        <div class="bank-item" data-bank="itau">
+          <img src="assets/itau-icon.png" alt="Itaú">
+          <span>Itaú</span>
+          <button class="btn-connect" onclick="connectBank('itau')">Conectar</button>
+        </div>
+        <div class="bank-item" data-bank="caixa">
+          <img src="assets/caixa-icon.png" alt="Caixa">
+          <span>Caixa</span>
+          <button class="btn-connect" onclick="connectBank('caixa')">Conectar</button>
+        </div>
+      </div>
+      <p><strong>Banco conectado:</strong> <span id="perfil-banco">Nenhum</span></p>
+    </section>
+
+    <!-- Cartão Ações -->
+    <section class="card actions-card">
+      <button id="btn-export-data" class="btn-primary">📤 Exportar Dados</button>
+      <button id="btn-logout"      class="btn-danger">🚪 Sair</button>
+      <label class="theme-switch">
+        🌓 Tema Escuro
+        <input type="checkbox" id="toggle-theme">
+        <span class="slider"></span>
+      </label>
+    </section>
+  </div>
+</div>
+
         
         <!-- Página: Configurações -->
         <div id="config-page" class="page">

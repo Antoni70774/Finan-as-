@@ -168,8 +168,6 @@ function startApp() {
       if (pageId) navigateToPage(pageId);
     });
   });
-}
-
 
   // Navegação páginas
   function navigateToPage(pageId) {

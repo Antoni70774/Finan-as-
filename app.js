@@ -147,28 +147,6 @@ function startApp() {
     if (dateEl) dateEl.value = today.toISOString().split('T')[0];
   }
 
-  // Navegação de páginas
-  function navigateToPage(pageId) {
-    pages.forEach(page => page.classList.remove('active'));
-    const selectedPage = document.getElementById(pageId);
-    if (selectedPage) selectedPage.classList.add('active');
-
-    navItems.forEach(item => {
-      item.classList.remove('active');
-      if (item.getAttribute('data-page') === pageId) {
-        item.classList.add('active');
-      }
-    });
-  }
-
-  navItems.forEach(item => {
-    item.addEventListener('click', e => {
-      e.preventDefault();
-      const pageId = item.getAttribute('data-page');
-      if (pageId) navigateToPage(pageId);
-    });
-  });
-
   // Navegação páginas
   function navigateToPage(pageId) {
     pages.forEach(page => page.classList.remove('active'));

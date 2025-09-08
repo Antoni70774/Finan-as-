@@ -1,5 +1,5 @@
 // --- app.js ---
-import firebaseConfig from './firebase-config.js'; // Importa o arquivo de configuração
+import firebaseConfig from './firebase-config.js';
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
 import {

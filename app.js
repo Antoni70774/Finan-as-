@@ -56,15 +56,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // VERIFICA AUTENTICAÇÃO
     onAuthStateChanged(auth, async (user) => {
-        if (user) {
+    if (user) {
+        try {
             state.currentUser = user;
-            currentUserNameEl.textContent = user.displayName || user.email;
+            if (currentUserNameEl) {
+                currentUserNameEl.textContent = user.displayName || user.email;
+            }
             await loadAllData();
             setupUI();
-        } else {
-            window.location.href = 'login.html';
+        } catch (error) {
+            console.error("Erro ao carregar dados:", error);
         }
-    });
+    } else {
+        window.location.href = 'login.html';
+    }
+});
+
     
     // CARREGA DADOS DO FIRESTORE
     async function loadAllData() {

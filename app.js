@@ -1,23 +1,11 @@
 // --- app.js ---
 import firebaseConfig from './firebase-config.js';
-import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-import {
-  getFirestore,
-  collection,
-  doc,
-  setDoc,
-  deleteDoc,
-  onSnapshot,
-  getDocs,
-  writeBatch
-} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
-// Inicialização do Firebase
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Inicialização do Firebase (as funções já estão disponíveis globalmente)
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 // Estado global do app
 const state = {

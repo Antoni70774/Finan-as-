@@ -446,6 +446,7 @@ const openTransactionModal = (transaction = null) => {
     deleteBtn.style.display = 'none';
     document.getElementById('date').valueAsDate = new Date();
 }
+
   modal.classList.add('active');
 
  // ✅ Adiciona o listener ao botão de cancelamento

@@ -148,16 +148,6 @@ function startApp() {
   }
 
   // Navegação páginas
-  function navigateToPage(pageId) {
-    pages.forEach(page => page.classList.remove('active'));
-    const selectedPage = document.getElementById(pageId);
-    if (selectedPage) selectedPage.classList.add('active');
-
-    navItems.forEach(item => {
-      item.classList.remove('active');
-      if (item.getAttribute('data-page') === pageId) item.classList.add('active');
-    });
-
     const titles = {
       'dashboard-page': 'Visão Geral',
       'goals-page': 'Metas Pessoais',
@@ -175,14 +165,6 @@ function startApp() {
       atualizarNomeDoMes();
     }
   }
-
-  navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      const pageId = item.getAttribute('data-page');
-      if (pageId) navigateToPage(pageId);
-    });
-  });
 
   // Modal helpers
   function openModal(modal) { modal.classList.add('active'); }

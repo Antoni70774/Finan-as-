@@ -35,57 +35,90 @@ function startApp() {
   if (temaSalvo === 'dark') document.body.classList.add('dark-theme');
 
   // Elementos da UI
-  const navItems = document.querySelectorAll('.nav-item');
-  const pages = document.querySelectorAll('.page');
-  const addButton = document.getElementById('add-transaction-btn');
-  const transactionModal = document.getElementById('transaction-modal');
-  const cancelBtn = document.getElementById('cancel-btn');
-  const transactionForm = document.getElementById('transaction-form');
-  const typeExpenseBtn = document.getElementById('type-expense-btn');
-  const typeIncomeBtn = document.getElementById('type-income-btn');
-  const transactionTypeInput = document.getElementById('transaction-type');
-  const categorySelect = document.getElementById('category');
-  const transactionModalTitle = document.getElementById('transaction-modal-title');
-  const transactionIdInput = document.getElementById('transaction-id');
-  const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
-  const menuBotao = document.getElementById('menu-botao');
-  const menuFlutuante = document.getElementById('menu-perfil');
+  const navItems            = document.querySelectorAll('.nav-item');
+  const pages               = document.querySelectorAll('.page');
+  const addButton           = document.getElementById('add-transaction-btn');
+  const transactionModal    = document.getElementById('transaction-modal');
+  const cancelBtn           = document.getElementById('cancel-btn');
+  const transactionForm     = document.getElementById('transaction-form');
+  const typeExpenseBtn      = document.getElementById('type-expense-btn');
+  const typeIncomeBtn       = document.getElementById('type-income-btn');
+  const transactionTypeInput= document.getElementById('transaction-type');
+  const categorySelect      = document.getElementById('category');
+  const transactionModalTitle  = document.getElementById('transaction-modal-title');
+  const transactionIdInput  = document.getElementById('transaction-id');
+  const deleteTransactionBtn= document.getElementById('delete-transaction-btn');
+  const menuBotao           = document.getElementById('menu-botao');
+  const menuFlutuante       = document.getElementById('menu-perfil');
 
-  const addGoalBtn = document.getElementById('add-goal-btn');
-  const goalModal = document.getElementById('goal-modal');
-  const cancelGoalBtn = document.getElementById('cancel-goal-btn');
-  const goalForm = document.getElementById('goal-form');
-  const goalList = document.getElementById('goal-list');
+  const addGoalBtn          = document.getElementById('add-goal-btn');
+  const goalModal           = document.getElementById('goal-modal');
+  const cancelGoalBtn       = document.getElementById('cancel-goal-btn');
+  const goalForm            = document.getElementById('goal-form');
+  const goalList            = document.getElementById('goal-list');
 
-  const currentUserNameEl = document.getElementById('current-user-name');
-  const exportDataBtn = document.getElementById('export-data-btn');
-  const chartBtns = document.querySelectorAll('.chart-btn');
-  const chartTitle = document.getElementById('chart-title');
+  const currentUserNameEl   = document.getElementById('current-user-name');
+  const exportDataBtn       = document.getElementById('export-data-btn');
+  const chartBtns           = document.querySelectorAll('.chart-btn');
+  const chartTitle          = document.getElementById('chart-title');
 
   // Payables
-  const addPayableBtn = document.getElementById('add-payable-btn');
-  const payableModal = document.getElementById('payable-modal');
-  const cancelPayableBtn = document.getElementById('cancel-payable-btn');
-  const payableForm = document.getElementById('payable-form');
-  const payableList = document.getElementById('payable-list');
+  const addPayableBtn       = document.getElementById('add-payable-btn');
+  const payableModal        = document.getElementById('payable-modal');
+  const cancelPayableBtn    = document.getElementById('cancel-payable-btn');
+  const payableForm         = document.getElementById('payable-form');
+  const payableList         = document.getElementById('payable-list');
 
-// STATE MANAGEMENT
-const state = {
-  transactions: JSON.parse(localStorage.getItem('transactions')) || [],
-  goals:        JSON.parse(localStorage.getItem('goals'))        || [],
-  payables:     JSON.parse(localStorage.getItem('payables'))     || [],
-  currentUser:  localStorage.getItem('currentUser')              || 'Bem Vindo',
-  currentDate:  new Date(),
-  expenseCategories: [
-    'Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde',
-    'Empréstimo', 'Cartão de Crédito', 'Energia', 'Água',
-    'Gás', 'Internet', 'Investimento', 'Outros'
-  ],
-  incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
-  chartType: 'all' // all | expense | income
-};
+  // STATE MANAGEMENT
+  const state = {
+    transactions:    JSON.parse(localStorage.getItem('transactions')) || [],
+    goals:           JSON.parse(localStorage.getItem('goals'))        || [],
+    payables:        JSON.parse(localStorage.getItem('payables'))     || [],
+    currentUser:     localStorage.getItem('currentUser')              || 'Bem Vindo',
+    currentDate:     new Date(),
+    expenseCategories: [
+      'Alimentação','Transporte','Moradia','Lazer','Saúde',
+      'Empréstimo','Cartão de Crédito','Energia','Água',
+      'Gás','Internet','Investimento','Outros'
+    ],
+    incomeCategories: ['Salário','Combustível','Aluguel','Outros'],
+    chartType:       'all' // all | expense | income
+  };  // ← aqui fecha o objeto state
 
-  // Inicialização
+  // -----------------------------
+  // 📄 Atualiza a UI da Página Perfil
+  // -----------------------------
+  document.getElementById('perfil-usuario').textContent =
+    auth.currentUser.displayName || 'Sem nome';
+  document.getElementById('perfil-email').textContent =
+    auth.currentUser.email;
+
+  const bancoSalvo = localStorage.getItem('bancoConectado') || 'Nenhum';
+  document.getElementById('perfil-banco').textContent = bancoSalvo;
+
+  document.getElementById('btn-logout')
+    .addEventListener('click', async () => {
+      await auth.signOut();
+      window.location.href = 'login.html';
+    });
+
+  const toggle = document.getElementById('toggle-theme');
+  toggle.checked = document.body.classList.contains('dark-theme');
+  toggle.addEventListener('change', trocarTema);
+
+  document.getElementById('btn-change-password')
+    .addEventListener('click', async () => {
+      const nova = prompt('Digite sua nova senha:');
+      if (!nova) return;
+      try {
+        await auth.currentUser.updatePassword(nova);
+        alert('Senha alterada com sucesso!');
+      } catch (e) {
+        alert('Erro ao alterar senha: ' + e.message);
+      }
+    });
+
+    // Inicialização do resto do app
   createExpenseChart();
   setCurrentDate();
   updateAll();
@@ -93,23 +126,35 @@ const state = {
 
   // Menu lateral toggle
   menuBotao.addEventListener('click', () => {
-    menuFlutuante.style.display = menuFlutuante.style.display === 'none' ? 'block' : 'none';
+    menuFlutuante.style.display =
+      menuFlutuante.style.display === 'none' ? 'block' : 'none';
   });
 
-  // Navegação meses (dashboard)
-  document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
-  document.getElementById('next-month').addEventListener('click', () => changeMonth(1));
+  // -----------------------------
+  // Navegação de meses (Dashboard)
+  // -----------------------------
+  document.getElementById('prev-month')
+    .addEventListener('click', () => changeMonth(-1));
+  document.getElementById('next-month')
+    .addEventListener('click', () => changeMonth(1));
 
+  // Função auxiliar para trocar mês e re-renderizar
   function changeMonth(direction) {
-    state.currentDate.setMonth(state.currentDate.getMonth() + direction);
+    state.currentDate.setMonth(
+      state.currentDate.getMonth() + direction
+    );
     updateAll();
   }
 
+  // Ajusta o campo <input type="date"> para hoje
   function setCurrentDate() {
     const today = new Date();
     const dateEl = document.getElementById('date');
     if (dateEl) dateEl.value = today.toISOString().split('T')[0];
   }
+
+// fecha startApp()
+}
 
   // Navegação páginas
   function navigateToPage(pageId) {

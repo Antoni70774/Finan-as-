@@ -147,24 +147,52 @@ function startApp() {
     if (dateEl) dateEl.value = today.toISOString().split('T')[0];
   }
 
-  // Navegação páginas
-    const titles = {
-      'dashboard-page': 'Visão Geral',
-      'goals-page': 'Metas Pessoais',
-      'payables-page': 'Despesas a Pagar',
-      'menu-page': 'Menu',
-      'resumo-anual-page': 'Resumo Anual',
-      'config-page': 'Configurações'
-    };
+  // --- NAVEGAÇÃO CENTRALIZADA (SOLUÇÃO) ---
+  const titles = {
+    'dashboard-page': 'Visão Geral',
+    'goals-page': 'Metas Pessoais',
+    'payables-page': 'Despesas a Pagar',
+    'menu-page': 'Menu',
+    'resumo-anual-page': 'Resumo Anual',
+    'config-page': 'Configurações'
+  };
+
+  function navigateToPage(pageId) {
+    pages.forEach(page => page.classList.remove('active'));
+    const selectedPage = document.getElementById(pageId);
+    if (selectedPage) selectedPage.classList.add('active');
+
+    navItems.forEach(item => {
+      item.classList.remove('active');
+      if (item.getAttribute('data-page') === pageId) item.classList.add('active');
+    });
+
     const header = document.querySelector('.app-header h1');
     if (header) header.textContent = titles[pageId] || 'Visão Geral';
 
     if (pageId === 'payables-page') renderPayables();
+    if (pageId === 'goals-page') renderGoals();
     if (pageId === 'dashboard-page') {
       carregarResumoMensal();
       atualizarNomeDoMes();
+      updateMainChart(filterTransactionsByMonth(state.transactions, state.currentDate));
+    }
+    if (pageId === 'resumo-anual-page') {
+      // Chama a função de resumo anual apenas se o usuário estiver nessa página
+      atualizarResumoAnual();
     }
   }
+
+  // Adiciona o event listener uma única vez
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const pageId = item.getAttribute('data-page');
+      if (pageId) navigateToPage(pageId);
+      // Fecha o menu flutuante ao navegar
+      if (menuFlutuante) menuFlutuante.style.display = 'none';
+    });
+  });
 
   // Modal helpers
   function openModal(modal) { modal.classList.add('active'); }
@@ -175,11 +203,9 @@ function startApp() {
     openTransactionModal();
   });
 
-  // [NOVO] Fecha modal de transação de forma robusta
   function closeTransactionModal() {
     const modal = document.getElementById('transaction-modal');
     if (!modal) return;
-    modal.style.display = 'none';
     modal.classList.remove('active');
     const form = document.getElementById('transaction-form');
     if (form) form.reset();
@@ -200,18 +226,33 @@ function startApp() {
     }
   });
 
-  // Ações de página do menu lateral
-  function abrirPagina(paginaId) {
-    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-    document.getElementById(paginaId).classList.add('active');
-    menuFlutuante.style.display = 'none';
+  // Resumo mensal e anual
+  function carregarResumoMensal() {
+    const mesAtual = state.currentDate.getMonth();
+    const anoAtual = state.currentDate.getFullYear();
+
+    const transacoesDoMes = state.transactions.filter(t => {
+      const data = new Date(t.date);
+      return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+    });
+
+    const receita = transacoesDoMes.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
+    const despesa = transacoesDoMes.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+    const saldo = receita - despesa;
+
+    document.getElementById("monthly-revenue").textContent = receita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    document.getElementById("monthly-expense").textContent = despesa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    document.getElementById("monthly-balance").textContent = saldo.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   }
 
-  function abrirResumoAnual() {
-    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-    document.getElementById('resumo-anual-page').classList.add('active');
-    menuFlutuante.style.display = 'none';
+  function atualizarNomeDoMes() {
+    const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+    const mes = meses[state.currentDate.getMonth()];
+    const ano = state.currentDate.getFullYear();
+    document.getElementById("mes-atual").textContent = `${mes} de ${ano}`;
+  }
 
+  function atualizarResumoAnual() {
     const transacoes = state.transactions;
     const receitaTotal = transacoes.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
     const despesaTotal = transacoes.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
@@ -254,47 +295,6 @@ function startApp() {
       },
       options: { responsive: true, plugins: { legend: { position: 'top' } } }
     });
-  }
-
-  function abrirConfig() {
-    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-    document.getElementById('config-page').classList.add('active');
-    menuFlutuante.style.display = 'none';
-  }
-
-  // Resumo mensal
-  function carregarResumoMensal() {
-    const mesAtual = state.currentDate.getMonth();
-    const anoAtual = state.currentDate.getFullYear();
-
-    const transacoesDoMes = state.transactions.filter(t => {
-      const data = new Date(t.date);
-      return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
-    });
-
-    const receita = transacoesDoMes.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
-    const despesa = transacoesDoMes.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
-    const saldo = receita - despesa;
-
-    document.getElementById("monthly-revenue").textContent = receita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    document.getElementById("monthly-expense").textContent = despesa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    document.getElementById("monthly-balance").textContent = saldo.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  }
-
-  function atualizarNomeDoMes() {
-    const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
-    const mes = meses[state.currentDate.getMonth()];
-    const ano = state.currentDate.getFullYear();
-    document.getElementById("mes-atual").textContent = `${mes} de ${ano}`;
-  }
-
-  function abrirResumoMensal() {
-    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-    document.getElementById('resumo-mensal-page').classList.add('active');
-    menuFlutuante.style.display = 'none';
-    carregarResumoMensal();
-    atualizarNomeDoMes();
-    atualizarGraficoMensal();
   }
 
   // Fecha menu ao clicar fora
@@ -711,7 +711,7 @@ function startApp() {
 
         <div class="goal-actions">
           <button class="btn-secondary" onclick="editGoal('${goal.id}')">Editar</button>
-          <button class="btn-danger" onclick="window.deleteGoal && deleteGoal('${goal.id}')">Excluir</button>
+          <button class="btn-danger" onclick="deleteGoal('${goal.id}')">Excluir</button>
         </div>
       `;
       goalList.appendChild(card);
@@ -853,20 +853,11 @@ function startApp() {
         state.goals[index] = { ...state.goals[index], ...goalData };
       }
     } else {
-      state.goals.push({ id: Date.now().toString(), ...goalData });
+      state.goals.push({ id: crypto.randomUUID(), ...goalData });
     }
 
     saveAndRerender();
     closeGoalModal();
-  });
-
-  document.getElementById('delete-goal-btn').addEventListener('click', function () {
-    const goalId = document.getElementById('goal-id').value;
-    if (confirm('Tem certeza que deseja excluir esta meta?')) {
-      state.goals = state.goals.filter(g => g.id !== goalId);
-      saveAndRerender();
-      closeModal(goalModal);
-    }
   });
 
   window.editGoal = function (goalId) {
@@ -890,21 +881,9 @@ function startApp() {
     document.getElementById('delete-goal-btn').style.display = 'none';
   };
 
-  // Export, tema, reset no escopo global
-  window.abrirResumoMensal = abrirResumoMensal;
-  window.abrirResumoAnual = abrirResumoAnual;
-  window.abrirPagina = abrirPagina;
-  window.abrirConfig = abrirConfig;
+  // Funções globais que podem ser chamadas no HTML (mantidas para compatibilidade)
+  window.navigateToPage = navigateToPage;
   window.exportarDados = exportarDados;
   window.trocarTema = trocarTema;
   window.resetarApp = resetarApp;
-
-  // Service Worker
-  function registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
-      });
-    }
-  }
 }

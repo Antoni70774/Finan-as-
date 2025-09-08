@@ -1,264 +1,208 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Financeiro</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4A90E2">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle Financeiro</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4A90E2">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
-<body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <h1>Visão Geral</h1>
-            <div class="profile-icon">
-                <div id="alert-icon" onclick="abrirAlerta()">
-                    🔔 <span id="alert-count" class="badge">0</span>
-                </div>
-            </div>
-        </header>
-        
-        <!-- Main Content -->
-        <main id="app-main">
-            <!-- Dashboard Page -->
-            <div id="dashboard-page" class="page active">
-                <div class="month-nav">
-                    <button id="prev-month" class="btn-secondary">&lt;</button>
-                    <span id="current-month-year"></span>
-                    <button id="next-month" class="btn-secondary">&gt;</button>
-                </div>
-                <div class="dashboard-summary" id="dashboard-summary">
-                    <div class="summary-item">
-                        <span>Receita</span>
-                        <h4 id="month-income">R$ 0,00</h4>
-                        <div id="display-month-income" class="summary-display"></div>
-                    </div>
-                    <div class="summary-item">
-                        <span>Despesa</span>
-                        <h4 id="month-expense">R$ 0,00</h4>
-                        <div id="display-month-expense" class="summary-display"></div>
-                    </div>
-                    <div class="summary-item">
-                        <span>Saldo</span>
-                        <h4 id="month-balance">R$ 0,00</h4>
-                    </div>
-                </div>
-                <div class="chart-selector">
-                    <button class="chart-btn active" data-type="all">Geral</button>
-                    <button class="chart-btn" data-type="expense">Despesas</button>
-                    <button class="chart-btn" data-type="income">Receitas</button>
-                </div>
-                <div class="chart-container">
-                    <h3 id="chart-title">Movimentação por Categoria</h3>
-                    <canvas id="main-chart"></canvas>
-                </div>
-                <div id="chart-details" class="chart-details"></div>
 
-                <div class="category-summary-section">
-                    <h3>Resumo por Categoria</h3>
-                    <div id="category-summary" class="category-grid"></div>
-                </div>
-                
-                <div class="recent-transactions">
-                    <h3>Transações Recentes</h3>
-                    <ul id="transaction-list"></ul>
-                </div>
-            </div>
+<body class="dark-theme">
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const temaSalvo = localStorage.getItem('tema');
+      if (temaSalvo === 'claro') {
+        document.body.classList.remove('dark-theme');
+      } else {
+        document.body.classList.add('dark-theme'); // modo escuro por padrão
+      }
+    });
+  
+    window.trocarTema = () => {
+      document.body.classList.toggle('dark-theme');
+      const temaAtual = document.body.classList.contains('dark-theme') ? 'escuro' : 'claro';
+      localStorage.setItem('tema', temaAtual);
+    };
+  </script>
 
-            <!-- Goals Page -->
-            <div id="goals-page" class="page">
-              <h2>Metas Pessoais</h2>
-              <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
-              <div id="goal-list"></div>
+  <div class="app-container">
+
+    <header class="top-nav">
+        <div class="nav-brand">Controle Financeiro</div>
+        <div class="nav-actions">
+            <button id="alert-btn" class="nav-button alert-btn">
+              <span class="material-icons-sharp">notifications</span>
+              <span class="alert-badge" id="alert-count">0</span>
+            </button>
+            <div class="profile-trigger" id="menu-botao">
+              <span class="material-icons-sharp">account_circle</span>
+            </div>
+        </div>
+    </header>
+
+    <aside class="menu-lateral" id="menu-perfil">
+        <div class="perfil-info">
+            <span class="material-icons-sharp profile-icon">account_circle</span>
+            <div class="perfil-details">
+                <span id="perfil-usuario">Carregando...</span>
+                <small id="perfil-email">Carregando...</small>
+            </div>
+        </div>
+        <ul class="menu-lista">
+            <li class="nav-item" data-page="perfil-page">
+                <span class="material-icons-sharp">person</span>
+                <span>Meu Perfil</span>
+            </li>
+            <li class="nav-item" data-page="config-page">
+                <span class="material-icons-sharp">settings</span>
+                <span>Configurações</span>
+            </li>
+            <li class="nav-item" data-page="ajuda-page">
+                <span class="material-icons-sharp">help</span>
+                <span>Ajuda</span>
+            </li>
+            <li class="nav-item" id="btn-logout">
+                <span class="material-icons-sharp">logout</span>
+                <span>Sair</span>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <nav class="main-nav">
+            <a href="#" class="nav-item active" data-page="dashboard-page">
+                <span class="material-icons-sharp">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-page="transactions-page">
+                <span class="material-icons-sharp">list_alt</span>
+                <span>Transações</span>
+            </a>
+            <a href="#" class="nav-item" data-page="goals-page">
+                <span class="material-icons-sharp">emoji_events</span>
+                <span>Metas</span>
+            </a>
+            <a href="#" class="nav-item" data-page="payables-page">
+                <span class="material-icons-sharp">payments</span>
+                <span>Contas</span>
+            </a>
+            <a href="#" class="nav-item" data-page="resumo-mensal-page">
+                <span class="material-icons-sharp">calendar_month</span>
+                <span>Resumo</span>
+            </a>
+        </nav>
+
+        <div id="dashboard-page" class="page active">
+            <div class="dashboard-header">
+                <button class="nav-arrow" id="prev-month">❮</button>
+                <h2 id="current-month-year"></h2>
+                <button class="nav-arrow" id="next-month">❯</button>
             </div>
             
-            <div id="payables-page" class="page">
-                <h2>Despesas a Pagar</h2>
-                <button id="add-payable-btn" class="btn-primary">Nova Conta</button>
-                <div id="payable-list"></div>
+            <div class="balance-cards">
+                <div class="card income">
+                    <h4>Receitas do mês</h4>
+                    <p id="month-income">R$ 0,00</p>
+                </div>
+                <div class="card expense">
+                    <h4>Despesas do mês</h4>
+                    <p id="month-expense">R$ 0,00</p>
+                </div>
+                <div class="card balance">
+                    <h4>Saldo do mês</h4>
+                    <p id="month-balance">R$ 0,00</p>
+                </div>
             </div>
 
-            <!-- Profile Page -->
-            <div id="profile-page" class="page">
-                <h2>Perfil</h2>
-                <div>
-                    <span>Usuário atual: <span id="current-user-name"></span></span>
-                </div>
-                <div class="bank-connect">
-                    <h4>Conexão Bancária</h4>
-                    <p>Selecione seu banco para conectar:</p>
-                    <div class="bank-integration">
-                        <button class="bank-button" onclick="connectBank('nubank')">
-                            <img src="assets/nubank-icon.png" alt="Nubank">
-                            Nubank
-                        </button>
-                        <button class="bank-button" onclick="connectBank('itau')">
-                            <img src="assets/itau-icon.png" alt="Itaú">
-                            Itaú
-                        </button>
-                        <button class="bank-button" onclick="connectBank('caixa')">
-                            <img src="assets/caixa-icon.png" alt="Caixa">
-                            Caixa
-                        </button>
+            <div class="dashboard-chart-container card">
+                <div class="chart-header">
+                    <h3 id="chart-title"></h3>
+                    <div class="chart-options">
+                        <button class="chart-btn active" data-type="all">Todos</button>
+                        <button class="chart-btn" data-type="expense">Despesas</button>
+                        <button class="chart-btn" data-type="income">Receitas</button>
                     </div>
                 </div>
-                <button id="export-data-btn" class="btn-secondary">Exportar Dados</button>
+                <canvas id="main-chart"></canvas>
             </div>
-        </main>
-
-        <!-- Transaction Modal -->
-        <div id="transaction-modal" class="modal-overlay">
-            <div class="modal-content">
-                <form id="transaction-form">
-                    <h3 id="transaction-modal-title">Nova Transação</h3>
-                    <div class="toggle-type">
-                        <button type="button" id="type-expense-btn" class="toggle-btn active">Despesa</button>
-                        <button type="button" id="type-income-btn" class="toggle-btn">Receita</button>
-                    </div>
-                    <input type="hidden" id="transaction-type" value="expense">
-                    <label for="amount">Valor</label>
-                    <input type="number" id="amount" placeholder="R$ 0,00" step="0.01" required>
-                    <label for="description">Descrição</label>
-                    <input type="text" id="description" placeholder="Ex: Almoço" required>
-                    <label for="category">Categoria</label>
-                    <select id="category" required></select>
-                    <label for="date">Data</label>
-                    <input type="date" id="date" required>
-                    <input type="hidden" id="transaction-id">
-                    <div class="modal-actions" id="transaction-modal-actions">
-                        <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn-primary">Salvar</button>
-                        <button type="button" id="delete-transaction-btn" class="btn-danger" style="display:none;">Excluir</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <!-- Goal Modal -->
-        <div id="goal-modal" class="modal-overlay">
-            <div class="modal-content">
-                <form id="goal-form">
-                    <h3 id="goal-modal-title">Nova Meta Financeira</h3>
-                    <input type="hidden" id="goal-id">
-                    <label for="goal-name">Nome</label>
-                    <input type="text" id="goal-name" required>
-                    <label for="goal-target">Valor alvo</label>
-                    <input type="number" id="goal-target" step="0.01" required>
-                    <label for="goal-current">Valor atual</label>
-                    <input type="number" id="goal-current" step="0.01" required>
-                    <label for="goal-date">Data limite</label>
-                    <input type="date" id="goal-date" required>
-                    <div class="modal-actions">
-                        <button type="button" id="cancel-goal-btn" class="btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn-primary">Salvar</button>
-                        <button type="button" id="delete-goal-btn" class="btn-danger" style="display:none;">Excluir</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <!-- Payable Modal -->
-        <div id="payable-modal" class="modal-overlay">
-            <div class="modal-content">
-                <!-- CORRIGIDO: todos campos e ids alinhados com JS -->
-                <form id="payable-form">
-                    <h3 id="payable-modal-title">Nova Conta a Pagar</h3>
-                    <input type="hidden" id="payable-id">
-                    <label for="payable-description">Descrição</label>
-                    <input type="text" id="payable-description" required>
-                    <label for="payable-category">Categoria</label>
-                    <input type="text" id="payable-category" required>
-                    <label for="payable-amount">Valor</label>
-                    <input type="number" id="payable-amount" step="0.01" required>
-                    <label for="payable-date">Data de Vencimento</label>
-                    <input type="date" id="payable-date" required>
-                    <div class="modal-actions">
-                        <button type="button" id="cancel-payable-btn" class="btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn-primary">Salvar</button>
-                    </div>
-                </form>
-            </div>
+            <div id="category-summary" class="summary-grid"></div>
         </div>
 
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" data-page="dashboard-page">
-                <span class="material-icons-sharp">home</span>
-            </button>
-            <button class="nav-item" data-page="goals-page">
-                <span class="material-icons-sharp">flag</span>
-            </button>
-            <button id="add-transaction-btn" class="fab">
-                <span class="material-icons-sharp">add</span>
-            </button>
-            <button class="nav-item" data-page="payables-page">
-                <span class="material-icons-sharp">notifications</span>
-            </button>
-            <button id="menu-botao" class="nav-item profile-trigger">
-              <span class="material-icons-sharp">menu</span>
-            </button>
-        </nav>
-        <!-- Menu lateral do perfil -->
-        <div id="menu-perfil" class="menu-lateral" style="display: none;">
-          <ul>
-            <li onclick="abrirResumoMensal()">📅 Resumo Mensal</li>
-            <li onclick="abrirResumoAnual()">📈 Resumo Anual</li>
-            <li onclick="abrirPagina('profile-page')">👤 Perfil</li>
-            <li onclick="exportarDados()">📤 Exportar Dados</li>
-            <li onclick="abrirConfig()">⚙️ Configurações</li>
-          </ul>
+        <div id="transactions-page" class="page">
+            <div class="page-header">
+                <h2>🧾 Transações</h2>
+                <button class="add-btn" id="add-transaction-btn">+</button>
+            </div>
+            <ul id="transaction-list" class="transaction-list"></ul>
         </div>
-         <!-- Página: Resumo Mensal -->
+
+        <div id="goals-page" class="page">
+            <div class="page-header">
+                <h2>🎯 Metas</h2>
+                <button class="add-btn" id="add-goal-btn">+</button>
+            </div>
+            <div id="goal-list" class="list-container"></div>
+        </div>
+
+        <div id="payables-page" class="page">
+            <div class="page-header">
+                <h2>🗓️ Contas a Pagar</h2>
+                <button class="add-btn" id="add-payable-btn">+</button>
+            </div>
+            <div id="payable-list" class="list-container"></div>
+        </div>
+
         <div id="resumo-mensal-page" class="page">
-          <h2>📅 Resumo Mensal</h2>
-          <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
-          
-          <div class="dashboard-summary" id="resumo-mensal-summary">
-            <div class="summary-item">
-              <span>Receita</span>
-              <h4 id="monthly-revenue">R$ 0,00</h4>
+            <div class="dashboard-header">
+                <button class="nav-arrow" id="resumo-prev-month">❮</button>
+                <h2 id="resumo-monthly-title"></h2>
+                <button class="nav-arrow" id="resumo-next-month">❯</button>
             </div>
-            <div class="summary-item">
-              <span>Despesa</span>
-              <h4 id="monthly-expense">R$ 0,00</h4>
+            <div class="balance-cards">
+                <div class="card income">
+                    <h4>Receitas</h4>
+                    <p id="resumo-monthly-income">R$ 0,00</p>
+                </div>
+                <div class="card expense">
+                    <h4>Despesas</h4>
+                    <p id="resumo-monthly-expense">R$ 0,00</p>
+                </div>
+                <div class="card balance">
+                    <h4>Saldo</h4>
+                    <p id="resumo-monthly-balance">R$ 0,00</p>
+                </div>
             </div>
-            <div class="summary-item">
-              <span>Saldo</span>
-              <h4 id="monthly-balance">R$ 0,00</h4>
-            </div>
-          </div>
-        
-          <canvas id="monthly-bar-chart" width="300" height="130"></canvas>
-        
-          <div class="month-nav">
-            <button id="resumo-prev-month" class="btn-secondary">&lt;</button>
-            <span id="resumo-current-month-year"></span>
-            <button id="resumo-next-month" class="btn-secondary">&gt;</button>
-          </div>
+            <ul id="resumo-monthly-list" class="transaction-list"></ul>
         </div>
         
-        <!-- Página: Resumo Anual -->
         <div id="resumo-anual-page" class="page">
-          <h2>📈 Resumo Anual</h2>
-          <div class="summary-boxes">
-            <div class="box"><h4>Receita Total</h4><p id="annual-revenue">R$ 0,00</p></div>
-            <div class="box"><h4>Despesa Total</h4><p id="annual-expense">R$ 0,00</p></div>
-            <div class="box"><h4>Saldo Acumulado</h4><p id="annual-balance">R$ 0,00</p></div>
-          </div>
-          <canvas id="annual-chart" width="100%" height="70"></canvas>
+            <h2>📊 Resumo Anual</h2>
+            <div class="dashboard-chart-container card">
+                <canvas id="annual-chart"></canvas>
+            </div>
         </div>
-        <!-- Perfil -->
+
         <div id="perfil-page" class="page">
-          <h2>👤 Perfil do Usuário</h2>
-          <p><b>Usuário atual:</b> <span id="perfil-usuario"></span></p>
-          <p><b>Email:</b> <span id="perfil-email"></span></p>
-          <p><b>Banco conectado:</b> <span id="perfil-banco"></span></p>
+          <h2>👤 Meu Perfil</h2>
+          <div class="perfil-details-content">
+              <p><b>Usuário:</b> <span id="perfil-usuario-content"></span></p>
+              <p><b>Email:</b> <span id="perfil-email-content"></span></p>
+              <p><b>Banco Conectado:</b> <span id="perfil-banco">Nenhum</span></p>
+          </div>
+          <div class="bank-connect">
+              <p><b>Conexão Bancária (Simulado)</b></p>
+              <div class="bank-integration">
+                  <button class="bank-button" onclick="connectBank('banco1')">Banco 1</button>
+                  <button class="bank-button" onclick="connectBank('banco2')">Banco 2</button>
+              </div>
+          </div>
         </div>
         
-        <!-- Página: Configurações -->
         <div id="config-page" class="page">
           <h2>⚙️ Configurações</h2>
           <ul class="config-options">
@@ -268,7 +212,6 @@
           </ul>
         </div>
         
-        <!-- Ajuda -->
         <div id="ajuda-page" class="page">
           <h2>❓ Ajuda</h2>
           <p>Bem-vindo ao <b>Controle Financeiro</b>!</p>
@@ -280,16 +223,119 @@
           </ul>
         </div>
 
-    <!-- Modal de alerta -->
-                <div id="alert-modal" class="modal">
-                  <div class="modal-content">
-                    <h3>Contas a vencer</h3>
-                    <ul id="alert-list"></ul>
-                    <button onclick="fecharAlerta()">Fechar</button>
-                  </div>
-                </div>
-            </div>
+    <div id="transaction-modal" class="modal">
+      <div class="modal-content">
+        <h3 id="transaction-modal-title">Nova Transação</h3>
+        <form id="transaction-form">
+          <input type="hidden" id="transaction-id">
+          <div class="input-group">
+            <label for="description">Descrição</label>
+            <input type="text" id="description" required>
+          </div>
+          <div class="input-group">
+            <label for="amount">Valor</label>
+            <input type="number" id="amount" step="0.01" required>
+          </div>
+          <div class="input-group">
+            <label for="date">Data</label>
+            <input type="date" id="date" required>
+          </div>
+          <div class="input-group">
+            <label for="category">Categoria</label>
+            <select id="category" required></select>
+          </div>
+          <div class="input-group transaction-type-toggle">
+            <button type="button" class="toggle-btn active" data-type="expense" id="type-expense-btn">Despesa</button>
+            <button type="button" class="toggle-btn" data-type="income" id="type-income-btn">Receita</button>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="delete-transaction-btn">Excluir</button>
+            <button type="submit" class="btn-primary">Salvar</button>
+          </div>
+        </form>
+        <button class="modal-close-btn" id="close-transaction-modal">✖</button>
+      </div>
+    </div>
     
-    <script type="module" src="app.js"></script>
+    <div id="goal-modal" class="modal">
+      <div class="modal-content">
+        <h3 id="goal-modal-title">Nova Meta Financeira</h3>
+        <form id="goal-form">
+          <input type="hidden" id="goal-id">
+          <div class="input-group">
+            <label for="goal-name">Nome da Meta</label>
+            <input type="text" id="goal-name" required>
+          </div>
+          <div class="input-group">
+            <label for="goal-target">Valor da Meta</label>
+            <input type="number" id="goal-target" step="0.01" required>
+          </div>
+          <div class="input-group">
+            <label for="goal-current">Valor Atual</label>
+            <input type="number" id="goal-current" step="0.01" required>
+          </div>
+          <div class="input-group">
+            <label for="goal-date">Data Limite</label>
+            <input type="date" id="goal-date" required>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="delete-goal-btn">Excluir</button>
+            <button type="submit" class="btn-primary">Salvar</button>
+          </div>
+        </form>
+        <button class="modal-close-btn" id="close-goal-modal">✖</button>
+      </div>
+    </div>
+
+    <div id="payable-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="payable-modal-title">Nova Conta a Pagar</h3>
+            <form id="payable-form">
+                <input type="hidden" id="payable-id">
+                <div class="input-group">
+                    <label for="payable-description">Descrição</label>
+                    <input type="text" id="payable-description" required>
+                </div>
+                <div class="input-group">
+                    <label for="payable-amount">Valor</label>
+                    <input type="number" id="payable-amount" step="0.01" required>
+                </div>
+                <div class="input-group">
+                    <label for="payable-category">Categoria</label>
+                    <select id="payable-category" required>
+                        <option value="Moradia">Moradia</option>
+                        <option value="Transporte">Transporte</option>
+                        <option value="Alimentação">Alimentação</option>
+                        <option value="Saúde">Saúde</option>
+                        <option value="Lazer">Lazer</option>
+                        <option value="Empréstimo">Empréstimo</option>
+                        <option value="Cartão de Crédito">Cartão de Crédito</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="payable-dueDate">Data de Vencimento</label>
+                    <input type="date" id="payable-dueDate" required>
+                </div>
+                <div class="modal-actions">
+                  <button type="button" class="btn-secondary" id="delete-payable-btn">Excluir</button>
+                  <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+            <button class="modal-close-btn" id="close-payable-modal">✖</button>
+        </div>
+    </div>
+
+    <div id="alert-modal" class="modal">
+      <div class="modal-content">
+        <h3>Contas a Vencer</h3>
+        <ul id="alert-list"></ul>
+        <button class="modal-close-btn" id="close-alert-modal">✖</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="./app.js"></script>
 </body>
 </html>

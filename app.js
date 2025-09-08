@@ -1,22 +1,42 @@
 // --- app.js ---
-// [Auth Guard] Firebase Authentication (exige login antes de iniciar o app)
+import firebaseConfig from './firebase-config.js'; // Importa o arquivo de configuração
 import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  deleteDoc,
+  onSnapshot,
+  getDocs,
+  writeBatch
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { createExpenseChart, updateExpenseChart } from './chart-setup.js';
 
-// Config do Firebase (mesma do login.html)
-const firebaseConfig = {
-  apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
-  authDomain: "controle-financeiro-65744.firebaseapp.com",
-  projectId: "controle-financeiro-65744",
-  storageBucket: "controle-financeiro-65744.firebasestorage.app",
-  messagingSenderId: "587527394934",
-  appId: "1:587527394934:web:c142740ef0139a5cf63157",
-  measurementId: "G-RT2T1HNV4G"
-};
-
+// Inicialização do Firebase
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Estado global do app
+const state = {
+  transactions: [],
+  goals: [],
+  payables: [],
+  currentUser: 'Carregando...',
+  currentDate: new Date(),
+  expenseCategories: [
+    'Alimentação', 'Transporte', 'Moradia', 'Lazer', 'Saúde',
+    'Empréstimo', 'Cartão de Crédito', 'Energia', 'Água',
+    'Gás', 'Internet', 'Investimento', 'Outros'
+  ],
+  incomeCategories: ['Salário', 'Combustível', 'Aluguel', 'Outros'],
+  chartType: 'all' // all | expense | income
+};
+
+// Referências aos elementos do DOM
+let currentUserNameEl;
 
 // Aguarda DOM e valida autenticação antes de iniciar
 document.addEventListener('DOMContentLoaded', () => {
@@ -25,119 +45,41 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = 'login.html';
       return;
     }
+    state.currentUser = user.displayName || user.email;
     startApp();
   });
 });
 
-function startApp() {
-  // Tema salvo
-  const temaSalvo = localStorage.getItem('tema');
-  if (temaSalvo === 'dark') document.body.classList.add('dark-theme');
-
-  // Elementos da UI
-  const navItems            = document.querySelectorAll('.nav-item');
-  const pages               = document.querySelectorAll('.page');
-  const addButton           = document.getElementById('add-transaction-btn');
-  const transactionModal    = document.getElementById('transaction-modal');
-  const cancelBtn           = document.getElementById('cancel-btn');
-  const transactionForm     = document.getElementById('transaction-form');
-  const typeExpenseBtn      = document.getElementById('type-expense-btn');
-  const typeIncomeBtn       = document.getElementById('type-income-btn');
-  const transactionTypeInput= document.getElementById('transaction-type');
-  const categorySelect      = document.getElementById('category');
-  const transactionModalTitle  = document.getElementById('transaction-modal-title');
-  const transactionIdInput  = document.getElementById('transaction-id');
-  const deleteTransactionBtn= document.getElementById('delete-transaction-btn');
-  const menuBotao           = document.getElementById('menu-botao');
-  const menuFlutuante       = document.getElementById('menu-perfil');
-
-  const addGoalBtn          = document.getElementById('add-goal-btn');
-  const goalModal           = document.getElementById('goal-modal');
-  const cancelGoalBtn       = document.getElementById('cancel-goal-btn');
-  const goalForm            = document.getElementById('goal-form');
-  const goalList            = document.getElementById('goal-list');
-
-  const currentUserNameEl   = document.getElementById('current-user-name');
-  const exportDataBtn       = document.getElementById('export-data-btn');
-  const chartBtns           = document.querySelectorAll('.chart-btn');
-  const chartTitle          = document.getElementById('chart-title');
-
-  // Payables
-  const addPayableBtn       = document.getElementById('add-payable-btn');
-  const payableModal        = document.getElementById('payable-modal');
-  const cancelPayableBtn    = document.getElementById('cancel-payable-btn');
-  const payableForm         = document.getElementById('payable-form');
-  const payableList         = document.getElementById('payable-list');
-
-  // STATE MANAGEMENT
-  const state = {
-    transactions:    JSON.parse(localStorage.getItem('transactions')) || [],
-    goals:           JSON.parse(localStorage.getItem('goals'))        || [],
-    payables:        JSON.parse(localStorage.getItem('payables'))     || [],
-    currentUser:     localStorage.getItem('currentUser')              || 'Bem Vindo',
-    currentDate:     new Date(),
-    expenseCategories: [
-      'Alimentação','Transporte','Moradia','Lazer','Saúde',
-      'Empréstimo','Cartão de Crédito','Energia','Água',
-      'Gás','Internet','Investimento','Outros'
-    ],
-    incomeCategories: ['Salário','Combustível','Aluguel','Outros'],
-    chartType:       'all' // all | expense | income
-  };
-
-  // Atualiza a UI da Página Perfil
-  document.getElementById('perfil-usuario').textContent =
-    auth.currentUser.displayName || 'Sem nome';
-  document.getElementById('perfil-email').textContent =
-    auth.currentUser.email;
-
-  const bancoSalvo = localStorage.getItem('bancoConectado') || 'Nenhum';
-  document.getElementById('perfil-banco').textContent = bancoSalvo;
-
-  document.getElementById('btn-logout')
-    .addEventListener('click', async () => {
-      await auth.signOut();
-      window.location.href = 'login.html';
-    });
-
-  const toggle = document.getElementById('toggle-theme');
-  toggle.checked = document.body.classList.contains('dark-theme');
-  toggle.addEventListener('change', trocarTema);
-
-  document.getElementById('btn-change-password')
-    .addEventListener('click', async () => {
-      const nova = prompt('Digite sua nova senha:');
-      if (!nova) return;
-      try {
-        await auth.currentUser.updatePassword(nova);
-        alert('Senha alterada com sucesso!');
-      } catch (e) {
-        alert('Erro ao alterar senha: ' + e.message);
-      }
-    });
-
+async function startApp() {
   // Inicialização do app
+  currentUserNameEl = document.getElementById('current-user-name');
   createExpenseChart();
   setCurrentDate();
-  updateAll();
+  fetchAndRenderData();
   registerServiceWorker();
 
   // Menu lateral toggle
-  menuBotao.addEventListener('click', () => {
-    menuFlutuante.style.display =
-      menuFlutuante.style.display === 'none' ? 'block' : 'none';
+  document.getElementById('menu-botao').addEventListener('click', () => {
+    const menuFlutuante = document.getElementById('menu-perfil');
+    if (menuFlutuante) menuFlutuante.style.display = menuFlutuante.style.display === 'none' ? 'block' : 'none';
+  });
+
+  // Fecha menu ao clicar fora
+  document.addEventListener("click", function (event) {
+    const menu = document.getElementById("menu-perfil");
+    const botaoMenu = document.getElementById("menu-botao");
+    const menuVisivel = menu.style.display === "block";
+    if (menuVisivel && !menu.contains(event.target) && !botaoMenu.contains(event.target)) {
+      menu.style.display = "none";
+    }
   });
 
   // Navegação de meses (Dashboard)
-  document.getElementById('prev-month')
-    .addEventListener('click', () => changeMonth(-1));
-  document.getElementById('next-month')
-    .addEventListener('click', () => changeMonth(1));
+  document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
+  document.getElementById('next-month').addEventListener('click', () => changeMonth(1));
 
   function changeMonth(direction) {
-    state.currentDate.setMonth(
-      state.currentDate.getMonth() + direction
-    );
+    state.currentDate.setMonth(state.currentDate.getMonth() + direction);
     updateAll();
   }
 
@@ -147,70 +89,101 @@ function startApp() {
     if (dateEl) dateEl.value = today.toISOString().split('T')[0];
   }
 
-  // --- NAVEGAÇÃO CENTRALIZADA (SOLUÇÃO) ---
+  // --- NAVEGAÇÃO CENTRALIZADA ---
   const titles = {
     'dashboard-page': 'Visão Geral',
     'goals-page': 'Metas Pessoais',
     'payables-page': 'Despesas a Pagar',
-    'menu-page': 'Menu',
+    'profile-page': 'Meu Perfil',
+    'resumo-mensal-page': 'Resumo Mensal',
     'resumo-anual-page': 'Resumo Anual',
     'config-page': 'Configurações'
   };
 
   function navigateToPage(pageId) {
-    pages.forEach(page => page.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
     const selectedPage = document.getElementById(pageId);
     if (selectedPage) selectedPage.classList.add('active');
 
-    navItems.forEach(item => {
+    document.querySelectorAll('.nav-item').forEach(item => {
       item.classList.remove('active');
       if (item.getAttribute('data-page') === pageId) item.classList.add('active');
     });
 
     const header = document.querySelector('.app-header h1');
     if (header) header.textContent = titles[pageId] || 'Visão Geral';
-
-    if (pageId === 'payables-page') renderPayables();
-    if (pageId === 'goals-page') renderGoals();
-    if (pageId === 'dashboard-page') {
+    if (pageId === 'resumo-anual-page') atualizarResumoAnual();
+    if (pageId === 'resumo-mensal-page') {
       carregarResumoMensal();
       atualizarNomeDoMes();
-      updateMainChart(filterTransactionsByMonth(state.transactions, state.currentDate));
-    }
-    if (pageId === 'resumo-anual-page') {
-      atualizarResumoAnual();
     }
   }
 
-  // Adiciona o event listener uma única vez
-  navItems.forEach(item => {
+  document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       const pageId = item.getAttribute('data-page');
       if (pageId) navigateToPage(pageId);
-      // Fecha o menu flutuante ao navegar
+      const menuFlutuante = document.getElementById('menu-perfil');
       if (menuFlutuante) menuFlutuante.style.display = 'none';
     });
   });
+
+  // Funções Globais para o HTML
+  window.navigateToPage = navigateToPage;
+  window.abrirResumoMensal = () => navigateToPage('resumo-mensal-page');
+  window.abrirResumoAnual = () => navigateToPage('resumo-anual-page');
+  window.abrirPagina = (pageId) => navigateToPage(pageId);
+  window.abrirConfig = () => navigateToPage('config-page');
+  window.abrirAlerta = () => { document.getElementById('alert-modal').classList.add('active'); };
+  window.fecharAlerta = () => { document.getElementById('alert-modal').classList.remove('active'); };
+  window.exportarDados = exportarDados;
+  window.trocarTema = trocarTema;
+  window.resetarApp = resetarApp;
+  window.markPayablePaid = markPayablePaid;
+  window.editPayable = editPayable;
+  window.deletePayable = deletePayable;
+  window.editGoal = editGoal;
+  window.deleteGoal = deleteGoal;
+  window.closeGoalModal = closeGoalModal;
 
   // Modal helpers
   function openModal(modal) { modal.classList.add('active'); }
   function closeModal(modal) { modal.classList.remove('active'); }
 
   // Modal Transação - abrir
+  const addButton = document.getElementById('add-transaction-btn');
+  const transactionModal = document.getElementById('transaction-modal');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const transactionForm = document.getElementById('transaction-form');
+  const typeExpenseBtn = document.getElementById('type-expense-btn');
+  const typeIncomeBtn = document.getElementById('type-income-btn');
+  const transactionTypeInput = document.getElementById('transaction-type');
+  const categorySelect = document.getElementById('category');
+  const transactionModalTitle = document.getElementById('transaction-modal-title');
+  const transactionIdInput = document.getElementById('transaction-id');
+  const deleteTransactionBtn = document.getElementById('delete-transaction-btn');
+  const addGoalBtn = document.getElementById('add-goal-btn');
+  const goalModal = document.getElementById('goal-modal');
+  const cancelGoalBtn = document.getElementById('cancel-goal-btn');
+  const goalForm = document.getElementById('goal-form');
+  const goalList = document.getElementById('goal-list');
+  const addPayableBtn = document.getElementById('add-payable-btn');
+  const payableModal = document.getElementById('payable-modal');
+  const cancelPayableBtn = document.getElementById('cancel-payable-btn');
+  const payableForm = document.getElementById('payable-form');
+  const payableList = document.getElementById('payable-list');
+  const chartBtns = document.querySelectorAll('.chart-btn');
+  const chartTitle = document.getElementById('chart-title');
+
   addButton.addEventListener('click', () => {
     openTransactionModal();
   });
 
   function closeTransactionModal() {
-    const modal = document.getElementById('transaction-modal');
-    if (!modal) return;
-    modal.classList.remove('active');
-    const form = document.getElementById('transaction-form');
-    if (form) form.reset();
+    if (transactionModal) transactionModal.classList.remove('active');
+    if (transactionForm) transactionForm.reset();
   }
-
-  // Botão cancelar do modal
   cancelBtn.addEventListener('click', closeTransactionModal);
 
   // Deletar transação
@@ -218,9 +191,7 @@ function startApp() {
     const id = transactionIdInput.value;
     if (!id) return;
     if (confirm("Deseja excluir esta transação?")) {
-      state.transactions = state.transactions.filter(t => t.id !== id);
-      localStorage.setItem('transactions', JSON.stringify(state.transactions));
-      saveAndRerender();
+      deleteTransaction(id);
       closeTransactionModal();
     }
   });
@@ -229,16 +200,13 @@ function startApp() {
   function carregarResumoMensal() {
     const mesAtual = state.currentDate.getMonth();
     const anoAtual = state.currentDate.getFullYear();
-
     const transacoesDoMes = state.transactions.filter(t => {
-      const data = new Date(t.date);
+      const data = new Date(t.date + "T03:00:00");
       return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
     });
-
     const receita = transacoesDoMes.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
     const despesa = transacoesDoMes.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
     const saldo = receita - despesa;
-
     document.getElementById("monthly-revenue").textContent = receita.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     document.getElementById("monthly-expense").textContent = despesa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     document.getElementById("monthly-balance").textContent = saldo.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -256,11 +224,9 @@ function startApp() {
     const receitaTotal = transacoes.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
     const despesaTotal = transacoes.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
     const saldoTotal = receitaTotal - despesaTotal;
-
     document.getElementById("annual-revenue").textContent = receitaTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     document.getElementById("annual-expense").textContent = despesaTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
     document.getElementById("annual-balance").textContent = saldoTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
     atualizarGraficoAnual();
   }
 
@@ -270,9 +236,8 @@ function startApp() {
     const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
     const receitas = Array(12).fill(0);
     const despesas = Array(12).fill(0);
-
     state.transactions.forEach(t => {
-      const data = new Date(t.date);
+      const data = new Date(t.date + "T03:00:00");
       const mes = data.getMonth();
       const ano = data.getFullYear();
       if (ano === state.currentDate.getFullYear()) {
@@ -280,9 +245,7 @@ function startApp() {
         if (t.type === "expense") despesas[mes] += t.amount;
       }
     });
-
     if (annualChart) annualChart.destroy();
-
     annualChart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -296,126 +259,10 @@ function startApp() {
     });
   }
 
-  // Fecha menu ao clicar fora
-  document.addEventListener("click", function (event) {
-    const menu = document.getElementById("menu-perfil");
-    const botaoMenu = document.getElementById("menu-botao");
-    const menuVisivel = menu.style.display === "block";
-    if (menuVisivel && !menu.contains(event.target) && !botaoMenu.contains(event.target)) {
-      menu.style.display = "none";
-    }
-  });
-
-  // Navegação no resumo mensal
-  document.getElementById('resumo-prev-month').addEventListener('click', () => {
-    state.currentDate.setMonth(state.currentDate.getMonth() - 1);
-    carregarResumoMensal();
-    atualizarNomeDoMes();
-    atualizarGraficoMensal();
-  });
-
-  document.getElementById('resumo-next-month').addEventListener('click', () => {
-    state.currentDate.setMonth(state.currentDate.getMonth() + 1);
-    carregarResumoMensal();
-    atualizarNomeDoMes();
-    atualizarGraficoMensal();
-  });
-
-  function atualizarGraficoMensal() {
-    const ctx = document.getElementById('monthly-bar-chart').getContext('2d');
-    const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-    const receitas = Array(12).fill(0);
-    const despesas = Array(12).fill(0);
-
-    state.transactions.forEach(t => {
-      const data = new Date(t.date);
-      const mes = data.getMonth();
-      if (data.getFullYear() === state.currentDate.getFullYear()) {
-        if (t.type === "income") receitas[mes] += t.amount;
-        if (t.type === "expense") despesas[mes] += t.amount;
-      }
-    });
-
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: meses,
-        datasets: [
-          { label: 'Receita', data: receitas, backgroundColor: '#2bc47d' },
-          { label: 'Despesa', data: despesas, backgroundColor: '#ff3d3d' }
-        ]
-      },
-      options: { responsive: true, plugins: { legend: { position: 'top' } } }
-    });
-  }
-
-  // Exportar / Tema / Reset
-  function exportarDados() {
-    const dados = { transacoes: state.transactions, metas: state.goals, contas: state.payables };
-    const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'dados-financeiros.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function trocarTema() {
-    const isDark = document.body.classList.toggle('dark-theme');
-    localStorage.setItem('tema', isDark ? 'dark' : 'light');
-  }
-
-  function resetarApp() {
-    if (confirm("Tem certeza que deseja resetar o aplicativo? Todos os dados serão apagados.")) {
-      localStorage.clear();
-      location.reload();
-    }
-  }
-
-  // Alerta de contas a vencer (ícone do sino)
-  window.abrirAlerta = function () {
-    document.getElementById('alert-modal').classList.add('active');
-  };
-
-  window.fecharAlerta = function () {
-    document.getElementById('alert-modal').classList.remove('active');
-  };
-
-  function diasRestantes(dataVencimento) {
-    const hoje = new Date();
-    const vencimento = new Date(dataVencimento);
-    const diff = vencimento - hoje;
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  }
-
-  function verificarContasAVencer() {
-    const proximas = state.payables.filter(c => {
-      const dias = diasRestantes(c.date);
-      return dias >= 0 && dias <= 5;
-    });
-
-    const alertCount = document.getElementById('alert-count');
-    const alertList = document.getElementById('alert-list');
-    const alertIcon = document.getElementById('alert-icon');
-
-    alertCount.textContent = proximas.length;
-    alertIcon.classList.toggle('ativo', proximas.length > 0);
-
-    alertList.innerHTML = proximas.length
-      ? proximas.map(c => {
-        const dataFormatada = new Date(c.date).toLocaleDateString('pt-BR');
-        return `<li>${c.description} - vence em ${dataFormatada}</li>`;
-      }).join('')
-      : "<li>Nenhuma conta próxima do vencimento</li>";
-  }
-
-  verificarContasAVencer();
-
   // Payables form
   payableForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const id = document.getElementById('payable-id').value || Date.now().toString();
+    const id = document.getElementById('payable-id').value || crypto.randomUUID();
     const payable = {
       id,
       description: document.getElementById('payable-description').value,
@@ -424,29 +271,12 @@ function startApp() {
       date: document.getElementById('payable-date').value,
       paid: false
     };
-
     const duplicada = state.payables.some(p =>
-      p.description === payable.description &&
-      p.date === payable.date &&
-      p.amount === payable.amount &&
-      p.category === payable.category &&
-      p.id !== id
+      p.description === payable.description && p.date === payable.date &&
+      p.amount === payable.amount && p.category === payable.category && p.id !== id
     );
-    if (duplicada) {
-      alert('Essa conta já foi lançada.');
-      return;
-    }
-
-    const index = state.payables.findIndex(p => p.id === id);
-    if (index > -1) {
-      state.payables[index] = payable;
-    } else {
-      state.payables.push(payable);
-    }
-
-    localStorage.setItem('payables', JSON.stringify(state.payables));
-    renderPayables();
-    verificarContasAVencer();
+    if (duplicada) { alert('Essa conta já foi lançada.'); return; }
+    savePayable(payable);
     closeModal(payableModal);
   });
 
@@ -460,37 +290,19 @@ function startApp() {
   // Form transação (novo/editar)
   transactionForm.addEventListener('submit', function (e) {
     e.preventDefault();
-    const id = transactionIdInput.value;
+    const id = transactionIdInput.value || crypto.randomUUID();
     const type = transactionTypeInput.value;
     const amount = parseFloat(document.getElementById('amount').value);
     const description = document.getElementById('description').value;
     const category = categorySelect.value;
     const date = document.getElementById('date').value;
     const user = state.currentUser;
-
     if (!amount || !description || !category || !date) {
       alert('Preencha todos os campos');
       return;
     }
-
-    if (id) {
-      const idx = state.transactions.findIndex(t => t.id === id);
-      if (idx > -1) {
-        state.transactions[idx] = { id, type, amount, description, category, date, user };
-      }
-    } else {
-      state.transactions.push({
-        id: crypto.randomUUID(),
-        type,
-        amount,
-        description,
-        category,
-        date,
-        user
-      });
-    }
-    localStorage.setItem('transactions', JSON.stringify(state.transactions));
-    saveAndRerender();
+    const newTransaction = { id, type, amount, description, category, date, user };
+    saveTransaction(newTransaction);
     closeTransactionModal();
   });
 
@@ -548,33 +360,114 @@ function startApp() {
     });
   });
 
-  // Persistência e render
-  function saveAndRerender() {
-    localStorage.setItem('transactions', JSON.stringify(state.transactions));
-    localStorage.setItem('goals', JSON.stringify(state.goals));
-    localStorage.setItem('payables', JSON.stringify(state.payables));
-    updateAll();
+  // Função para buscar e renderizar todos os dados do Firestore
+  function fetchAndRenderData() {
+    if (!auth.currentUser) return;
+
+    // Transações
+    const transactionsRef = collection(db, `users/${auth.currentUser.uid}/transactions`);
+    onSnapshot(transactionsRef, (snapshot) => {
+      state.transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      updateAll();
+    });
+
+    // Metas
+    const goalsRef = collection(db, `users/${auth.currentUser.uid}/goals`);
+    onSnapshot(goalsRef, (snapshot) => {
+      state.goals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderGoals();
+    });
+
+    // Contas a pagar
+    const payablesRef = collection(db, `users/${auth.currentUser.uid}/payables`);
+    onSnapshot(payablesRef, (snapshot) => {
+      state.payables = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderPayables();
+      verificarContasAVencer();
+    });
+  }
+
+  // Funções de CRUD para Firestore
+  async function saveTransaction(transaction) {
+    try {
+      const docRef = doc(db, `users/${auth.currentUser.uid}/transactions`, transaction.id);
+      await setDoc(docRef, transaction);
+    } catch (e) {
+      console.error("Erro ao salvar transação: ", e);
+      alert("Erro ao salvar transação: " + e.message);
+    }
+  }
+
+  async function deleteTransaction(id) {
+    try {
+      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/transactions`, id));
+    } catch (e) {
+      console.error("Erro ao deletar transação: ", e);
+      alert("Erro ao deletar transação: " + e.message);
+    }
+  }
+
+  async function saveGoal(goal) {
+    try {
+      const docRef = doc(db, `users/${auth.currentUser.uid}/goals`, goal.id);
+      await setDoc(docRef, goal);
+    } catch (e) {
+      console.error("Erro ao salvar meta: ", e);
+      alert("Erro ao salvar meta: " + e.message);
+    }
+  }
+
+  async function deleteGoal(goalId) {
+    try {
+      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/goals`, goalId));
+    } catch (e) {
+      console.error("Erro ao deletar meta: ", e);
+      alert("Erro ao deletar meta: " + e.message);
+    }
+  }
+
+  async function savePayable(payable) {
+    try {
+      const docRef = doc(db, `users/${auth.currentUser.uid}/payables`, payable.id);
+      await setDoc(docRef, payable);
+    } catch (e) {
+      console.error("Erro ao salvar conta: ", e);
+      alert("Erro ao salvar conta: " + e.message);
+    }
+  }
+
+  async function deletePayable(id) {
+    try {
+      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/payables`, id));
+    } catch (e) {
+      console.error("Erro ao deletar conta: ", e);
+      alert("Erro ao deletar conta: " + e.message);
+    }
+  }
+
+  async function markPayablePaid(id) {
+    const payable = state.payables.find(p => p.id === id);
+    if (!payable) return;
+    payable.paid = !payable.paid;
+    savePayable(payable);
   }
 
   function updateAll() {
     const monthFiltered = filterTransactionsByMonth(state.transactions, state.currentDate);
-
     let transactionsForDisplay = monthFiltered;
     if (state.chartType === 'expense') {
       transactionsForDisplay = monthFiltered.filter(t => t.type === 'expense');
     } else if (state.chartType === 'income') {
       transactionsForDisplay = monthFiltered.filter(t => t.type === 'income');
     }
-
     renderSummary(monthFiltered);
     renderTransactionList(transactionsForDisplay);
     updateMainChart(monthFiltered);
-    renderGoals();
-    renderPayables();
     updateMonthDisplay();
     updateUserUI();
   }
 
+  // Funções de renderização da UI (as mesmas que você já tinha)
   function filterTransactionsByMonth(transactions, date) {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -588,7 +481,6 @@ function startApp() {
     let cats = state.expenseCategories;
     let filtered = transactions;
     let title = 'Movimentação por Categoria';
-
     if (state.chartType === 'expense') {
       filtered = transactions.filter(t => t.type === 'expense');
       cats = state.expenseCategories;
@@ -598,25 +490,20 @@ function startApp() {
       cats = state.incomeCategories;
       title = 'Receitas por Categoria';
     }
-
     updateExpenseChart(filtered, cats);
     chartTitle.textContent = title;
-
     renderCategorySummary(filtered);
   }
 
   function renderCategorySummary(transactions) {
     const container = document.getElementById('category-summary');
     if (!container) return;
-
     container.innerHTML = '';
-
     const summary = {};
     transactions.forEach(t => {
       if (!summary[t.category]) summary[t.category] = { total: 0, type: t.type };
       summary[t.category].total += t.amount;
     });
-
     Object.entries(summary).forEach(([category, data]) => {
       const icon = getCategoryIcon(category);
       const card = document.createElement('div');
@@ -636,21 +523,11 @@ function startApp() {
 
   function getCategoryIcon(category) {
     const icons = {
-      'Alimentação': 'restaurant',
-      'Transporte': 'directions_bus',
-      'Moradia': 'home',
-      'Lazer': 'sports_esports',
-      'Saúde': 'local_hospital',
-      'Empréstimo': 'account_balance',
-      'Cartão de Crédito': 'credit_card',
-      'Energia': 'bolt',
-      'Água': 'water_drop',
-      'Gás': 'local_fire_department',
-      'Internet': 'wifi',
-      'Investimento': 'trending_up',
-      'Outros': 'category',
-      'Salário': 'attach_money',
-      'Combustível': 'local_gas_station',
+      'Alimentação': 'restaurant', 'Transporte': 'directions_bus', 'Moradia': 'home',
+      'Lazer': 'sports_esports', 'Saúde': 'local_hospital', 'Empréstimo': 'account_balance',
+      'Cartão de Crédito': 'credit_card', 'Energia': 'bolt', 'Água': 'water_drop',
+      'Gás': 'local_fire_department', 'Internet': 'wifi', 'Investimento': 'trending_up',
+      'Outros': 'category', 'Salário': 'attach_money', 'Combustível': 'local_gas_station',
       'Aluguel': 'business'
     };
     return icons[category] || 'category';
@@ -688,12 +565,12 @@ function startApp() {
   }
 
   function renderGoals() {
+    if (!goalList) return;
     goalList.innerHTML = '';
     if (state.goals.length === 0) {
       goalList.innerHTML = '<p>Nenhuma meta financeira cadastrada.</p>';
       return;
     }
-
     state.goals.forEach(goal => {
       const card = document.createElement('div');
       card.className = 'goal-card';
@@ -702,24 +579,20 @@ function startApp() {
         <span class="meta-info">Alvo: <strong>${formatCurrency(goal.target)}</strong></span>
         <span class="meta-info">Atual: <strong>${formatCurrency(goal.current)}</strong></span>
         <span class="meta-info">Limite: <strong>${formatDateBR(goal.date)}</strong></span>
-
         <div class="goal-visual">
           <canvas id="goal-chart-${goal.id}" width="70" height="70"></canvas>
           <p class="monthly-suggestion" id="monthly-${goal.id}"></p>
         </div>
-
         <div class="goal-actions">
           <button class="btn-secondary" onclick="editGoal('${goal.id}')">Editar</button>
           <button class="btn-danger" onclick="deleteGoal('${goal.id}')">Excluir</button>
         </div>
       `;
       goalList.appendChild(card);
-
       const restante = goal.target - goal.current;
       const mesesRestantes = Math.max(Math.ceil((new Date(goal.date) - new Date()) / (1000 * 60 * 60 * 24 * 30)), 1);
       const sugestao = restante / mesesRestantes;
       document.getElementById(`monthly-${goal.id}`).textContent = `Sugestão: R$ ${sugestao.toFixed(2)} por mês`;
-
       const ctx = document.getElementById(`goal-chart-${goal.id}`).getContext('2d');
       new Chart(ctx, {
         type: 'doughnut',
@@ -729,14 +602,8 @@ function startApp() {
     });
   }
 
-  window.deleteGoal = function (goalId) {
-    if (confirm('Tem certeza que deseja excluir esta meta?')) {
-      state.goals = state.goals.filter(g => g.id !== goalId);
-      saveAndRerender();
-    }
-  };
-
   function renderPayables() {
+    if (!payableList) return;
     payableList.innerHTML = '';
     if (state.payables.length === 0) {
       payableList.innerHTML = '<p>Nenhuma conta lançada.</p>';
@@ -751,37 +618,20 @@ function startApp() {
           <span class="meta-info">Vencimento: ${formatDateBR(p.date)}</span>
           <span class="meta-info">Status: ${p.paid ? '<span style="color:green">Pago</span>' : '<span style="color:red">A pagar</span>'}</span>
           <div class="goal-actions">
-            <button class="btn-secondary" onclick="window.markPayablePaid('${p.id}')">${p.paid ? 'Desfazer' : 'Marcar Pago'}</button>
-            <button class="btn-secondary" onclick="window.editPayable('${p.id}')">Editar</button>
-            <button class="btn-danger" onclick="window.deletePayable('${p.id}')">Excluir</button>
+            <button class="btn-secondary" onclick="markPayablePaid('${p.id}')">${p.paid ? 'Desfazer' : 'Marcar Pago'}</button>
+            <button class="btn-secondary" onclick="editPayable('${p.id}')">Editar</button>
+            <button class="btn-danger" onclick="deletePayable('${p.id}')">Excluir</button>
           </div>
         </div>
       `;
     });
   }
 
-  window.markPayablePaid = function (id) {
-    const idx = state.payables.findIndex(p => p.id === id);
-    if (idx > -1) {
-      state.payables[idx].paid = !state.payables[idx].paid;
-      localStorage.setItem('payables', JSON.stringify(state.payables));
-      renderPayables();
-    }
-  };
-
-  window.deletePayable = function (id) {
-    if (confirm('Excluir esta conta?')) {
-      state.payables = state.payables.filter(p => p.id !== id);
-      localStorage.setItem('payables', JSON.stringify(state.payables));
-      renderPayables();
-    }
-  };
-
-  window.editPayable = function (id) {
+  function editPayable(id) {
     const payable = state.payables.find(p => p.id === id);
     if (!payable) return;
     openPayableModal(payable);
-  };
+  }
 
   function openPayableModal(payable = null) {
     payableForm.reset();
@@ -810,7 +660,6 @@ function startApp() {
     const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
     const balance = income - expense;
-
     document.getElementById('month-income').textContent = formatCurrency(income);
     document.getElementById('month-expense').textContent = formatCurrency(expense);
     document.getElementById('month-balance').textContent = formatCurrency(balance);
@@ -823,46 +672,31 @@ function startApp() {
   }
 
   function updateUserUI() {
-    // CORREÇÃO: Verifica se o elemento existe antes de tentar manipulá-lo
     if (currentUserNameEl) {
       currentUserNameEl.textContent = state.currentUser;
     }
-    const userButtons = document.querySelectorAll('.user-buttons button');
-    userButtons.forEach(button => {
-      button.classList.toggle('active', button.dataset.user === state.currentUser);
-    });
   }
 
   // Metas
   goalForm.addEventListener('submit', function (e) {
     e.preventDefault();
-    const goalId = document.getElementById('goal-id').value;
+    const goalId = document.getElementById('goal-id').value || crypto.randomUUID();
     const goalData = {
       name: document.getElementById('goal-name').value,
       target: parseFloat(document.getElementById('goal-target').value),
       current: parseFloat(document.getElementById('goal-current').value),
       date: document.getElementById('goal-date').value
     };
-
     if (!goalData.name || !goalData.target || isNaN(goalData.current)) {
       alert('Por favor, preencha todos os campos corretamente');
       return;
     }
-
-    if (goalId) {
-      const index = state.goals.findIndex(g => g.id === goalId);
-      if (index !== -1) {
-        state.goals[index] = { ...state.goals[index], ...goalData };
-      }
-    } else {
-      state.goals.push({ id: crypto.randomUUID(), ...goalData });
-    }
-
-    saveAndRerender();
+    const newGoal = { id: goalId, ...goalData };
+    saveGoal(newGoal);
     closeGoalModal();
   });
 
-  window.editGoal = function (goalId) {
+  function editGoal(goalId) {
     const goal = state.goals.find(g => g.id === goalId);
     if (!goal) return;
     document.getElementById('goal-id').value = goal.id;
@@ -873,25 +707,90 @@ function startApp() {
     document.getElementById('goal-modal-title').textContent = 'Editar Meta';
     document.getElementById('delete-goal-btn').style.display = 'block';
     openModal(goalModal);
-  };
+  }
 
-  window.closeGoalModal = function () {
+  function closeGoalModal() {
     closeModal(goalModal);
     goalForm.reset();
     document.getElementById('goal-id').value = '';
     document.getElementById('goal-modal-title').textContent = 'Nova Meta Financeira';
     document.getElementById('delete-goal-btn').style.display = 'none';
-  };
+  }
 
-  // Funções globais que podem ser chamadas no HTML (mantidas para compatibilidade)
-  window.navigateToPage = navigateToPage;
-  window.exportarDados = exportarDados;
-  window.trocarTema = trocarTema;
-  window.resetarApp = resetarApp;
-  
-  // CORREÇÃO: Re-adiciona as funções para compatibilidade com o HTML
-  window.abrirPagina = (pageId) => navigateToPage(pageId);
-  window.abrirResumoMensal = () => navigateToPage('resumo-mensal-page');
-  window.abrirResumoAnual = () => navigateToPage('resumo-anual-page');
-  window.abrirConfig = () => navigateToPage('config-page');
+  function exportarDados() {
+    const dados = { transacoes: state.transactions, metas: state.goals, contas: state.payables };
+    const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dados-financeiros.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function trocarTema() {
+    const isDark = document.body.classList.toggle('dark-theme');
+    localStorage.setItem('tema', isDark ? 'dark' : 'light');
+  }
+
+  function resetarApp() {
+    if (confirm("Tem certeza que deseja resetar o aplicativo? Todos os dados serão apagados.")) {
+      // Deleta todos os dados do usuário no Firestore
+      const deleteCollection = async (collectionRef) => {
+        const snapshot = await getDocs(collectionRef);
+        const batch = writeBatch(db);
+        snapshot.docs.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+        await batch.commit();
+      };
+      deleteCollection(collection(db, `users/${auth.currentUser.uid}/transactions`));
+      deleteCollection(collection(db, `users/${auth.currentUser.uid}/goals`));
+      deleteCollection(collection(db, `users/${auth.currentUser.uid}/payables`));
+      localStorage.clear();
+      location.reload();
+    }
+  }
+
+  function diasRestantes(dataVencimento) {
+    const hoje = new Date();
+    const vencimento = new Date(dataVencimento + "T03:00:00");
+    const diff = vencimento - hoje;
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  }
+
+  function verificarContasAVencer() {
+    const proximas = state.payables.filter(c => {
+      const dias = diasRestantes(c.date);
+      return dias >= 0 && dias <= 5;
+    });
+    const alertCount = document.getElementById('alert-count');
+    const alertList = document.getElementById('alert-list');
+    const alertIcon = document.getElementById('alert-icon');
+    if (alertCount) alertCount.textContent = proximas.length;
+    if (alertIcon) alertIcon.classList.toggle('ativo', proximas.length > 0);
+    if (alertList) {
+      alertList.innerHTML = proximas.length
+        ? proximas.map(c => {
+          const dataFormatada = new Date(c.date).toLocaleDateString('pt-BR');
+          return `<li>${c.description} - vence em ${dataFormatada}</li>`;
+        }).join('')
+        : "<li>Nenhuma conta próxima do vencimento</li>";
+    }
+  }
+}
+
+// Service Worker (mesma função de antes)
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('SW registrado: ', registration);
+        })
+        .catch(registrationError => {
+          console.log('SW falhou: ', registrationError);
+        });
+    });
+  }
 }

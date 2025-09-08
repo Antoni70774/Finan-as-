@@ -10,8 +10,56 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth.js"></script>
+  <script>
+    // Sua configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBQeYc0Y-eYONv3ZfvZoJEzOjoKR371P-Y",
+            authDomain: "controle-financeiro-65744.firebaseapp.com",
+            projectId: "controle-financeiro-65744",
+            storageBucket: "controle-financeiro-65744.firebasestorage.app",
+            messagingSenderId: "587527394934",
+            appId: "1:587527394934:web:c142740ef0139a5cf63157",
+            measurementId: "G-RT2T1HNV4G"
+        };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
+    <!-- Tela de carregamento -->
+  <div id="loading" style="text-align:center; padding:20px;">
+    Verificando login...
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    const auth = firebase.auth();
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        // Aqui você pode carregar os dados do usuário
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    function openTransactionModal() {
+      const modal = document.getElementById('transaction-modal');
+      modal.style.display = 'flex';
+      modal.classList.add('active');
+    }
+
+    function closeTransactionModal() {
+      const modal = document.getElementById('transaction-modal');
+      modal.style.display = 'none';
+      modal.classList.remove('active');
+      document.getElementById('transaction-form').reset();
+    }
+    
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
@@ -182,6 +230,7 @@
                 </form>
             </div>
         </div>
+
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">

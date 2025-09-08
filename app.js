@@ -231,25 +231,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ATUALIZAÇÃO E RENDERIZAÇÃO DA UI
-    function updateAll() {
+        function updateAll() {
         const monthFiltered = filterTransactionsByMonth(state.transactions, state.currentDate);
-
+    
         let transactionsForDisplay = monthFiltered;
         if (state.chartType === 'expense') {
             transactionsForDisplay = monthFiltered.filter(t => t.type === 'expense');
         } else if (state.chartType === 'income') {
             transactionsForDisplay = monthFiltered.filter(t => t.type === 'income');
         }
-
-        renderSummary(monthFiltered);
-        renderTransactionList(transactionsForDisplay);
-        updateMainChart(monthFiltered);
-        renderGoals();
-        renderPayables();
-        updateMonthDisplay();
-        verificarContasAVencer();
-    }
     
+        renderSummary(transactionsForDisplay);
+        renderChart(transactionsForDisplay);
+        renderTransactions(transactionsForDisplay);
+        renderCategorySummary(transactionsForDisplay);
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        await signOut(auth);
+        window.location.href = 'login.html';
+    });
+
     function filterTransactionsByMonth(transactions, date) {
         const year = date.getFullYear();
         const month = date.getMonth();

@@ -178,7 +178,6 @@ function startApp() {
       updateMainChart(filterTransactionsByMonth(state.transactions, state.currentDate));
     }
     if (pageId === 'resumo-anual-page') {
-      // Chama a função de resumo anual apenas se o usuário estiver nessa página
       atualizarResumoAnual();
     }
   }
@@ -824,7 +823,10 @@ function startApp() {
   }
 
   function updateUserUI() {
-    currentUserNameEl.textContent = state.currentUser;
+    // CORREÇÃO: Verifica se o elemento existe antes de tentar manipulá-lo
+    if (currentUserNameEl) {
+      currentUserNameEl.textContent = state.currentUser;
+    }
     const userButtons = document.querySelectorAll('.user-buttons button');
     userButtons.forEach(button => {
       button.classList.toggle('active', button.dataset.user === state.currentUser);
@@ -886,4 +888,10 @@ function startApp() {
   window.exportarDados = exportarDados;
   window.trocarTema = trocarTema;
   window.resetarApp = resetarApp;
+  
+  // CORREÇÃO: Re-adiciona as funções para compatibilidade com o HTML
+  window.abrirPagina = (pageId) => navigateToPage(pageId);
+  window.abrirResumoMensal = () => navigateToPage('resumo-mensal-page');
+  window.abrirResumoAnual = () => navigateToPage('resumo-anual-page');
+  window.abrirConfig = () => navigateToPage('config-page');
 }

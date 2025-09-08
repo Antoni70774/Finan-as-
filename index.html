@@ -3,293 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle Financeiro</title>
+    <title>Entrar | Controle Financeiro</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4A90E2">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        .login-container h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        .login-container p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        .input-group input:focus {
+            border-color: #4A90E2;
+            outline: none;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: #4A90E2;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #357ABD;
+        }
+        .btn-google {
+            width: 100%;
+            padding: 12px;
+            background-color: #DB4437;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-google:hover {
+            background-color: #C2372E;
+        }
+        .btn-google img {
+            height: 20px;
+        }
+        .login-links {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+        .login-links a {
+            color: #4A90E2;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .error-message {
+            color: #DB4437;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header">
-            <h1>Visão Geral</h1>
-            <div class="profile-icon">
-                <div id="alert-icon" onclick="abrirAlerta()">
-                    🔔 <span id="alert-count" class="badge">0</span>
-                </div>
+    <div class="login-container">
+        <h1>Entrar no Aplicativo</h1>
+        <p>Acesse sua conta para gerenciar suas finanças.</p>
+        <form id="login-form">
+            <div class="input-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="seu-email@exemplo.com" required>
             </div>
-        </header>
-        
-        <!-- Main Content -->
-        <main id="app-main">
-            <!-- Dashboard Page -->
-            <div id="dashboard-page" class="page active">
-                <div class="month-nav">
-                    <button id="prev-month" class="btn-secondary">&lt;</button>
-                    <span id="current-month-year"></span>
-                    <button id="next-month" class="btn-secondary">&gt;</button>
-                </div>
-                <div class="dashboard-summary" id="dashboard-summary">
-                    <div class="summary-item">
-                        <span>Receita</span>
-                        <h4 id="month-income">R$ 0,00</h4>
-                        <div id="display-month-income" class="summary-display"></div>
-                    </div>
-                    <div class="summary-item">
-                        <span>Despesa</span>
-                        <h4 id="month-expense">R$ 0,00</h4>
-                        <div id="display-month-expense" class="summary-display"></div>
-                    </div>
-                    <div class="summary-item">
-                        <span>Saldo</span>
-                        <h4 id="month-balance">R$ 0,00</h4>
-                    </div>
-                </div>
-                <div class="chart-selector">
-                    <button class="chart-btn active" data-type="all">Geral</button>
-                    <button class="chart-btn" data-type="expense">Despesas</button>
-                    <button class="chart-btn" data-type="income">Receitas</button>
-                </div>
-                <div class="chart-container">
-                    <h3 id="chart-title">Movimentação por Categoria</h3>
-                    <canvas id="main-chart"></canvas>
-                </div>
-                <div id="chart-details" class="chart-details"></div>
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="********" required>
+            </div>
+            <div class="input-group">
+              <button type="submit" class="btn-primary">Entrar</button>
+            </div>
+            <div class="input-group">
+              <button type="button" id="btn-create-account" class="btn-primary">Criar Conta</button>
+            </div>
+            <p class="error-message" id="error-message"></p>
+        </form>
+        <div class="login-links">
+            <a href="#" id="btn-forgot-password">Esqueceu a senha?</a>
+        </div>
+        <button id="btn-login-google" class="btn-google">
+            <img src="https://www.google.com/images/branding/googlelogo/svg/googlelogo_color_200x200dp.svg" alt="Google Logo">
+            Entrar com Google
+        </button>
+    </div>
 
-                <div class="category-summary-section">
-                    <h3>Resumo por Categoria</h3>
-                    <div id="category-summary" class="category-grid"></div>
-                </div>
-                
-                <div class="recent-transactions">
-                    <h3>Transações Recentes</h3>
-                    <ul id="transaction-list"></ul>
-                </div>
-            </div>
+    <script type="module">
+        // Importe os módulos do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-            <!-- Goals Page -->
-            <div id="goals-page" class="page">
-              <h2>Metas Pessoais</h2>
-              <button id="add-goal-btn" class="btn-primary">Nova Meta</button>
-              <div id="goal-list"></div>
-            </div>
-            
-            <div id="payables-page" class="page">
-                <h2>Despesas a Pagar</h2>
-                <button id="add-payable-btn" class="btn-primary">Nova Conta</button>
-                <div id="payable-list"></div>
-            </div>
+        // Cole aqui a configuração do seu projeto Firebase
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_AUTH_DOMAIN",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_STORAGE_BUCKET",
+            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+            appId: "SEU_APP_ID"
+        };
 
-            <!-- Profile Page -->
-            <div id="profile-page" class="page">
-                <h2>Perfil</h2>
-                <div>
-                    <span>Usuário atual: <span id="current-user-name"></span></span>
-                </div>
-                <div class="bank-connect">
-                    <h4>Conexão Bancária</h4>
-                    <p>Selecione seu banco para conectar:</p>
-                    <div class="bank-integration">
-                        <button class="bank-button" onclick="connectBank('nubank')">
-                            <img src="assets/nubank-icon.png" alt="Nubank">
-                            Nubank
-                        </button>
-                        <button class="bank-button" onclick="connectBank('itau')">
-                            <img src="assets/itau-icon.png" alt="Itaú">
-                            Itaú
-                        </button>
-                        <button class="bank-button" onclick="connectBank('caixa')">
-                            <img src="assets/caixa-icon.png" alt="Caixa">
-                            Caixa
-                        </button>
-                    </div>
-                </div>
-                <button id="export-data-btn" class="btn-secondary">Exportar Dados</button>
-            </div>
-        </main>
+        // Inicialize o Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const errorMessageDiv = document.getElementById('error-message');
 
-        <!-- Transaction Modal -->
-        <div id="transaction-modal" class="modal-overlay">
-            <div class="modal-content">
-                <form id="transaction-form">
-                    <h3 id="transaction-modal-title">Nova Transação</h3>
-                    <div class="toggle-type">
-                        <button type="button" id="type-expense-btn" class="toggle-btn active">Despesa</button>
-                        <button type="button" id="type-income-btn" class="toggle-btn">Receita</button>
-                    </div>
-                    <input type="hidden" id="transaction-type" value="expense">
-                    <label for="amount">Valor</label>
-                    <input type="number" id="amount" placeholder="R$ 0,00" step="0.01" required>
-                    <label for="description">Descrição</label>
-                    <input type="text" id="description" placeholder="Ex: Almoço" required>
-                    <label for="category">Categoria</label>
-                    <select id="category" required></select>
-                    <label for="date">Data</label>
-                    <input type="date" id="date" required>
-                    <input type="hidden" id="transaction-id">
-                    <div class="modal-actions" id="transaction-modal-actions">
-                        <button type="button" id="cancel-btn" class="btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn-primary">Salvar</button>
-                        <button type="button" id="delete-transaction-btn" class="btn-danger" style="display:none;">Excluir</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <!-- Goal Modal -->
-        <div id="goal-modal" class="modal-overlay">
-            <div class="modal-content">
-                <form id="goal-form">
-                    <h3 id="goal-modal-title">Nova Meta Financeira</h3>
-                    <input type="hidden" id="goal-id">
-                    <label for="goal-name">Nome</label>
-                    <input type="text" id="goal-name" required>
-                    <label for="goal-target">Valor alvo</label>
-                    <input type="number" id="goal-target" step="0.01" required>
-                    <label for="goal-current">Valor atual</label>
-                    <input type="number" id="goal-current" step="0.01" required>
-                    <label for="goal-date">Data limite</label>
-                    <input type="date" id="goal-date" required>
-                    <div class="modal-actions">
-                        <button type="button" id="cancel-goal-btn" class="btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn-primary">Salvar</button>
-                        <button type="button" id="delete-goal-btn" class="btn-danger" style="display:none;">Excluir</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <!-- Payable Modal -->
-        <div id="payable-modal" class="modal-overlay">
-            <div class="modal-content">
-                <!-- CORRIGIDO: todos campos e ids alinhados com JS -->
-                <form id="payable-form">
-                    <h3 id="payable-modal-title">Nova Conta a Pagar</h3>
-                    <input type="hidden" id="payable-id">
-                    <label for="payable-description">Descrição</label>
-                    <input type="text" id="payable-description" required>
-                    <label for="payable-category">Categoria</label>
-                    <input type="text" id="payable-category" required>
-                    <label for="payable-amount">Valor</label>
-                    <input type="number" id="payable-amount" step="0.01" required>
-                    <label for="payable-date">Data de Vencimento</label>
-                    <input type="date" id="payable-date" required>
-                    <div class="modal-actions">
-                        <button type="button" id="cancel-payable-btn" class="btn-secondary">Cancelar</button>
-                        <button type="submit" class="btn-primary">Salvar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        // Redireciona se o usuário já estiver logado
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = 'index.html';
+            }
+        });
 
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" data-page="dashboard-page">
-                <span class="material-icons-sharp">home</span>
-            </button>
-            <button class="nav-item" data-page="goals-page">
-                <span class="material-icons-sharp">flag</span>
-            </button>
-            <button id="add-transaction-btn" class="fab">
-                <span class="material-icons-sharp">add</span>
-            </button>
-            <button class="nav-item" data-page="payables-page">
-                <span class="material-icons-sharp">notifications</span>
-            </button>
-            <button id="menu-botao" class="nav-item profile-trigger">
-              <span class="material-icons-sharp">menu</span>
-            </button>
-        </nav>
-        <!-- Menu lateral do perfil -->
-        <div id="menu-perfil" class="menu-lateral" style="display: none;">
-          <ul>
-            <li onclick="abrirResumoMensal()">📅 Resumo Mensal</li>
-            <li onclick="abrirResumoAnual()">📈 Resumo Anual</li>
-            <li onclick="abrirPagina('profile-page')">👤 Perfil</li>
-            <li onclick="exportarDados()">📤 Exportar Dados</li>
-            <li onclick="abrirConfig()">⚙️ Configurações</li>
-          </ul>
-        </div>
-         <!-- Página: Resumo Mensal -->
-        <div id="resumo-mensal-page" class="page">
-          <h2>📅 Resumo Mensal</h2>
-          <p><strong>Mês:</strong> <span id="mes-atual"></span></p>
-          
-          <div class="dashboard-summary" id="resumo-mensal-summary">
-            <div class="summary-item">
-              <span>Receita</span>
-              <h4 id="monthly-revenue">R$ 0,00</h4>
-            </div>
-            <div class="summary-item">
-              <span>Despesa</span>
-              <h4 id="monthly-expense">R$ 0,00</h4>
-            </div>
-            <div class="summary-item">
-              <span>Saldo</span>
-              <h4 id="monthly-balance">R$ 0,00</h4>
-            </div>
-          </div>
-        
-          <canvas id="monthly-bar-chart" width="300" height="130"></canvas>
-        
-          <div class="month-nav">
-            <button id="resumo-prev-month" class="btn-secondary">&lt;</button>
-            <span id="resumo-current-month-year"></span>
-            <button id="resumo-next-month" class="btn-secondary">&gt;</button>
-          </div>
-        </div>
-        
-        <!-- Página: Resumo Anual -->
-        <div id="resumo-anual-page" class="page">
-          <h2>📈 Resumo Anual</h2>
-          <div class="summary-boxes">
-            <div class="box"><h4>Receita Total</h4><p id="annual-revenue">R$ 0,00</p></div>
-            <div class="box"><h4>Despesa Total</h4><p id="annual-expense">R$ 0,00</p></div>
-            <div class="box"><h4>Saldo Acumulado</h4><p id="annual-balance">R$ 0,00</p></div>
-          </div>
-          <canvas id="annual-chart" width="100%" height="70"></canvas>
-        </div>
-        <!-- Perfil -->
-        <div id="perfil-page" class="page">
-          <h2>👤 Perfil do Usuário</h2>
-          <p><b>Usuário atual:</b> <span id="perfil-usuario"></span></p>
-          <p><b>Email:</b> <span id="perfil-email"></span></p>
-          <p><b>Banco conectado:</b> <span id="perfil-banco"></span></p>
-        </div>
-        
-        <!-- Página: Configurações -->
-        <div id="config-page" class="page">
-          <h2>⚙️ Configurações</h2>
-          <ul class="config-options">
-            <li><button onclick="exportarDados()">📤 Exportar Dados</button></li>
-            <li><button onclick="trocarTema()">🎨 Alterar Tema</button></li>
-            <li><button onclick="resetarApp()">♻️ Resetar Aplicativo</button></li>
-          </ul>
-        </div>
-        
-        <!-- Ajuda -->
-        <div id="ajuda-page" class="page">
-          <h2>❓ Ajuda</h2>
-          <p>Bem-vindo ao <b>Controle Financeiro</b>!</p>
-          <ul>
-            <li>📅 Resumo Mensal → Veja receitas, despesas e saldo do mês.</li>
-            <li>📊 Resumo Anual → Acompanhe seu desempenho no ano.</li>
-            <li>👤 Perfil → Gerencie suas informações pessoais.</li>
-            <li>⚙️ Configurações → Exporte dados, mude tema ou reset.</li>
-          </ul>
-        </div>
+        const showErrorMessage = (message) => {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.style.display = 'block';
+        };
 
-    <!-- Modal de alerta -->
-                <div id="alert-modal" class="modal">
-                  <div class="modal-content">
-                    <h3>Contas a vencer</h3>
-                    <ul id="alert-list"></ul>
-                    <button onclick="fecharAlerta()">Fechar</button>
-                  </div>
-                </div>
-            </div>
-    
-    <script type="module" src="app.js"></script>
+        const hideErrorMessage = () => {
+            errorMessageDiv.style.display = 'none';
+        };
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideErrorMessage();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    let message = 'Erro ao entrar. Verifique seu e-mail e senha.';
+                    if (error.code === 'auth/invalid-email') {
+                        message = 'O formato do e-mail é inválido.';
+                    } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                        message = 'E-mail ou senha incorretos.';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        message = 'Muitas tentativas de login. Tente novamente mais tarde.';
+                    }
+                    showErrorMessage(message);
+                });
+        });
+
+        document.getElementById('btn-create-account').addEventListener('click', () => {
+            hideErrorMessage();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (password.length < 6) {
+                showErrorMessage('A senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    alert('Conta criada com sucesso! Você será redirecionado.');
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    let message = 'Erro ao criar conta. Tente novamente.';
+                    if (error.code === 'auth/email-already-in-use') {
+                        message = 'Este e-mail já está em uso.';
+                    } else if (error.code === 'auth/weak-password') {
+                        message = 'A senha é muito fraca.';
+                    }
+                    showErrorMessage(message);
+                });
+        });
+
+        document.getElementById('btn-forgot-password').addEventListener('click', () => {
+            hideErrorMessage();
+            const email = document.getElementById('email').value;
+            if (!email) {
+                showErrorMessage('Digite seu e-mail para recuperar a senha.');
+                return;
+            }
+            sendPasswordResetEmail(auth, email)
+                .then(() => {
+                    alert('Um e-mail de recuperação de senha foi enviado para ' + email);
+                })
+                .catch(() => {
+                    showErrorMessage('Erro ao enviar e-mail. Verifique se o e-mail está correto.');
+                });
+        });
+
+        document.getElementById('btn-login-google').addEventListener('click', () => {
+            hideErrorMessage();
+            const provider = new GoogleAuthProvider();
+
+            signInWithPopup(auth, provider)
+                .then(() => {
+                    window.location.href = 'index.html';
+                })
+                .catch(() => {
+                    showErrorMessage('Erro ao entrar com Google. Tente novamente.');
+                });
+        });
+    </script>
 </body>
 </html>

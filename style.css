@@ -726,4 +726,15 @@ body, html {
       padding: 1rem;
     }
 
+    #resumo-mensal-page {
+      padding-top: 0 !important;
+      margin-top: 0 !important;
+    }
+    
+    #resumo-mensal-page h2,
+    #resumo-mensal-page .summary-boxes {
+      margin-top: 0 !important;
+    }
+
+
 }

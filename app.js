@@ -302,16 +302,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('resumo-prev-month').addEventListener('click', () => {
-      const novoMes = new Date(state.currentDate);
-      novoMes.setMonth(novoMes.getMonth() - 1);
-      state.currentDate = novoMes;
-      abrirResumoMensal(); // centraliza a atualização
+      state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+      abrirResumoMensal();
     });
     
     document.getElementById('resumo-next-month').addEventListener('click', () => {
-      const novoMes = new Date(state.currentDate);
-      novoMes.setMonth(novoMes.getMonth() + 1);
-      state.currentDate = novoMes;
+      state.currentDate.setMonth(state.currentDate.getMonth() + 1);
       abrirResumoMensal();
     });
 

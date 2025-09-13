@@ -272,6 +272,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       document.getElementById('resumo-mensal-page').classList.add('active');
       menuFlutuante.style.display = 'none';
+    
+      // Scroll para o topo
+      const main = document.getElementById('app-main');
+      if (main) main.scrollTop = 0;
+    
       carregarResumoMensal();
       atualizarNomeDoMes();
       atualizarGraficoMensal();
@@ -297,21 +302,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('resumo-prev-month').addEventListener('click', () => {
-      const novoMes = new Date(state.currentDate); // cria uma cópia
-      novoMes.setMonth(novoMes.getMonth() - 1);    // subtrai 1 mês
-      state.currentDate = novoMes;                 // atualiza o estado
-      carregarResumoMensal();
-      atualizarNomeDoMes();
-      atualizarGraficoMensal();
+      const novoMes = new Date(state.currentDate);
+      novoMes.setMonth(novoMes.getMonth() - 1);
+      state.currentDate = novoMes;
+      abrirResumoMensal(); // centraliza a atualização
     });
     
     document.getElementById('resumo-next-month').addEventListener('click', () => {
       const novoMes = new Date(state.currentDate);
       novoMes.setMonth(novoMes.getMonth() + 1);
       state.currentDate = novoMes;
-      carregarResumoMensal();
-      atualizarNomeDoMes();
-      atualizarGraficoMensal();
+      abrirResumoMensal();
     });
 
     function atualizarGraficoMensal() {

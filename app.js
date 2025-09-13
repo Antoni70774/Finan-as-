@@ -297,14 +297,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('resumo-prev-month').addEventListener('click', () => {
-      state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+      const novoMes = new Date(state.currentDate); // cria uma cópia
+      novoMes.setMonth(novoMes.getMonth() - 1);    // subtrai 1 mês
+      state.currentDate = novoMes;                 // atualiza o estado
       carregarResumoMensal();
       atualizarNomeDoMes();
       atualizarGraficoMensal();
     });
     
     document.getElementById('resumo-next-month').addEventListener('click', () => {
-      state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+      const novoMes = new Date(state.currentDate);
+      novoMes.setMonth(novoMes.getMonth() + 1);
+      state.currentDate = novoMes;
       carregarResumoMensal();
       atualizarNomeDoMes();
       atualizarGraficoMensal();

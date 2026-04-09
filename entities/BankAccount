@@ -1,0 +1,43 @@
+{
+  "name": "BankAccount",
+  "type": "object",
+  "properties": {
+    "bank_name": {
+      "type": "string",
+      "description": "Bank name"
+    },
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "checking",
+        "savings",
+        "credit_card",
+        "investment"
+      ],
+      "description": "Account type"
+    },
+    "balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Current balance"
+    },
+    "color": {
+      "type": "string",
+      "description": "Brand color"
+    },
+    "is_connected": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether connected via Open Finance"
+    },
+    "last_sync": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last sync date"
+    }
+  },
+  "required": [
+    "bank_name",
+    "account_type"
+  ]
+}

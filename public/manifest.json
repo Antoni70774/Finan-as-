@@ -1,0 +1,25 @@
+{
+  "short_name": "FLOW",
+  "name": "FLOW - Controle Financeiro",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#020617",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#020617",
+  "description": "Controle Financeiro",
+  "orientation": "portrait",
+  "categories": ["finance"]
+}

@@ -1,0 +1,54 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string",
+      "description": "Transaction description"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Transaction amount"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "income",
+        "expense"
+      ],
+      "description": "Transaction type"
+    },
+    "category_id": {
+      "type": "string",
+      "description": "Category ID reference"
+    },
+    "category_name": {
+      "type": "string",
+      "description": "Category name for display"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Transaction date"
+    },
+    "account": {
+      "type": "string",
+      "description": "Bank account name"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a recurring transaction"
+    }
+  },
+  "required": [
+    "description",
+    "amount",
+    "type",
+    "date"
+  ]
+}

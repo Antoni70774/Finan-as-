@@ -1,0 +1,34 @@
+{
+  "name": "Category",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Category name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "income",
+        "expense"
+      ],
+      "description": "Category type"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Icon name from lucide"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color hex code"
+    },
+    "budget_limit": {
+      "type": "number",
+      "description": "Monthly budget limit for this category"
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ]
+}

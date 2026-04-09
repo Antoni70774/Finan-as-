@@ -1,0 +1,47 @@
+{
+  "name": "Bill",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Bill title"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Bill amount"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Due date"
+    },
+    "category_name": {
+      "type": "string",
+      "description": "Category name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "overdue"
+      ],
+      "default": "pending",
+      "description": "Bill payment status"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this bill recurs monthly"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "title",
+    "amount",
+    "due_date"
+  ]
+}

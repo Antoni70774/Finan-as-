@@ -1,0 +1,46 @@
+{
+  "name": "Goal",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Goal title"
+    },
+    "target_amount": {
+      "type": "number",
+      "description": "Target amount to reach"
+    },
+    "current_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Current saved amount"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date",
+      "description": "Goal deadline"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Icon name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color for the goal card"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed",
+        "paused"
+      ],
+      "default": "active",
+      "description": "Goal status"
+    }
+  },
+  "required": [
+    "title",
+    "target_amount"
+  ]
+}

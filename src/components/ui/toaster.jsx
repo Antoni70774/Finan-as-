@@ -1,0 +1,33 @@
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastTitle,
+  ToastViewport,
+} from "@/components/ui/toast";
+
+export function Toaster() {
+  const { toasts } = useToast();
+
+  return (
+    <>
+      {toasts.map(({ id, title, description, action, ...props }) => {
+        // Removemos propriedades de eventos que podem causar erro no DOM
+        const { onOpenChange, ...cleanProps } = props; 
+        
+        return (
+          <Toast key={id} {...cleanProps}>
+            <div className="grid gap-1">
+              {title && <ToastTitle>{title}</ToastTitle>}
+              {description && <ToastDescription>{description}</ToastDescription>}
+            </div>
+            {action}
+            <ToastClose />
+          </Toast>
+        );
+      })}
+      <ToastViewport />
+    </>
+  );
+}

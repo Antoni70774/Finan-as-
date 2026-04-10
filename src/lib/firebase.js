@@ -25,7 +25,7 @@ export async function registerNotificationToken(user) {
     if (permission !== "granted") return;
 
     const token = await getToken(messaging, {
-      vapidKey: "BGiT64eJfgOP3Wu1ldsfBDOmg-YaZkFi2TmtufwT4Ovm5UcrteP2LcqN75BZuVcxFZH3mzo_hKaxQ5HRf5smYg8"
+      vapidKey: "BHpuCQHo64eti4Cp3FfqFJCvZD1xTDaCFs3drjVlxK6z9tUPtJXyQGxRUBs3n3JuB4iCZAQOyYg9hUi0xb38rnc"
     });
 
     if (token) {

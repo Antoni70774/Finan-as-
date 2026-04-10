@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClientInstance } from "./lib/query-client";
 import { Toaster } from "./components/ui/toaster";
 
 import { AuthProvider, useAuth } from "./lib/AuthContext";
+import { registerNotificationToken } from "./lib/firebase";
+
 import PageNotFound from "./lib/PageNotFound";
 
 import AppLayout from "./components/layout/AppLayout";
@@ -50,12 +52,27 @@ function RequireAuth({ children }) {
   return children;
 }
 
+// 🔥 NOVO: componente interno para ativar notificações
+function NotificationManager() {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      registerNotificationToken(user);
+    }
+  }, [user]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
+          <NotificationManager /> {/* 🔥 ESSENCIAL */}
           <Toaster />
+
           <Routes>
             {/* Rota pública */}
             <Route path="/login" element={<Login />} />
@@ -78,18 +95,18 @@ export default function App() {
               <Route path="bills" element={<Bills />} />
               <Route path="goals" element={<Goals />} />
               <Route path="categories" element={<Categories />} />
-              
+
               {/* Utilidades e Perfil */}
               <Route path="openfinance" element={<OpenFinance />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
 
-              {/* Ajuste de Segurança: Normalização de Caminhos */}
+              {/* Normalização */}
               <Route path="Calculadora" element={<Navigate to="/calculadora" replace />} />
               <Route path="Calculators" element={<Navigate to="/calculadora" replace />} />
               <Route path="calculators" element={<Navigate to="/calculadora" replace />} />
 
-              {/* Sub-rotas de Calculadoras */}
+              {/* Calculadoras */}
               <Route path="calculadora">
                 <Route index element={<CalculadoraMenu />} />
                 <Route path="anual-mensal" element={<AnualMensal />} />
@@ -115,11 +132,9 @@ export default function App() {
                 <Route path="*" element={<Navigate to="/calculadora" replace />} />
               </Route>
 
-              {/* Erro 404 dentro do Layout */}
               <Route path="*" element={<PageNotFound />} />
             </Route>
 
-            {/* Erro 404 Global fora do Layout */}
             <Route path="*" element={<PageNotFound />} />
           </Routes>
         </Router>

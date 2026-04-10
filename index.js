@@ -43,7 +43,13 @@ app.post("/send-reminders", async (req, res) => {
             token: token,
             notification: {
               title: "Lembrete de Conta",
-              body: `${bill.description} vence em ${diffDias} dias.`
+              body: `${bill.title} vence em ${diffDias} dias.` // ✅ usando bill.title
+            },
+            webpush: {
+              notification: {
+                icon: "https://finance-app-6bdb0.web.app/icon-192.png",
+                click_action: "https://finance-app-6bdb0.web.app/bills"
+              }
             }
           });
           disparos++;

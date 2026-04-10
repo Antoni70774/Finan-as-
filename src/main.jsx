@@ -3,16 +3,12 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-// ✅ REGISTRO DO SERVICE WORKER
+// 🔥 REGISTRAR SERVICE WORKER
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker
     .register("/firebase-messaging-sw.js")
-    .then((registration) => {
-      console.log("✅ Service Worker registrado:", registration);
-    })
-    .catch((err) => {
-      console.error("❌ Erro ao registrar SW:", err);
-    });
+    .then((reg) => console.log("SW registrado:", reg))
+    .catch((err) => console.error("Erro SW:", err));
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(

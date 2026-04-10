@@ -18,23 +18,34 @@ export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 export const messaging = getMessaging(app);
 
-export async function registerNotificationToken(user) {
-  if (!user) return;
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") return;
+// Substitua pela sua chave pública VAPID exata do Console
+const VAPID_KEY = "BGiT64eJfgOP3Wu1ldsfBDOmg-YaZkFi2TmtufwT4Ovm5UcrteP2LcqN75BZuVcxFZH3mzo_hKaxQ5HRf5smYg8";
 
-    // CHAVE ATUALIZADA (8 de abril)
-    const token = await getToken(messaging, {
-      vapidKey: "BGiT64eJfgOP3Wu1ldsfBDOmg-YaZkFi2TmtufwT4Ovm5UcrteP2LcqN75BZuVcxFZH3mzo_hKaxQ5HRf5smYg8"
-    });
+export async function registerNotificationToken(user) {
+  if (!user) {
+    console.log("registerNotificationToken: usuário não informado");
+    return;
+  }
+  try {
+    console.log("Solicitando permissão de notificação...");
+    const permission = await Notification.requestPermission();
+    console.log("Permissão:", permission);
+    if (permission !== "granted") {
+      console.warn("Permissão de notificação não concedida");
+      return;
+    }
+
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+    console.log("getToken result:", token);
 
     if (token) {
       await setDoc(doc(db, "users", user.uid, "settings", "notifications"), {
         token: token,
         updatedAt: new Date().toISOString()
       });
-      console.log("Token atualizado!");
+      console.log("Token salvo no Firestore:", token);
+    } else {
+      console.warn("getToken retornou vazio");
     }
   } catch (err) {
     console.error("Erro no token:", err);

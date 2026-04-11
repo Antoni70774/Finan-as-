@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db, registerNotificationToken } from "@/lib/firebase";
 import { useAuth } from "@/lib/AuthContext";
 import { format, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -23,6 +23,16 @@ export default function Dashboard() {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
+  // 🚀 Gerar e salvar token quando usuário logar
+  useEffect(() => {
+    if (user) {
+      console.log("Usuário logado:", user.uid);
+      registerNotificationToken(user).catch(err => {
+        console.error("Falha ao registrar token de notificação:", err);
+      });
+    }
+  }, [user]);
+
   // 1. 🔎 Buscar Categorias primeiro (Necessário para traduzir o ID em nome)
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", user?.uid],
@@ -31,6 +41,7 @@ export default function Dashboard() {
       const snap = await getDocs(collection(db, "users", user.uid, "categories"));
       return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     },
+    enabled: !!user,
   });
 
   // 2. 🔎 Buscar transações e cruzar com Categorias
@@ -42,16 +53,15 @@ export default function Dashboard() {
       const snap = await getDocs(q);
       return snap.docs.map(d => {
         const data = d.data() || {};
-        // Encontra o nome da categoria comparando o ID
         const catObj = categories.find(c => c.id === data.category || c.name === data.category);
-        
+
         return {
           id: d.id,
           description: data.description || "Sem descrição",
           amount: Number(data.amount) || 0,
           type: data.type || "expense",
           category_name: catObj ? catObj.name : (data.category_name || "Outros"),
-          date: data.date || "", 
+          date: data.date || "",
           account: data.account || "",
         };
       });
@@ -67,15 +77,16 @@ export default function Dashboard() {
       const q = query(collection(db, "users", user.uid, "bills"));
       const snap = await getDocs(q);
       return snap.docs.map(d => {
-        const data = d.data();
-        return { 
-          id: d.id, 
+        const data = d.data() || {};
+        return {
+          id: d.id,
           ...data,
           // Formata a data aqui para o UpcomingBills usar corretamente
           formattedDate: data.date ? data.date.split("-").reverse().join("/") : ""
         };
       });
     },
+    enabled: !!user,
   });
 
   // 🔎 Buscar metas
@@ -87,6 +98,7 @@ export default function Dashboard() {
       const snap = await getDocs(q);
       return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     },
+    enabled: !!user,
   });
 
   // 🔥 Filtro de transações (CORREÇÃO DE DATA)
@@ -119,7 +131,7 @@ export default function Dashboard() {
       const d = subMonths(refDate, i);
       const m = d.getMonth();
       const y = d.getFullYear();
-      
+
       const filtered = transactions.filter(tx => {
         if (!tx.date) return false;
         const [txY, txM] = tx.date.split("-").map(Number);

@@ -21,22 +21,28 @@ export const messaging = getMessaging(app);
 export async function registerNotificationToken(user) {
   if (!user) return;
   try {
+    // 1. Pede permissão
     const permission = await Notification.requestPermission();
-    if (permission !== "granted") return;
+    if (permission !== "granted") {
+      console.warn("Permissão de notificação negada.");
+      return;
+    }
 
-    // CHAVE ATUALIZADA (8 de abril)
+    // 2. Obtém o Token do FCM
     const token = await getToken(messaging, {
       vapidKey: "BGiT64eJfgOP3Wu1ldsfBDOmg-YaZkFi2TmtufwT4Ovm5UcrteP2LcqN75BZuVcxFZH3mzo_hKaxQ5HRf5smYg8"
     });
 
     if (token) {
+      // 3. Salva no Firestore EXATAMENTE onde o servidor vai procurar
       await setDoc(doc(db, "users", user.uid, "settings", "notifications"), {
         token: token,
         updatedAt: new Date().toISOString()
-      });
-      console.log("Token atualizado!");
+      }, { merge: true });
+      
+      console.log("Token PWA registrado com sucesso!");
     }
   } catch (err) {
-    console.error("Erro no token:", err);
+    console.error("Erro ao registrar dispositivo:", err);
   }
 }

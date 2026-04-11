@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClientInstance } from "./lib/query-client";
@@ -6,6 +6,7 @@ import { Toaster } from "./components/ui/toaster";
 
 import { AuthProvider, useAuth } from "./lib/AuthContext";
 import PageNotFound from "./lib/PageNotFound";
+import { registerNotificationToken } from "./lib/firebase"; // Importação vital
 
 import AppLayout from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
@@ -42,9 +43,17 @@ import Rescisao from "./components/calculators/calcs/Rescisao";
 import SalarioLiquido from "./components/calculators/calcs/SalarioLiquido";
 import TaxaEquivalente from "./components/calculators/calcs/TaxaEquivalente";
 
-// Componente de Proteção de Rota
+// Componente de Proteção de Rota + Registro de Notificação
 function RequireAuth({ children }) {
   const { user, loading } = useAuth();
+
+  useEffect(() => {
+    // Se o usuário logar, registra o token de notificação
+    if (user && !loading) {
+      registerNotificationToken(user);
+    }
+  }, [user, loading]);
+
   if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
   return children;

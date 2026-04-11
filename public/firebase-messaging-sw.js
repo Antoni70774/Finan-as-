@@ -10,13 +10,16 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// Captura a notificação quando o app está em background
 messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: "/icon-192.png", 
-    vibrate: [200, 100, 200],
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    vibrate: [100, 50, 100],
     data: { url: "https://finance-app-6bdb0.web.app/bills" }
   };
+
   self.registration.showNotification(notificationTitle, notificationOptions);
 });

@@ -26,7 +26,7 @@ export default function Bills() {
   const [form, setForm] = useState({
     title: "",
     amount: "",
-    due_date: "",
+    dueDate: "",
     category_name: "",
     is_recurring: false,
     notes: ""
@@ -46,6 +46,8 @@ export default function Bills() {
         ...d.data(),
         amount: Number(d.data().amount) || 0,
         status: d.data().status || "pending",
+        // Garante compatibilidade se houver dados antigos com underline no banco
+        dueDate: d.data().dueDate || d.data().due_date
       }));
       setBills(lista);
     } catch (err) {
@@ -68,14 +70,13 @@ export default function Bills() {
         createdAt: new Date().toISOString(),
       });
 
-      // toast com duração de 1 segundo
       toast({ title: "Conta adicionada!", duration: 1000 });
 
       setDialogOpen(false);
       setForm({
         title: "",
         amount: "",
-        due_date: "",
+        dueDate: "",
         category_name: "",
         is_recurring: false,
         notes: ""
@@ -99,13 +100,13 @@ export default function Bills() {
 
   const filtered = useMemo(() => {
     return bills.filter(b => {
-      if (!b.due_date) return false;
-      const d = parseISO(b.due_date);
+      const dateValue = b.dueDate || b.due_date;
+      if (!dateValue) return false;
+      const d = parseISO(dateValue);
       if (!isValid(d)) return false;
 
       const matchesDate = d.getMonth() === month && d.getFullYear() === year;
       
-      // Lógica de Vencidos (Overdue)
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const isOverdue = d < today && b.status !== "paid";
@@ -148,7 +149,7 @@ export default function Bills() {
                   </div>
                   <div className="space-y-2">
                     <Label>Vencimento</Label>
-                    <Input type="date" value={form.due_date} onChange={e => setForm({ ...form, due_date: e.target.value })} required />
+                    <Input type="date" value={form.dueDate} onChange={e => setForm({ ...form, dueDate: e.target.value })} required />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -186,7 +187,6 @@ export default function Bills() {
       </div>
 
       <div className="flex justify-start">
-        {/* A KEY AQUI É VITAL PARA NÃO QUEBRAR O SELECT NO REACT */}
         <Select 
           key={`filter-${month}-${year}`} 
           value={statusFilter} 
@@ -212,7 +212,8 @@ export default function Bills() {
             <div className="text-center py-20 text-muted-foreground italic">Nenhum compromisso encontrado para este filtro.</div>
           ) : (
             filtered.map(bill => {
-              const dueDate = parseISO(bill.due_date);
+              const dateValue = bill.dueDate || bill.due_date;
+              const dueDate = parseISO(dateValue);
               const today = new Date();
               today.setHours(0,0,0,0);
               const isOverdue = dueDate < today && bill.status !== "paid";

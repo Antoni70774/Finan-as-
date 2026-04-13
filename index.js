@@ -83,7 +83,7 @@ app.post("/send-reminders", async (req, res) => {
     }
 
     console.log(`Sucesso! Foram enviados ${disparos} lembretes.`);
-    res.status(200).send(`OK: ${disparos} disparos.`);
+	res.json({ status: "ok", disparos });
   } catch (err) {
     console.error("Erro geral no servidor:", err);
     res.status(500).send(err.message);

@@ -36,13 +36,14 @@ app.get("/firebase-messaging-sw.js", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "firebase-messaging-sw.js"));
 });
 
+// Rota corrigida para disparo imediato
 app.post("/send-reminders", async (req, res) => {
-  console.log("🚀 Iniciando agrupamento de notificações...");
+  console.log("🚀 Iniciando verificação de contas...");
   const db = admin.firestore();
   
   try {
     const usersSnapshot = await db.collection("users").get();
-    let totalDisparos = 0;
+    let disparos = 0;
 
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
@@ -56,8 +57,6 @@ app.post("/send-reminders", async (req, res) => {
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
 
-      let contasPendentes = [];
-
       for (const billDoc of billsSnapshot.docs) {
         const bill = billDoc.data();
         const rawDate = bill.dueDate || bill.due_date;
@@ -68,48 +67,43 @@ app.post("/send-reminders", async (req, res) => {
 
         const diffDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
 
+        // Filtro de 0 a 5 dias para o vencimento
         if (diffDias >= 0 && diffDias <= 5) {
-          const dataBr = vencimento.toLocaleDateString('pt-BR');
-          const status = diffDias === 0 ? "HOJE" : `em ${diffDias} dias`;
-          contasPendentes.push(`• ${bill.title}: ${dataBr} (${status})`);
-        }
-      }
+          try {
+            const dataVencimentoFormatada = vencimento.toLocaleDateString('pt-BR');
+            const diasTexto = diffDias === 0 ? "HOJE" : `em ${diffDias} dias`;
 
-      // Só envia se houver ao menos uma conta
-      if (contasPendentes.length > 0) {
-        const plural = contasPendentes.length > 1;
-        const titulo = plural ? "⚠️ Alerta de Contas" : "⚠️ Vencimento de Conta";
-        const corpoTotal = plural 
-          ? `Você tem ${contasPendentes.length} contas próximas:\n${contasPendentes.join('\n')}`
-          : `Sua conta ${contasPendentes[0]} está próxima.`;
-
-        try {
-          await admin.messaging().send({
-            token,
-            webpush: {
-              headers: { "Urgency": "high" },
-              notification: {
-                title: titulo,
-                body: corpoTotal,
-                icon: "https://finance-app-6bdb0.web.app/icon-192.png",
-                badge: "https://finance-app-6bdb0.web.app/icon-192.png",
-                tag: "resumo-financeiro", // Tag fixa para atualizar sempre a mesma notificação
-                renotify: true,
-                requireInteraction: true,
-                vibrate: [500, 110, 500, 110, 450, 110],
-                data: { url: "https://finance-app-6bdb0.web.app/bills" }
+            await admin.messaging().send({
+              token,
+              webpush: {
+                headers: {
+                  "Urgency": "high"
+                },
+                notification: {
+                  title: "Vencimento de Conta",
+                  body: `Sua conta de "${bill.title}" vence ${diasTexto} (${dataVencimentoFormatada}).`,
+                  icon: "https://finance-app-6bdb0.web.app/icon-192.png",
+                  badge: "https://finance-app-6bdb0.web.app/icon-192.png",
+                  tag: billDoc.id,
+                  renotify: true,
+                  requireInteraction: true,
+                  vibrate: [500, 110, 500, 110, 450, 110],
+                  data: {
+                    url: "https://finance-app-6bdb0.web.app/bills"
+                  }
+                }
               }
-            }
-          });
-          totalDisparos++;
-          console.log(`✅ Notificação única enviada para ${userId} com ${contasPendentes.length} contas.`);
-        } catch (fcmError) {
-          console.error(`❌ Erro ao enviar para ${userId}:`, fcmError.message);
+            });
+            disparos++;
+            console.log(`✅ Lembrete enviado: ${bill.title} para ${userId}`);
+          } catch (fcmError) {
+            console.error(`❌ Erro no token de ${userId}:`, fcmError.message);
+          }
         }
       }
     }
 
-    res.json({ status: "ok", usuariosNotificados: totalDisparos });
+    res.json({ status: "ok", disparos });
   } catch (err) {
     res.status(500).send(err.message);
   }

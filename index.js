@@ -32,7 +32,6 @@ app.post("/send-reminders", async (req, res) => {
   const db = admin.firestore();
   try {
     const usersSnapshot = await db.collection("users").get();
-    let totalRemetidos = 0;
 
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
@@ -44,7 +43,7 @@ app.post("/send-reminders", async (req, res) => {
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
 
-      let contasParaNotificar = [];
+      let listaContas = [];
       billsSnapshot.forEach(billDoc => {
         const bill = billDoc.data();
         const rawDate = bill.dueDate || bill.due_date;
@@ -54,37 +53,34 @@ app.post("/send-reminders", async (req, res) => {
           const diff = Math.ceil((venci - hoje) / (1000 * 60 * 60 * 24));
           
           if (diff >= 0 && diff <= 5) {
-            const prazo = diff === 0 ? "HOJE" : `em ${diff} dias`;
-            contasParaNotificar.push(`• ${bill.title}: ${venci.toLocaleDateString('pt-BR')} (${prazo})`);
+            const status = diff === 0 ? "HOJE" : `em ${diff} dias`;
+            listaContas.push(`• ${bill.title}: ${venci.toLocaleDateString('pt-BR')} (${status})`);
           }
         }
       });
 
-      if (contasParaNotificar.length > 0) {
-        const plural = contasParaNotificar.length > 1;
-        const msgCorpo = plural 
-          ? `Você possui ${contasParaNotificar.length} contas próximas:\n${contasParaNotificar.join('\n')}`
-          : `Sua conta ${contasParaNotificar[0].replace('• ', '')} está próxima.`;
-
-        // ENVIO APENAS DE DATA - Isso mata a notificação duplicada e o link do navegador
+      if (listaContas.length > 0) {
+        const plural = listaContas.length > 1;
         await admin.messaging().send({
           token,
           data: {
-            title: "⚠️ Alerta de Vencimentos",
-            body: msgCorpo,
+            title: plural ? "⚠️ Alerta de Vencimentos" : "⚠️ Vencimento de Conta",
+            body: plural 
+              ? `Você possui ${listaContas.length} contas próximas:\n${listaContas.join('\n')}`
+              : `Sua conta ${listaContas[0].replace('• ', '')} está próxima.`,
             url: "https://finance-app-6bdb0.web.app/bills"
           }
         });
-        totalRemetidos++;
       }
     }
-    res.json({ status: "ok", processados: totalRemetidos });
+    // Resposta mínima obrigatória para o cron-job.org não dar erro
+    res.status(200).send("OK");
   } catch (err) {
-    res.status(500).send(err.message);
+    res.status(500).send("Erro");
   }
 });
 
 app.get("*", (req, res) => res.sendFile(path.join(__dirname, "public", "dist", "index.html")));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Flow rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`Flow online`));

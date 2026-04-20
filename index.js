@@ -32,7 +32,7 @@ app.post("/send-reminders", async (req, res) => {
   const db = admin.firestore();
   try {
     const usersSnapshot = await db.collection("users").get();
-    let totalUsuariosNotificados = 0;
+    let totalRemetidos = 0;
 
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
@@ -44,7 +44,7 @@ app.post("/send-reminders", async (req, res) => {
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
 
-      let listaDeContas = [];
+      let contasParaNotificar = [];
       billsSnapshot.forEach(billDoc => {
         const bill = billDoc.data();
         const rawDate = bill.dueDate || bill.due_date;
@@ -54,34 +54,31 @@ app.post("/send-reminders", async (req, res) => {
           const diff = Math.ceil((venci - hoje) / (1000 * 60 * 60 * 24));
           
           if (diff >= 0 && diff <= 5) {
-            const status = diff === 0 ? "HOJE" : `em ${diff} dias`;
-            listaDeContas.push(`• ${bill.title}: ${venci.toLocaleDateString('pt-BR')} (${status})`);
+            const prazo = diff === 0 ? "HOJE" : `em ${diff} dias`;
+            contasParaNotificar.push(`• ${bill.title}: ${venci.toLocaleDateString('pt-BR')} (${prazo})`);
           }
         }
       });
 
-      if (listaDeContas.length > 0) {
-        const plural = listaDeContas.length > 1;
-        const titulo = plural ? "⚠️ Alerta de Vencimentos" : "⚠️ Vencimento de Conta";
-        const corpo = plural 
-          ? `Você possui ${listaDeContas.length} contas próximas:\n${listaDeContas.join('\n')}`
-          : `Sua conta ${listaDeContas[0].replace('• ', '')} está próxima.`;
+      if (contasParaNotificar.length > 0) {
+        const plural = contasParaNotificar.length > 1;
+        const msgCorpo = plural 
+          ? `Você possui ${contasParaNotificar.length} contas próximas:\n${contasParaNotificar.join('\n')}`
+          : `Sua conta ${contasParaNotificar[0].replace('• ', '')} está próxima.`;
 
+        // ENVIO APENAS DE DATA - Isso mata a notificação duplicada e o link do navegador
         await admin.messaging().send({
           token,
-          // Enviamos apenas DATA para o Service Worker criar a notificação local e ocultar o link
           data: {
-            title: titulo,
-            body: corpo,
-            icon: "https://finance-app-6bdb0.web.app/icon-192.png",
-            badge: "https://finance-app-6bdb0.web.app/icon-192.png",
+            title: "⚠️ Alerta de Vencimentos",
+            body: msgCorpo,
             url: "https://finance-app-6bdb0.web.app/bills"
           }
         });
-        totalUsuariosNotificados++;
+        totalRemetidos++;
       }
     }
-    res.json({ status: "ok", usuarios_notificados: totalUsuariosNotificados });
+    res.json({ status: "ok", processados: totalRemetidos });
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -90,4 +87,4 @@ app.post("/send-reminders", async (req, res) => {
 app.get("*", (req, res) => res.sendFile(path.join(__dirname, "public", "dist", "index.html")));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Servidor Flow rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`Flow rodando na porta ${PORT}`));

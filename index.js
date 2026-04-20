@@ -37,12 +37,12 @@ app.get("/firebase-messaging-sw.js", (req, res) => {
 });
 
 app.post("/send-reminders", async (req, res) => {
-  console.log("🚀 Iniciando agrupamento de notificações...");
+  console.log("🚀 Iniciando processamento de notificações agrupadas...");
   const db = admin.firestore();
   
   try {
     const usersSnapshot = await db.collection("users").get();
-    let totalDisparos = 0;
+    let totalUsuariosNotificados = 0;
 
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
@@ -56,7 +56,7 @@ app.post("/send-reminders", async (req, res) => {
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
 
-      let contasPendentes = [];
+      let listaDeContas = [];
 
       for (const billDoc of billsSnapshot.docs) {
         const bill = billDoc.data();
@@ -68,20 +68,23 @@ app.post("/send-reminders", async (req, res) => {
 
         const diffDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
 
+        // Filtro de vencimento entre hoje e 5 dias
         if (diffDias >= 0 && diffDias <= 5) {
-          const dataBr = vencimento.toLocaleDateString('pt-BR');
-          const status = diffDias === 0 ? "HOJE" : `em ${diffDias} dias`;
-          contasPendentes.push(`• ${bill.title}: ${dataBr} (${status})`);
+          const dataFormatada = vencimento.toLocaleDateString('pt-BR');
+          const statusTexto = diffDias === 0 ? "VENCE HOJE" : `vence em ${diffDias} dias`;
+          listaDeContas.push(`• ${bill.title}: ${dataFormatada} (${statusTexto})`);
         }
       }
 
-      // Só envia se houver ao menos uma conta
-      if (contasPendentes.length > 0) {
-        const plural = contasPendentes.length > 1;
-        const titulo = plural ? "⚠️ Alerta de Contas" : "⚠️ Vencimento de Conta";
-        const corpoTotal = plural 
-          ? `Você tem ${contasPendentes.length} contas próximas:\n${contasPendentes.join('\n')}`
-          : `Sua conta ${contasPendentes[0]} está próxima.`;
+      // Se houver contas, envia UMA única notificação para o usuário
+      if (listaDeContas.length > 0) {
+        const plural = listaDeContas.length > 1;
+        const tituloNotificacao = plural ? "⚠️ Alerta de Vencimentos" : "⚠️ Vencimento de Conta";
+        
+        // Monta o corpo com as quebras de linha
+        const corpoMensagem = plural 
+          ? `Você possui ${listaDeContas.length} contas próximas:\n${listaDeContas.join('\n')}`
+          : `Sua conta ${listaDeContas[0].replace('• ', '')} está próxima.`;
 
         try {
           await admin.messaging().send({
@@ -89,11 +92,11 @@ app.post("/send-reminders", async (req, res) => {
             webpush: {
               headers: { "Urgency": "high" },
               notification: {
-                title: titulo,
-                body: corpoTotal,
+                title: tituloNotificacao,
+                body: corpoMensagem,
                 icon: "https://finance-app-6bdb0.web.app/icon-192.png",
                 badge: "https://finance-app-6bdb0.web.app/icon-192.png",
-                tag: "resumo-financeiro", // Tag fixa para atualizar sempre a mesma notificação
+                tag: "vencimento-unico", // Tag fixa para atualizar a mesma notificação se rodar de novo
                 renotify: true,
                 requireInteraction: true,
                 vibrate: [500, 110, 500, 110, 450, 110],
@@ -101,16 +104,17 @@ app.post("/send-reminders", async (req, res) => {
               }
             }
           });
-          totalDisparos++;
-          console.log(`✅ Notificação única enviada para ${userId} com ${contasPendentes.length} contas.`);
+          totalUsuariosNotificados++;
+          console.log(`✅ Sucesso: Enviado resumo para ${userId} (${listaDeContas.length} contas)`);
         } catch (fcmError) {
-          console.error(`❌ Erro ao enviar para ${userId}:`, fcmError.message);
+          console.error(`❌ Erro FCM para ${userId}:`, fcmError.message);
         }
       }
     }
 
-    res.json({ status: "ok", usuariosNotificados: totalDisparos });
+    res.json({ status: "ok", usuarios_notificados: totalUsuariosNotificados });
   } catch (err) {
+    console.error("❌ Erro geral:", err.message);
     res.status(500).send(err.message);
   }
 });
@@ -120,4 +124,4 @@ app.get("*", (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`Servidor Flow rodando na porta ${PORT}`));

@@ -12,79 +12,112 @@ const __dirname = path.dirname(__filename);
 let serviceAccount = null;
 try {
   const raw = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-  if (raw) serviceAccount = JSON.parse(raw);
+  if (!raw) {
+    console.error("ERRO: variável GOOGLE_APPLICATION_CREDENTIALS_JSON não definida.");
+  } else {
+    serviceAccount = JSON.parse(raw);
+  }
 } catch (err) {
-  console.error("Erro Credenciais:", err.message);
+  console.error("ERRO ao parsear GOOGLE_APPLICATION_CREDENTIALS_JSON:", err.message);
 }
 
-if (!admin.apps.length && serviceAccount) {
-  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+if (!admin.apps.length) {
+  if (serviceAccount && serviceAccount.client_email) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log("Admin SDK inicializado:", serviceAccount.project_id);
+  }
 }
 
 app.use(express.static(path.join(__dirname, "public", "dist")));
 
 app.get("/firebase-messaging-sw.js", (req, res) => {
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.sendFile(path.join(__dirname, "public", "firebase-messaging-sw.js"));
 });
 
 app.post("/send-reminders", async (req, res) => {
+  console.log("🚀 Iniciando agrupamento de notificações...");
   const db = admin.firestore();
+  
   try {
     const usersSnapshot = await db.collection("users").get();
-    let total = 0;
+    let totalDisparos = 0;
 
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
       const notifDoc = await db.collection("users").doc(userId).collection("settings").doc("notifications").get();
-      const token = notifDoc.exists ? notifDoc.data().token : null;
+      
+      if (!notifDoc.exists) continue;
+      const token = notifDoc.data().token;
       if (!token) continue;
 
       const billsSnapshot = await db.collection("users").doc(userId).collection("bills").get();
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
 
-      let contas = [];
-      billsSnapshot.forEach(billDoc => {
+      let contasPendentes = [];
+
+      for (const billDoc of billsSnapshot.docs) {
         const bill = billDoc.data();
         const rawDate = bill.dueDate || bill.due_date;
-        if (rawDate && bill.status !== "paid") {
-          let venci = typeof rawDate.toDate === "function" ? rawDate.toDate() : new Date(String(rawDate) + "T00:00:00");
-          venci.setHours(0, 0, 0, 0);
-          const diff = Math.ceil((venci - hoje) / (1000 * 60 * 60 * 24));
-          if (diff >= 0 && diff <= 5) {
-            contas.push(`• ${bill.title}: ${venci.toLocaleDateString('pt-BR')} (${diff === 0 ? "HOJE" : "em " + diff + " dias"})`);
-          }
+        if (!rawDate || bill.status === "paid") continue;
+
+        let vencimento = typeof rawDate.toDate === "function" ? rawDate.toDate() : new Date(String(rawDate) + "T00:00:00");
+        vencimento.setHours(0, 0, 0, 0);
+
+        const diffDias = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+
+        if (diffDias >= 0 && diffDias <= 5) {
+          const dataBr = vencimento.toLocaleDateString('pt-BR');
+          const status = diffDias === 0 ? "HOJE" : `em ${diffDias} dias`;
+          contasPendentes.push(`• ${bill.title}: ${dataBr} (${status})`);
         }
-      });
+      }
 
-      if (contas.length > 0) {
-        const titulo = contas.length > 1 ? "⚠️ Alerta de Vencimentos" : "⚠️ Vencimento de Conta";
-        const corpo = contas.length > 1 
-          ? `Você possui ${contas.length} contas próximas:\n${contas.join('\n')}`
-          : `Sua conta ${contas[0].replace('• ', '')} está próxima.`;
+      // Só envia se houver ao menos uma conta
+      if (contasPendentes.length > 0) {
+        const plural = contasPendentes.length > 1;
+        const titulo = plural ? "⚠️ Alerta de Contas" : "⚠️ Vencimento de Conta";
+        const corpoTotal = plural 
+          ? `Você tem ${contasPendentes.length} contas próximas:\n${contasPendentes.join('\n')}`
+          : `Sua conta ${contasPendentes[0]} está próxima.`;
 
-        await admin.messaging().send({
-          token,
-          // CRITICAL: NÃO use o objeto 'notification' aqui. Use apenas 'data'.
-          data: {
-            title: titulo,
-            body: corpo,
-            icon: "https://finance-app-6bdb0.web.app/icon-192.png",
-            badge: "https://finance-app-6bdb0.web.app/icon-192.png",
-            url: "https://finance-app-6bdb0.web.app/bills"
-          }
-        });
-        total++;
+        try {
+          await admin.messaging().send({
+            token,
+            webpush: {
+              headers: { "Urgency": "high" },
+              notification: {
+                title: titulo,
+                body: corpoTotal,
+                icon: "https://finance-app-6bdb0.web.app/icon-192.png",
+                badge: "https://finance-app-6bdb0.web.app/icon-192.png",
+                tag: "resumo-financeiro", // Tag fixa para atualizar sempre a mesma notificação
+                renotify: true,
+                requireInteraction: true,
+                vibrate: [500, 110, 500, 110, 450, 110],
+                data: { url: "https://finance-app-6bdb0.web.app/bills" }
+              }
+            }
+          });
+          totalDisparos++;
+          console.log(`✅ Notificação única enviada para ${userId} com ${contasPendentes.length} contas.`);
+        } catch (fcmError) {
+          console.error(`❌ Erro ao enviar para ${userId}:`, fcmError.message);
+        }
       }
     }
-    res.json({ status: "ok", enviados: total });
+
+    res.json({ status: "ok", usuariosNotificados: totalDisparos });
   } catch (err) {
     res.status(500).send(err.message);
   }
 });
 
-app.get("*", (req, res) => res.sendFile(path.join(__dirname, "public", "dist", "index.html")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "dist", "index.html"));
+});
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Flow rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

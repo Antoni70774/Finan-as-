@@ -9,6 +9,7 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// 🔥 Credenciais Firebase
 let serviceAccount = null;
 try {
   const raw = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
@@ -18,72 +19,118 @@ try {
 }
 
 if (!admin.apps.length && serviceAccount) {
-  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
 }
 
-// 1. Rota do Service Worker (com cache desativado)
+// 🔥 Service Worker (SEM CACHE)
 app.get("/firebase-messaging-sw.js", (req, res) => {
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Cache-Control", "no-store");
   res.sendFile(path.join(__dirname, "public", "firebase-messaging-sw.js"));
 });
 
-// 2. Rota de Lembretes (CORRIGIDA PARA CRON-JOB)
+// 🔥 ROTA DE NOTIFICAÇÃO (ANTI DUPLICAÇÃO PROFISSIONAL)
 app.post("/send-reminders", async (req, res) => {
   const db = admin.firestore();
+
   try {
     const usersSnapshot = await db.collection("users").get();
 
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
-      const notifDoc = await db.collection("users").doc(userId).collection("settings").doc("notifications").get();
-      const token = notifDoc.exists ? notifDoc.data().token : null;
+
+      const notifDoc = await db
+        .collection("users")
+        .doc(userId)
+        .collection("settings")
+        .doc("notifications")
+        .get();
+
+      const token = notifDoc.data()?.token;
       if (!token) continue;
 
-      const billsSnapshot = await db.collection("users").doc(userId).collection("bills").get();
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
+      const billsSnapshot = await db
+        .collection("users")
+        .doc(userId)
+        .collection("bills")
+        .get();
 
-      let listaContas = [];
-      billsSnapshot.forEach(billDoc => {
+      let lista = [];
+
+      for (const billDoc of billsSnapshot.docs) {
         const bill = billDoc.data();
-        const rawDate = bill.dueDate || bill.due_date;
-        if (rawDate && bill.status !== "paid") {
-          let venci = typeof rawDate.toDate === "function" ? rawDate.toDate() : new Date(String(rawDate) + "T00:00:00");
-          venci.setHours(0, 0, 0, 0);
-          const diff = Math.ceil((venci - hoje) / (1000 * 60 * 60 * 24));
-          
-          if (diff >= 0 && diff <= 5) {
-            const status = diff === 0 ? "HOJE" : `em ${diff} dias`;
-            listaContas.push(`• ${bill.title}: ${venci.toLocaleDateString('pt-BR')} (${status})`);
-          }
-        }
-      });
 
-      if (listaContas.length > 0) {
-        const plural = listaContas.length > 1;
+        const rawDate = bill.dueDate || bill.due_date;
+        if (!rawDate || bill.status === "paid") continue;
+
+        let vencimento =
+          typeof rawDate.toDate === "function"
+            ? rawDate.toDate()
+            : new Date(rawDate + "T00:00:00");
+
+        vencimento.setHours(0, 0, 0, 0);
+
+        const diff = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+
+        // 🔥 ANTI DUPLICAÇÃO POR DIA
+        const lastSent = bill.lastNotificationSent
+          ? new Date(bill.lastNotificationSent)
+          : null;
+
+        const enviadoHoje =
+          lastSent &&
+          lastSent.getDate() === hoje.getDate() &&
+          lastSent.getMonth() === hoje.getMonth() &&
+          lastSent.getFullYear() === hoje.getFullYear();
+
+        if (diff >= 0 && diff <= 5 && !enviadoHoje) {
+          const status = diff === 0 ? "HOJE" : `em ${diff} dias`;
+
+          lista.push(
+            `• ${bill.title}: ${vencimento.toLocaleDateString(
+              "pt-BR"
+            )} (${status})`
+          );
+
+          // 🔥 marca como enviado
+          await billDoc.ref.update({
+            lastNotificationSent: new Date().toISOString()
+          });
+        }
+      }
+
+      if (lista.length > 0) {
+        const plural = lista.length > 1;
+
         await admin.messaging().send({
           token,
           data: {
-            title: plural ? "⚠️ Alerta de Vencimentos" : "⚠️ Vencimento de Conta",
-            body: plural 
-              ? `Você possui ${listaContas.length} contas próximas:\n${listaContas.join('\n')}`
-              : `Sua conta ${listaContas[0].replace('• ', '')} está próxima.`,
-            url: "https://finance-app-6bdb0.web.app/bills"
+            title: "Flow",
+            body: plural
+              ? `⚠️ ${lista.length} contas próximas:\n${lista.join("\n")}`
+              : `⚠️ ${lista[0].replace("• ", "")}`,
+            url: "/bills"
           }
         });
       }
     }
-    // RETORNO LIMPO: Envia apenas status 200 e termina a conexão imediatamente
-    return res.status(200).end(); 
+
+    return res.status(200).end();
   } catch (err) {
     console.error("Erro:", err.message);
     return res.status(500).end();
   }
 });
 
-// 3. Arquivos Estáticos e SPA (Sempre por último)
+// 🔥 FRONT
 app.use(express.static(path.join(__dirname, "public", "dist")));
-app.get("*", (req, res) => res.sendFile(path.join(__dirname, "public", "dist", "index.html")));
+app.get("*", (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "dist", "index.html"))
+);
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Flow Ativo`));
+app.listen(PORT, () => console.log("Flow rodando 🚀"));

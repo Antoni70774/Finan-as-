@@ -21,13 +21,13 @@ if (!admin.apps.length && serviceAccount) {
   admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 }
 
-app.use(express.static(path.join(__dirname, "public", "dist")));
-
+// 1. Rota do Service Worker (com cache desativado)
 app.get("/firebase-messaging-sw.js", (req, res) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.sendFile(path.join(__dirname, "public", "firebase-messaging-sw.js"));
 });
 
+// 2. Rota de Lembretes (CORRIGIDA PARA CRON-JOB)
 app.post("/send-reminders", async (req, res) => {
   const db = admin.firestore();
   try {
@@ -73,14 +73,17 @@ app.post("/send-reminders", async (req, res) => {
         });
       }
     }
-    // Resposta mínima obrigatória para o cron-job.org não dar erro
-    res.status(200).send("OK");
+    // RETORNO LIMPO: Envia apenas status 200 e termina a conexão imediatamente
+    return res.status(200).end(); 
   } catch (err) {
-    res.status(500).send("Erro");
+    console.error("Erro:", err.message);
+    return res.status(500).end();
   }
 });
 
+// 3. Arquivos Estáticos e SPA (Sempre por último)
+app.use(express.static(path.join(__dirname, "public", "dist")));
 app.get("*", (req, res) => res.sendFile(path.join(__dirname, "public", "dist", "index.html")));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Flow online`));
+app.listen(PORT, () => console.log(`Flow Ativo`));

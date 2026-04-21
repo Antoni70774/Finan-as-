@@ -9,112 +9,78 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🔥 Firebase Admin
 let serviceAccount = null;
 try {
   const raw = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
   if (raw) serviceAccount = JSON.parse(raw);
 } catch (err) {
-  console.error("Erro credenciais:", err.message);
+  console.error("Erro Credenciais:", err.message);
 }
 
 if (!admin.apps.length && serviceAccount) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
+  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 }
 
-// 🔥 Service Worker SEM CACHE
+app.use(express.static(path.join(__dirname, "public", "dist")));
+
 app.get("/firebase-messaging-sw.js", (req, res) => {
-  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.sendFile(path.join(__dirname, "public", "firebase-messaging-sw.js"));
 });
 
-// 🔥 CRON ROUTE (SEM DUPLICAÇÃO + SOMENTE DATA)
 app.post("/send-reminders", async (req, res) => {
   const db = admin.firestore();
-
   try {
     const usersSnapshot = await db.collection("users").get();
 
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
     for (const userDoc of usersSnapshot.docs) {
       const userId = userDoc.id;
-
-      const notifDoc = await db
-        .collection("users")
-        .doc(userId)
-        .collection("settings")
-        .doc("notifications")
-        .get();
-
-      const token = notifDoc.data()?.token;
+      const notifDoc = await db.collection("users").doc(userId).collection("settings").doc("notifications").get();
+      const token = notifDoc.exists ? notifDoc.data().token : null;
       if (!token) continue;
 
-      const billsSnapshot = await db
-        .collection("users")
-        .doc(userId)
-        .collection("bills")
-        .get();
+      const billsSnapshot = await db.collection("users").doc(userId).collection("bills").get();
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
 
-      let lista = [];
-
-      for (const billDoc of billsSnapshot.docs) {
+      let listaContas = [];
+      billsSnapshot.forEach(billDoc => {
         const bill = billDoc.data();
-
         const rawDate = bill.dueDate || bill.due_date;
-        if (!rawDate || bill.status === "paid") continue;
-
-        let vencimento =
-          typeof rawDate.toDate === "function"
-            ? rawDate.toDate()
-            : new Date(rawDate + "T00:00:00");
-
-        vencimento.setHours(0, 0, 0, 0);
-
-        const diff = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
-
-        if (diff >= 0 && diff <= 5) {
-          const status = diff === 0 ? "HOJE" : `em ${diff} dias`;
-
-          lista.push(
-            `• ${bill.title}: ${vencimento.toLocaleDateString(
-              "pt-BR"
-            )} (${status})`
-          );
+        if (rawDate && bill.status !== "paid") {
+          let venci = typeof rawDate.toDate === "function" ? rawDate.toDate() : new Date(String(rawDate) + "T00:00:00");
+          venci.setHours(0, 0, 0, 0);
+          const diff = Math.ceil((venci - hoje) / (1000 * 60 * 60 * 24));
+          
+          if (diff >= 0 && diff <= 5) {
+            const status = diff === 0 ? "HOJE" : `em ${diff} dias`;
+            listaContas.push(`• ${bill.title}: ${venci.toLocaleDateString('pt-BR')} (${status})`);
+          }
         }
-      }
+      });
 
-      if (lista.length > 0) {
-        const plural = lista.length > 1;
-
+      if (listaContas.length > 0) {
+        const plural = listaContas.length > 1;
         await admin.messaging().send({
           token,
           data: {
-            title: "Flow",
-            body: plural
-              ? `⚠️ ${lista.length} contas próximas:\n${lista.join("\n")}`
-              : `⚠️ ${lista[0].replace("• ", "")}`,
-            url: "/bills"
+            title: plural ? "⚠️ Alerta de Vencimentos" : "⚠️ Vencimento de Conta",
+            body: plural 
+              ? `Você possui ${listaContas.length} contas próximas:\n${listaContas.join('\n')}`
+              : `Sua conta ${listaContas[0].replace('• ', '')} está próxima.`,
+            url: "https://finance-app-6bdb0.web.app/bills"
           }
         });
       }
     }
-
-    return res.status(200).end();
+    // Resposta mínima obrigatória para o cron-job.org não dar erro
+    res.status(200).send("OK");
   } catch (err) {
-    console.error("Erro:", err.message);
-    return res.status(500).end();
+    res.status(500).send("Erro");
   }
 });
 
-// 🔥 FRONT
-app.use(express.static(path.join(__dirname, "public", "dist")));
-app.get("*", (req, res) =>
-  res.sendFile(path.join(__dirname, "public", "dist", "index.html"))
-);
+app.get("*", (req, res) => res.sendFile(path.join(__dirname, "public", "dist", "index.html")));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log("🚀 Flow rodando"));
+app.listen(PORT, () => console.log(`Flow online`));

@@ -9,13 +9,13 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🔥 Credenciais Firebase
+// 🔥 Firebase Admin
 let serviceAccount = null;
 try {
   const raw = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
   if (raw) serviceAccount = JSON.parse(raw);
 } catch (err) {
-  console.error("Erro Credenciais:", err.message);
+  console.error("Erro credenciais:", err.message);
 }
 
 if (!admin.apps.length && serviceAccount) {
@@ -24,13 +24,13 @@ if (!admin.apps.length && serviceAccount) {
   });
 }
 
-// 🔥 Service Worker (SEM CACHE)
+// 🔥 Service Worker SEM CACHE
 app.get("/firebase-messaging-sw.js", (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.sendFile(path.join(__dirname, "public", "firebase-messaging-sw.js"));
 });
 
-// 🔥 ROTA DE NOTIFICAÇÃO (ANTI DUPLICAÇÃO PROFISSIONAL)
+// 🔥 CRON ROUTE (SEM DUPLICAÇÃO + SOMENTE DATA)
 app.post("/send-reminders", async (req, res) => {
   const db = admin.firestore();
 
@@ -76,18 +76,7 @@ app.post("/send-reminders", async (req, res) => {
 
         const diff = Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
 
-        // 🔥 ANTI DUPLICAÇÃO POR DIA
-        const lastSent = bill.lastNotificationSent
-          ? new Date(bill.lastNotificationSent)
-          : null;
-
-        const enviadoHoje =
-          lastSent &&
-          lastSent.getDate() === hoje.getDate() &&
-          lastSent.getMonth() === hoje.getMonth() &&
-          lastSent.getFullYear() === hoje.getFullYear();
-
-        if (diff >= 0 && diff <= 5 && !enviadoHoje) {
+        if (diff >= 0 && diff <= 5) {
           const status = diff === 0 ? "HOJE" : `em ${diff} dias`;
 
           lista.push(
@@ -95,11 +84,6 @@ app.post("/send-reminders", async (req, res) => {
               "pt-BR"
             )} (${status})`
           );
-
-          // 🔥 marca como enviado
-          await billDoc.ref.update({
-            lastNotificationSent: new Date().toISOString()
-          });
         }
       }
 
@@ -133,4 +117,4 @@ app.get("*", (req, res) =>
 );
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log("Flow rodando 🚀"));
+app.listen(PORT, () => console.log("🚀 Flow rodando"));

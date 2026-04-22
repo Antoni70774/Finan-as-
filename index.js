@@ -83,16 +83,26 @@ app.post("/send-reminders", async (req, res) => {
 
       if (lista.length > 0) {
         await admin.messaging().send({
-          token,
-          data: {
-            title: "⚠️ Alerta de Contas",
-            body: lista.join("\n"),
-            url: "/bills"
-          },
-          android: {
-            priority: "high"
-          }
-        });
+		  token,
+
+		  data: {
+			title: "⚠️ Alerta de Contas",
+			body: lista.join("\n"),
+			url: "/bills"
+		  },
+
+		  webpush: {
+			headers: {
+			  Urgency: "high"
+			},
+			notification: {
+			  title: "Flow",
+			  body: lista.join("\n"),
+			  icon: "/icon-192.png",
+			  badge: "/icon-192.png"
+			}
+		  }
+		});
       }
     }
 

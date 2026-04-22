@@ -91,16 +91,9 @@ app.post("/send-reminders", async (req, res) => {
 			url: "/bills"
 		  },
 
-		  webpush: {
-			headers: {
-			  Urgency: "high"
-			},
-			notification: {
-			  title: "Flow",
-			  body: lista.join("\n"),
-			  icon: "/icon-192.png",
-			  badge: "/icon-192.png"
-			}
+		  android: {
+			priority: "high",
+			collapseKey: "flow_alert" // 🔥 IMPEDE DUPLICAÇÃO
 		  }
 		});
       }

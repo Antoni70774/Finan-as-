@@ -21,13 +21,13 @@ if (!admin.apps.length && serviceAccount) {
   admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 }
 
-// 1. Rota do Service Worker (com cache desativado)
+app.use(express.static(path.join(__dirname, "public", "dist")));
+
 app.get("/firebase-messaging-sw.js", (req, res) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.sendFile(path.join(__dirname, "public", "firebase-messaging-sw.js"));
 });
 
-// 2. Rota de Lembretes (CORRIGIDA PARA CRON-JOB)
 app.post("/send-reminders", async (req, res) => {
   const db = admin.firestore();
   try {
@@ -62,28 +62,50 @@ app.post("/send-reminders", async (req, res) => {
       if (listaContas.length > 0) {
         const plural = listaContas.length > 1;
         await admin.messaging().send({
-          token,
-          data: {
-            title: plural ? "⚠️ Alerta de Vencimentos" : "⚠️ Vencimento de Conta",
-            body: plural 
-              ? `Você possui ${listaContas.length} contas próximas:\n${listaContas.join('\n')}`
-              : `Sua conta ${listaContas[0].replace('• ', '')} está próxima.`,
-            url: "https://finance-app-6bdb0.web.app/bills"
-          }
-        });
+		  token,
+
+		  notification: {
+			title: plural ? "⚠️ Alerta de Vencimentos" : "⚠️ Vencimento de Conta",
+			body: plural 
+			  ? `Você possui ${listaContas.length} contas próximas`
+			  : `Sua conta está próxima do vencimento`
+		  },
+
+		  data: {
+			url: "https://finance-app-6bdb0.web.app/bills"
+		  },
+
+		  android: {
+			priority: "high",
+			notification: {
+			  channelId: "default",
+			  sound: "default",
+			  defaultSound: true,
+			  defaultVibrateTimings: true,
+			  visibility: "public"
+			}
+		  },
+
+		  webpush: {
+			headers: {
+			  Urgency: "high"
+			},
+			notification: {
+			  icon: "/icon-192.png",
+			  badge: "/icon-192.png"
+			}
+		  }
+		});
       }
     }
-    // RETORNO LIMPO: Envia apenas status 200 e termina a conexão imediatamente
-    return res.status(200).end(); 
+    // Resposta mínima obrigatória para o cron-job.org não dar erro
+    res.status(200).send("OK");
   } catch (err) {
-    console.error("Erro:", err.message);
-    return res.status(500).end();
+    res.status(500).send("Erro");
   }
 });
 
-// 3. Arquivos Estáticos e SPA (Sempre por último)
-app.use(express.static(path.join(__dirname, "public", "dist")));
 app.get("*", (req, res) => res.sendFile(path.join(__dirname, "public", "dist", "index.html")));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Flow Ativo`));
+app.listen(PORT, () => console.log(`Flow online`));

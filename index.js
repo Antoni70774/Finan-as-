@@ -30,7 +30,7 @@ app.get("/firebase-messaging-sw.js", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "firebase-messaging-sw.js"));
 });
 
-// Rota de lembretes revisada
+// Rota de lembretes revisada (envia SOMENTE data)
 app.post("/send-reminders", async (req, res) => {
   const db = admin.firestore();
 
@@ -68,7 +68,7 @@ app.post("/send-reminders", async (req, res) => {
         if (raw && bill.status !== "paid") {
           let data = typeof raw.toDate === "function"
             ? raw.toDate()
-            : new Date(raw + "T00:00:00");
+            : new Date(String(raw) + "T00:00:00");
 
           data.setHours(0, 0, 0, 0);
 
@@ -83,19 +83,22 @@ app.post("/send-reminders", async (req, res) => {
 
       if (lista.length > 0) {
         await admin.messaging().send({
-		  token,
-
-		  data: {
-			title: "⚠️ Alerta de Contas",
-			body: lista.join("\n"),
-			url: "/bills"
-		  },
-
-		  android: {
-			priority: "high",
-			collapseKey: "flow_alert" // 🔥 IMPEDE DUPLICAÇÃO
-		  }
-		});
+          token,
+          data: {
+            title: "Flow", // título curto (aparecerá no SW)
+            body: lista.join("\n"),
+            url: "/bills"
+          },
+          android: {
+            priority: "high",
+            collapseKey: "flow_alert"
+          },
+          webpush: {
+            headers: {
+              Urgency: "high"
+            }
+          }
+        });
       }
     }
 
